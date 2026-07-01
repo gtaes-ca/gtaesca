@@ -1,0 +1,24 @@
+//
+// Booking invoice offcanvas — theme-aware document styling
+//
+
+.booking-invoice-offcanvas {
+    .booking-invoice-document {
+        color: var(--#{$prefix}body-color);
+        background-color: var(--#{$prefix}body-bg);
+        border-color: var(--#{$prefix}border-color) !important;
+        box-shadow: var(--#{$prefix}box-shadow-sm);
+    }
+
+    .booking-invoice-totals {
+        background-color: var(--#{$prefix}secondary-bg) !important;
+    }
+}
+
+html[data-bs-theme='dark'] {
+    .booking-invoice-offcanvas {
+        .booking-invoice-document {
+            box-shadow: none;
+        }
+    }
+}

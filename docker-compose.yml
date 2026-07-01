@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gtaes-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: gtaes
+      POSTGRES_PASSWORD: gtaes
+      POSTGRES_DB: gtaes
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gtaes -d gtaes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: gtaes-api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://gtaes:gtaes@db:5432/gtaes
+      - DB_HOST=db
+      - DB_USER=gtaes
+      - DB_PASSWORD=gtaes
+      - DB_NAME=gtaes
+      - DB_PORT=5432
+      - JWT_SECRET=${JWT_SECRET:-gtaes-dev-secret-change-in-production}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL:-superadmin@gtaes.local}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD:-SuperAdmin123!}
+      - ADMIN_URL=${ADMIN_URL:-http://localhost:5173}
+      - DB_INIT_DIR=/db/init
+      - UPLOADS_DIR=/app/uploads
+      - USEPLUNK_API_KEY=${USEPLUNK_API_KEY:-}
+      - USEPLUNK_FROM_EMAIL=${USEPLUNK_FROM_EMAIL:-}
+      - USEPLUNK_FROM_NAME=${USEPLUNK_FROM_NAME:-GTA Electric Services}
+      - USEPLUNK_API_URL=${USEPLUNK_API_URL:-https://next-api.useplunk.com/v1/send}
+    volumes:
+      - ./api:/app
+      - ./db/init:/db/init:ro
+      - api_uploads:/app/uploads
+      - api_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.dev
+    container_name: gtaes-admin
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./admin:/app
+      - admin_node_modules:/app/node_modules
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  api_node_modules:
+  api_uploads:
+  admin_node_modules:
