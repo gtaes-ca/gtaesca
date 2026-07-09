@@ -16,6 +16,12 @@ export const PAGE_PATH_BY_KEY = {
   'management.service-locations': '/management/service-locations',
   'management.bookings': '/management/bookings',
   'management.booking-settings': '/management/booking-settings',
+  'management.cms': '/management/cms/homepage',
+  'management.cms.about': '/management/cms/about',
+  'management.cms.team': '/management/cms/team',
+  'management.cms.projects': '/management/cms/projects',
+  'management.cms.services': '/management/cms/services',
+  'management.cms.contact': '/management/cms/contact',
   'technician.jobs': '/technician/jobs',
 };
 

@@ -746,10 +746,11 @@ const BookingWizardOffcanvas = ({ show, onHide, onSuccess }) => {
                     <p className="mb-1"><strong>Client:</strong> {client.firstName} {client.lastName}</p>
                     <p className="mb-1"><strong>Email:</strong> {client.email}</p>
                     <p className="mb-1"><strong>Phone:</strong> {client.phone || '—'}</p>
-                    <p className="mb-0"><strong>Address:</strong> {client.address || '—'}</p>
+                    <p className="mb-1"><strong>Address:</strong> {client.address || '—'}</p>
+                    <p className="mb-0"><strong>Booking type:</strong> Admin Booking</p>
                   </div>
                   <Alert variant="info" className="small mb-0">
-                    Creates a <strong>Pending</strong> booking for {formatCurrency(totalServicePrice)} across {selectedServices.length} service{selectedServices.length > 1 ? 's' : ''}.
+                    Creates a <strong>Pending</strong> <strong>Admin Booking</strong> for {formatCurrency(totalServicePrice)} across {selectedServices.length} service{selectedServices.length > 1 ? 's' : ''}.
                     {' '}A confirmation email goes to {client.email}.
                     {' '}New or not-yet-activated clients also receive an account activation link.
                   </Alert>

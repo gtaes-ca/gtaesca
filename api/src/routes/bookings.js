@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { BOOKING_STATUSES } from '../constants.js';
+import { BOOKING_SOURCES, BOOKING_STATUSES, canAccessAdminPanel } from '../constants.js';
+import { optionalAuthenticate } from '../middleware/auth.js';
 import {
   assertTechnicianAvailableForServices,
   assertSlotAvailable,
@@ -135,7 +136,7 @@ router.get('/availability', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', optionalAuthenticate, async (req, res) => {
   const {
     serviceIds: serviceIdsBody,
     serviceId,
@@ -190,6 +191,9 @@ router.post('/', async (req, res) => {
   const durationMinutes = await getTotalDurationMinutes(serviceIds);
   const servicePrice = await getTotalServicePrice(serviceIds);
   const primaryServiceId = serviceIds[0];
+  const bookingSource = req.user && canAccessAdminPanel(req.user)
+    ? BOOKING_SOURCES.ADMIN
+    : BOOKING_SOURCES.WEB;
 
   let referenceCode = generateReferenceCode();
   let attempts = 0;
@@ -219,8 +223,9 @@ router.post('/', async (req, res) => {
       `INSERT INTO bookings (
         reference_code, status, service_id, service_location_id, technician_user_id,
         customer_user_id, scheduled_at, duration_minutes, service_price, total_price,
-        client_first_name, client_last_name, client_email, client_phone, client_address, notes
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, $10, $11, $12, $13, $14, $15)
+        client_first_name, client_last_name, client_email, client_phone, client_address, notes,
+        booking_source
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING id`,
       [
         referenceCode,
@@ -238,6 +243,7 @@ router.post('/', async (req, res) => {
         clientPhone?.trim() || null,
         clientAddress?.trim() || null,
         notes?.trim() || null,
+        bookingSource,
       ]
     );
 

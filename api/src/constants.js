@@ -49,6 +49,16 @@ export function isSuperAdmin(user) {
   return user?.userType === USER_TYPES.SUPER_ADMIN;
 }
 
+export const BOOKING_SOURCES = {
+  WEB: 'web',
+  ADMIN: 'admin',
+};
+
+export const BOOKING_SOURCE_LABELS = {
+  web: 'Web Booking',
+  admin: 'Admin Booking',
+};
+
 export const BOOKING_STATUSES = {
   PENDING: 'pending',
   TECHNICIAN_ASSIGNED: 'technician_assigned',

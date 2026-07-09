@@ -88,6 +88,47 @@ export const MENU_ITEMS = [{
     pageKey: 'management.booking-settings'
   }]
 }, {
+  key: 'website-cms',
+  icon: 'iconamoon:file-document-duotone',
+  label: 'Website CMS',
+  children: [{
+    key: 'cms-homepage',
+    label: 'Homepage',
+    url: '/management/cms/homepage',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms'
+  }, {
+    key: 'cms-about',
+    label: 'About Us Page',
+    url: '/management/cms/about',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.about'
+  }, {
+    key: 'cms-team',
+    label: 'Team Page',
+    url: '/management/cms/team',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.team'
+  }, {
+    key: 'cms-projects',
+    label: 'Projects Page',
+    url: '/management/cms/projects',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.projects'
+  }, {
+    key: 'cms-services',
+    label: 'Services Page',
+    url: '/management/cms/services',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.services'
+  }, {
+    key: 'cms-contact',
+    label: 'Contact Page',
+    url: '/management/cms/contact',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.contact'
+  }]
+}, {
   key: 'technician-jobs',
   icon: 'iconamoon:tools-duotone',
   label: 'My Jobs',

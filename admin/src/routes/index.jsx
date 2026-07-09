@@ -138,6 +138,12 @@ const MaterialsManagement = lazy(() => import('@/app/(admin)/management/material
 const ServiceLocations = lazy(() => import('@/app/(admin)/management/service-locations/page'));
 const BookingsManagement = lazy(() => import('@/app/(admin)/management/bookings/page'));
 const BookingSettings = lazy(() => import('@/app/(admin)/management/booking-settings/page'));
+const HomepageCmsPage = lazy(() => import('@/app/(admin)/management/cms/homepage/page'));
+const AboutCmsPage = lazy(() => import('@/app/(admin)/management/cms/about/page'));
+const TeamCmsPage = lazy(() => import('@/app/(admin)/management/cms/team/page'));
+const ProjectsCmsPage = lazy(() => import('@/app/(admin)/management/cms/projects/page'));
+const ServicesCmsPage = lazy(() => import('@/app/(admin)/management/cms/services/page'));
+const ContactCmsPage = lazy(() => import('@/app/(admin)/management/cms/contact/page'));
 const PageAccess = lazy(() => import('../app/(admin)/management/page-access/page.jsx'));
 const BookService = lazy(() => import('@/app/(public)/book/page'));
 const TechnicianOnboarding = lazy(() => import('../app/(admin)/management/technician-onboarding/page'));
@@ -212,6 +218,36 @@ const managementRoutes = [{
   name: 'Booking Settings',
   element: <BookingSettings />,
   pageKey: 'management.booking-settings'
+}, {
+  path: '/management/cms/homepage',
+  name: 'Homepage',
+  element: <HomepageCmsPage />,
+  pageKey: 'management.cms'
+}, {
+  path: '/management/cms/about',
+  name: 'About Us Page',
+  element: <AboutCmsPage />,
+  pageKey: 'management.cms.about'
+}, {
+  path: '/management/cms/team',
+  name: 'Team Page',
+  element: <TeamCmsPage />,
+  pageKey: 'management.cms.team'
+}, {
+  path: '/management/cms/projects',
+  name: 'Projects Page',
+  element: <ProjectsCmsPage />,
+  pageKey: 'management.cms.projects'
+}, {
+  path: '/management/cms/services',
+  name: 'Services Page',
+  element: <ServicesCmsPage />,
+  pageKey: 'management.cms.services'
+}, {
+  path: '/management/cms/contact',
+  name: 'Contact Page',
+  element: <ContactCmsPage />,
+  pageKey: 'management.cms.contact'
 }, {
   path: '/management/page-access',
   name: 'Page Access',

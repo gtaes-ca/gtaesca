@@ -19,6 +19,16 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled', variant: 'danger' },
 ];
 
+const SOURCE_OPTIONS = {
+  web: { label: 'Web Booking', variant: 'primary' },
+  admin: { label: 'Admin Booking', variant: 'secondary' },
+};
+
+function sourceBadge(source) {
+  const opt = SOURCE_OPTIONS[source] || SOURCE_OPTIONS.web;
+  return <Badge bg={opt.variant}>{opt.label}</Badge>;
+}
+
 const NEXT_STATUS = {
   pending: ['technician_assigned', 'cancelled'],
   technician_assigned: ['completed', 'cancelled'],
@@ -321,6 +331,7 @@ const BookingsManagementPage = () => {
             <thead>
               <tr>
                 <th>Reference</th>
+                <th>Source</th>
                 <th>Client</th>
                 <th>Service</th>
                 <th>Total</th>
@@ -335,6 +346,7 @@ const BookingsManagementPage = () => {
               {bookings.map((booking) => (
                 <tr key={booking.id}>
                   <td className="fw-medium">{booking.referenceCode}</td>
+                  <td>{sourceBadge(booking.bookingSource)}</td>
                   <td>
                     <div>{booking.clientFirstName} {booking.clientLastName}</div>
                     <small className="text-muted">{booking.clientEmail}</small>
@@ -434,6 +446,7 @@ const BookingsManagementPage = () => {
                 <p className="mb-2">
                   <strong>{selectedBooking.referenceCode}</strong>
                   {' '}{statusBadge(selectedBooking.status)}
+                  {' '}{sourceBadge(selectedBooking.bookingSource)}
                 </p>
                 <p className="mb-1"><strong>Client:</strong> {selectedBooking.clientFirstName} {selectedBooking.clientLastName}</p>
                 <p className="mb-1"><strong>Email:</strong> {selectedBooking.clientEmail}</p>

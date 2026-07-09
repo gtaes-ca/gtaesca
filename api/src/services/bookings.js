@@ -86,6 +86,7 @@ export function formatBooking(row, services = [], materials = []) {
     clientPhone: row.client_phone,
     clientAddress: row.client_address,
     notes: row.notes,
+    bookingSource: row.booking_source || 'web',
     assignedAt: row.assigned_at,
     completedAt: row.completed_at,
     createdAt: row.created_at,

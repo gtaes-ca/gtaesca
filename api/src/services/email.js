@@ -357,3 +357,48 @@ export async function sendBookingStatusEmail({ booking, status }) {
     `,
   });
 }
+
+export async function sendContactQuoteEmail({
+  to,
+  name,
+  email,
+  phone = '',
+  company = '',
+  message,
+}) {
+  const safeName = String(name || '').trim();
+  const safeEmail = String(email || '').trim();
+  const safePhone = String(phone || '').trim();
+  const safeCompany = String(company || '').trim();
+  const safeMessage = String(message || '').trim();
+
+  return sendViaUsePlunk({
+    to,
+    subject: `${BRAND_NAME} Contact Form — ${safeName}`,
+    text: [
+      'New contact form submission:',
+      `Name: ${safeName}`,
+      `Email: ${safeEmail}`,
+      safePhone ? `Phone: ${safePhone}` : '',
+      safeCompany ? `Company: ${safeCompany}` : '',
+      '',
+      'Message:',
+      safeMessage,
+    ].filter(Boolean).join('\n'),
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+        ${safePhone ? `<p><strong>Phone:</strong> ${safePhone}</p>` : ''}
+        ${safeCompany ? `<p><strong>Company:</strong> ${safeCompany}</p>` : ''}
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap;">${safeMessage}</p>
+      </div>
+    `,
+    data: {
+      contactName: { value: safeName, persistent: false },
+      contactEmail: { value: safeEmail, persistent: false },
+    },
+  });
+}

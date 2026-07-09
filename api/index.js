@@ -21,12 +21,18 @@ import adminAnalyticsRoutes from './src/routes/admin/analytics.js';
 import pageAccessRoutes from './src/routes/admin/page-access.js';
 import notificationsRoutes from './src/routes/notifications.js';
 import servicesRoutes from './src/routes/services.js';
+import teamRoutes from './src/routes/team.js';
+import projectsRoutes from './src/routes/projects.js';
+import contactRoutes from './src/routes/contact.js';
+import webContentRoutes from './src/routes/web-content.js';
+import adminWebContentRoutes from './src/routes/admin/web-content.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
+const jsonBodyLimit = process.env.JSON_BODY_LIMIT || '15mb';
 
 app.use(cors());
-app.use(express.json({ limit: '3mb' }));
+app.use(express.json({ limit: jsonBodyLimit }));
 app.use('/uploads', express.static(getUploadsDir()));
 
 app.get('/health', async (_req, res) => {
@@ -59,8 +65,19 @@ app.use('/api/technician', technicianBookingsRoutes);
 app.use('/api/customer/bookings', customerBookingsRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/services', servicesRoutes);
+app.use('/api/team', teamRoutes);
+app.use('/api/projects', projectsRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/web-content', webContentRoutes);
+app.use('/api/admin/web-content', adminWebContentRoutes);
 
 app.use((err, _req, res, _next) => {
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({
+      error: `Request payload is too large. Image uploads must be ${jsonBodyLimit} or smaller after encoding.`,
+    });
+  }
+
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });

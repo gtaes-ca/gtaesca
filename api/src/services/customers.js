@@ -3,7 +3,7 @@ import { USER_TYPES } from '../constants.js';
 import { findUserByEmail } from './users.js';
 import { generateToken, hashValue } from '../utils/crypto.js';
 
-const ADMIN_URL = process.env.ADMIN_URL || 'http://localhost:5173';
+const WEB_URL = process.env.WEB_URL || process.env.ADMIN_URL || 'http://localhost:3000';
 const ACTIVATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function createActivationToken(userId, client = pool) {
@@ -26,7 +26,7 @@ async function createActivationToken(userId, client = pool) {
 
   return {
     token,
-    activationUrl: `${ADMIN_URL}/auth/activate-account?token=${token}`,
+    activationUrl: `${WEB_URL}/account/activate?token=${token}`,
   };
 }
 

@@ -19,6 +19,25 @@ const STATUS_LABEL = {
   cancelled: 'Cancelled',
 };
 
+const SOURCE_LABEL = {
+  web: 'Web Booking',
+  admin: 'Admin Booking',
+};
+
+const SOURCE_VARIANT = {
+  web: 'primary',
+  admin: 'secondary',
+};
+
+function sourceBadge(source) {
+  const key = source || 'web';
+  return (
+    <Badge bg={SOURCE_VARIANT[key] || 'primary'}>
+      {SOURCE_LABEL[key] || SOURCE_LABEL.web}
+    </Badge>
+  );
+}
+
 function statusBadge(status) {
   return (
     <Badge bg={STATUS_VARIANT[status] || 'secondary'}>
@@ -138,6 +157,7 @@ const BookingDetailOffcanvas = ({
                     <p className="text-muted mb-2 small">#{booking.referenceCode}</p>
                     <div className="d-flex align-items-center gap-2 flex-wrap">
                       {statusBadge(booking.status)}
+                      {sourceBadge(booking.bookingSource)}
                       {!isFinal && hasMaterials && (
                         <Badge bg="secondary-subtle" text="secondary" className="border border-secondary-subtle">
                           Includes materials

@@ -1,7 +1,21 @@
 import { Router } from 'express';
 import pool from '../db.js';
+import { getPublicServiceById, listPublicServices } from '../services/publicServices.js';
 
 const router = Router();
+
+router.get('/list', async (_req, res) => {
+  const services = await listPublicServices();
+  return res.json({ services });
+});
+
+router.get('/items/:id', async (req, res) => {
+  const service = await getPublicServiceById(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: 'Service not found' });
+  }
+  return res.json({ service });
+});
 
 router.get('/', async (_req, res) => {
   const result = await pool.query(

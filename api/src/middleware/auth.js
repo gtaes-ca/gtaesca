@@ -27,6 +27,30 @@ export async function authenticate(req, res, next) {
   }
 }
 
+export async function optionalAuthenticate(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const payload = verifyAccessToken(token);
+    const user = await validateSession(payload.sid, token);
+
+    if (user) {
+      req.user = user;
+      req.sessionId = payload.sid;
+      req.token = token;
+    }
+  } catch {
+    // Public routes may proceed without a valid session.
+  }
+
+  next();
+}
+
 export function requireSuperAdmin(req, res, next) {
   if (!isSuperAdmin(req.user)) {
     return res.status(403).json({ error: 'Super admin access required' });

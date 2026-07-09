@@ -34,6 +34,17 @@ export async function migrate() {
   await runSqlFile('13_materials.sql');
   await runSqlFile('14_notifications.sql');
   await runSqlFile('15_page_access.sql');
+  await runSqlFile('16_web_content.sql');
+  await runSqlFile('24_cms_about_page_access.sql');
+  await runSqlFile('25_cms_homepage_page_access.sql');
+  await runSqlFile('26_homepage_widgets_seed.sql');
+  await runSqlFile('27_about_banner_widget.sql');
+  await runSqlFile('28_cms_team_page.sql');
+  await runSqlFile('29_team_details_banner_widget.sql');
+  await runSqlFile('30_cms_projects_page.sql');
+  await runSqlFile('31_cms_services_page.sql');
+  await runSqlFile('32_cms_contact_page.sql');
+  await runSqlFile('33_booking_source.sql');
 
   const email = process.env.SUPER_ADMIN_EMAIL || 'superadmin@gtaes.local';
   const password = process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin123!';
