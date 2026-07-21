@@ -98,7 +98,7 @@ function ActivateForm() {
 
 export default function ActivatePage() {
   return (
-    <div className="dark-home account-page">
+    <div className="account-page">
       <Layout headerStyle={1} footerStyle={1}>
         <section className="account">
           <div className="container">

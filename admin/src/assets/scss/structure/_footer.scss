@@ -16,6 +16,37 @@
     box-shadow: $box-shadow;
 }
 
+.footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@include media-breakpoint-down(md) {
+    .footer {
+        justify-content: center;
+        height: auto;
+        min-height: $footer-height;
+        padding-top: calc(#{$spacer} * 0.5);
+        padding-bottom: calc(#{$spacer} * 0.5);
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+.footer-inner__copyright {
+    font-size: 13px;
+    color: var(--#{$prefix}secondary-color);
+}
+
 .footer-text {
     background: linear-gradient(
         to right,

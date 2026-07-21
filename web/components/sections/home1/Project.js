@@ -2,15 +2,16 @@
 
 import Link from "next/link"
 import { useEffect, useState } from 'react'
-import { resolveCmsAssetUrl } from '@/lib/cms'
+import { resolveCmsAssetUrl, hasGalleryImage } from '@/lib/cms'
+import { projectDetailPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const DEFAULT_CONTENT = {
-    tagline: 'Our Gallery',
-    titleLine1: 'Your Brightest',
-    titleLine2: 'Choice in Repairs',
-    buttonText: 'All Gallery',
+    tagline: '',
+    titleLine1: '',
+    titleLine2: '',
+    buttonText: '',
     buttonLink: '/projects',
     items: [],
 }
@@ -56,7 +57,6 @@ export default function Project() {
                 if (cancelled) return
                 if (data.content) {
                     setContent({
-                        ...DEFAULT_CONTENT,
                         ...data.content,
                         items: Array.isArray(data.content.items) ? data.content.items : [],
                     })
@@ -71,6 +71,8 @@ export default function Project() {
             cancelled = true
         }
     }, [])
+
+    const visibleItems = content.items.filter((item) => hasGalleryImage(item.image))
 
     return (
         <>
@@ -102,37 +104,40 @@ export default function Project() {
                     ) : null}
                 </div>
                 <div className="row">
-                    {content.items.map((item, index) => (
-                        <div
-                            key={`${item.title}-${index}`}
-                            className={`${COLUMN_CLASSES[index % COLUMN_CLASSES.length]} wow ${ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]}`}
-                            data-wow-delay={ANIMATION_DELAYS[index % ANIMATION_DELAYS.length]}
-                        >
-                            <div className="project-one__single">
-                                <div className="project-one__img-box">
-                                    <div className="project-one__img">
-                                        <img src={resolveCmsAssetUrl(item.image)} alt={item.title || ''}/>
-                                        <div className="project-one__arrow">
-                                            <Link href={item.link || '/projects'}>
-                                                <span className="icon-arrow-right"></span>
-                                            </Link>
+                    {visibleItems.map((item, index) => {
+                        const detailLink = projectDetailPath(item)
+                        return (
+                            <div
+                                key={`${item.title}-${index}`}
+                                className={`${COLUMN_CLASSES[index % COLUMN_CLASSES.length]} wow ${ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]}`}
+                                data-wow-delay={ANIMATION_DELAYS[index % ANIMATION_DELAYS.length]}
+                            >
+                                <div className="project-one__single">
+                                    <div className="project-one__img-box">
+                                        <div className="project-one__img">
+                                            <img src={resolveCmsAssetUrl(item.image)} alt={item.title || ''}/>
+                                            <div className="project-one__arrow">
+                                                <Link href={detailLink}>
+                                                    <span className="icon-arrow-right"></span>
+                                                </Link>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="project-one__content">
-                                        {item.subTitle ? (
-                                            <p className="project-one__sub-title">{item.subTitle}</p>
-                                        ) : null}
-                                        <h3 className="project-one__title">
-                                            <Link href={item.link || '/projects'}>{item.title}</Link>
-                                        </h3>
-                                        {item.text ? (
-                                            <p className="project-one__text">{item.text}</p>
-                                        ) : null}
+                                        <div className="project-one__content">
+                                            {item.subTitle ? (
+                                                <p className="project-one__sub-title">{item.subTitle}</p>
+                                            ) : null}
+                                            <h3 className="project-one__title">
+                                                <Link href={detailLink}>{item.title}</Link>
+                                            </h3>
+                                            {item.text ? (
+                                                <p className="project-one__text">{item.text}</p>
+                                            ) : null}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
         </section>

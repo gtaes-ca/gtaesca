@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { DEFAULT_PROJECTS_GALLERY, resolveCmsAssetUrl } from '@/lib/cms'
+import { DEFAULT_PROJECTS_GALLERY, resolveCmsAssetUrl, hasGalleryImage } from '@/lib/cms'
+import { projectDetailPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -48,7 +49,6 @@ export default function ProjectsGrid() {
                 if (cancelled) return
                 if (data.content) {
                     setContent({
-                        ...DEFAULT_PROJECTS_GALLERY,
                         ...data.content,
                         items: Array.isArray(data.content.items) ? data.content.items : [],
                     })
@@ -78,6 +78,8 @@ export default function ProjectsGrid() {
         )
     }
 
+    const visibleItems = content.items.filter((item) => hasGalleryImage(item.image))
+
     return (
         <section className="project-one projects-page">
             <div className="container">
@@ -106,8 +108,8 @@ export default function ProjectsGrid() {
                     ) : null}
                 </div>
                 <div className="row">
-                    {content.items.map((item, index) => {
-                        const detailLink = item.link || `/project-details?id=${item.id}`
+                    {visibleItems.map((item, index) => {
+                        const detailLink = projectDetailPath(item)
                         return (
                             <div
                                 key={item.id || `${item.title}-${index}`}

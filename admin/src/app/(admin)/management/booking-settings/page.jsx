@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap';
 import ComponentContainerCard from '@/components/ComponentContainerCard';
 import PageMetaData from '@/components/PageTitle';
+import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
+import { BOOKING_MODES, isSuperAdmin } from '@/helpers/auth';
 import httpClient from '@/helpers/httpClient';
 
 const WEEKDAYS = [
@@ -34,6 +36,8 @@ function formatHour(hour) {
 }
 
 const BookingSettingsPage = () => {
+  const { user } = useAuthContext();
+  const superAdmin = isSuperAdmin(user);
   const { showNotification } = useNotificationContext();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -43,6 +47,8 @@ const BookingSettingsPage = () => {
     lookaheadDays: 30,
     timezone: 'America/Toronto',
     workingDays: [1, 2, 3, 4, 5],
+    bookingMode: BOOKING_MODES.FULL,
+    companyWhatsappNumber: '',
   });
 
   const loadSettings = useCallback(async () => {
@@ -56,6 +62,8 @@ const BookingSettingsPage = () => {
         lookaheadDays: settings.lookaheadDays,
         timezone: settings.timezone,
         workingDays: settings.workingDays || [1, 2, 3, 4, 5],
+        bookingMode: settings.bookingMode || BOOKING_MODES.FULL,
+        companyWhatsappNumber: settings.companyWhatsappNumber || '',
       });
     } catch (e) {
       showNotification({
@@ -81,6 +89,8 @@ const BookingSettingsPage = () => {
     });
   };
 
+  const isWhatsAppMode = form.bookingMode === BOOKING_MODES.WHATSAPP;
+
   const summary = useMemo(() => {
     const days = WEEKDAYS.filter((d) => form.workingDays.includes(d.value))
       .map((d) => d.short)
@@ -98,24 +108,41 @@ const BookingSettingsPage = () => {
       showNotification({ message: 'Start hour must be before end hour', variant: 'danger' });
       return;
     }
+    if (isWhatsAppMode && !form.companyWhatsappNumber.trim()) {
+      showNotification({ message: 'Company WhatsApp number is required in WhatsApp mode', variant: 'danger' });
+      return;
+    }
 
     setSubmitting(true);
     try {
-      const res = await httpClient.patch('/api/admin/booking-settings', {
+      const payload = {
         startHour: Number(form.startHour),
         endHour: Number(form.endHour),
         lookaheadDays: Number(form.lookaheadDays),
         timezone: form.timezone,
         workingDays: form.workingDays,
-      });
+      };
+
+      if (superAdmin) {
+        payload.bookingMode = form.bookingMode;
+        payload.companyWhatsappNumber = form.companyWhatsappNumber.trim() || null;
+      }
+
+      const res = await httpClient.patch('/api/admin/booking-settings', payload);
+      const settings = res.data.settings;
       setForm({
-        startHour: res.data.settings.startHour,
-        endHour: res.data.settings.endHour,
-        lookaheadDays: res.data.settings.lookaheadDays,
-        timezone: res.data.settings.timezone,
-        workingDays: res.data.settings.workingDays,
+        startHour: settings.startHour,
+        endHour: settings.endHour,
+        lookaheadDays: settings.lookaheadDays,
+        timezone: settings.timezone,
+        workingDays: settings.workingDays,
+        bookingMode: settings.bookingMode || BOOKING_MODES.FULL,
+        companyWhatsappNumber: settings.companyWhatsappNumber || '',
       });
       showNotification({ message: 'Booking settings saved', variant: 'success' });
+      if (superAdmin && settings.bookingMode) {
+        window.dispatchEvent(new CustomEvent('booking-mode-changed', { detail: { bookingMode: settings.bookingMode } }));
+      }
     } catch (err) {
       showNotification({
         message: err.response?.data?.error || 'Failed to save settings',
@@ -129,6 +156,11 @@ const BookingSettingsPage = () => {
   return (
     <>
       <PageMetaData title="Booking Settings" />
+      {superAdmin && isWhatsAppMode ? (
+        <Alert variant="warning" className="mb-3">
+          WhatsApp mode is active. Dashboard, Online Customers, Bookings, and Booking Settings are hidden from non–super admin users.
+        </Alert>
+      ) : null}
       <ComponentContainerCard
         title="Booking Settings"
         description="Configure business hours, working days, and how far ahead customers can book."
@@ -138,6 +170,45 @@ const BookingSettingsPage = () => {
         ) : (
           <form onSubmit={handleSubmit}>
             <Row className="g-4">
+              {superAdmin ? (
+                <Col xs={12}>
+                  <h6 className="mb-3">Booking channel</h6>
+                  <Row className="g-3">
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Mode</Form.Label>
+                        <Form.Select
+                          value={form.bookingMode}
+                          onChange={(e) => setForm({ ...form, bookingMode: e.target.value })}
+                        >
+                          <option value={BOOKING_MODES.FULL}>Full booking system</option>
+                          <option value={BOOKING_MODES.WHATSAPP}>WhatsApp requests only</option>
+                        </Form.Select>
+                        <Form.Text className="text-muted">
+                          In WhatsApp mode, customers complete the wizard and send details via WhatsApp instead of creating a booking record.
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group>
+                        <Form.Label>Company WhatsApp number</Form.Label>
+                        <Form.Control
+                          type="tel"
+                          placeholder="e.g. 14165551234"
+                          value={form.companyWhatsappNumber}
+                          onChange={(e) => setForm({ ...form, companyWhatsappNumber: e.target.value })}
+                          disabled={!isWhatsAppMode}
+                          required={isWhatsAppMode}
+                        />
+                        <Form.Text className="text-muted">
+                          Include country code, digits only (10–15 digits).
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </Col>
+              ) : null}
+
               <Col lg={6}>
                 <h6 className="mb-3">Business hours</h6>
                 <Row className="g-3">

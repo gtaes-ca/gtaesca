@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import pool from './src/db.js';
-import { getUploadsDir } from './src/services/profileImage.js';
+import { getUploadsDir, ensureUploadsDirs } from './src/services/profileImage.js';
 import { migrate } from './src/migrate.js';
 import { BRAND_NAME } from './src/constants.js';
 import authRoutes from './src/routes/auth.js';
@@ -24,8 +24,10 @@ import servicesRoutes from './src/routes/services.js';
 import teamRoutes from './src/routes/team.js';
 import projectsRoutes from './src/routes/projects.js';
 import contactRoutes from './src/routes/contact.js';
+import faqsRoutes from './src/routes/faqs.js';
 import webContentRoutes from './src/routes/web-content.js';
 import adminWebContentRoutes from './src/routes/admin/web-content.js';
+import adminFaqsRoutes from './src/routes/admin/faqs.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
@@ -68,8 +70,10 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/faqs', faqsRoutes);
 app.use('/api/web-content', webContentRoutes);
 app.use('/api/admin/web-content', adminWebContentRoutes);
+app.use('/api/admin/faqs', adminFaqsRoutes);
 
 app.use((err, _req, res, _next) => {
   if (err?.type === 'entity.too.large') {
@@ -83,6 +87,7 @@ app.use((err, _req, res, _next) => {
 });
 
 async function start() {
+  ensureUploadsDirs();
   await migrate();
   app.listen(port, '0.0.0.0', () => {
     console.log(`${BRAND_NAME} API listening on port ${port}`);

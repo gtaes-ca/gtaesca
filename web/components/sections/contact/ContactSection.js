@@ -35,10 +35,7 @@ export default function ContactSection() {
                 const data = await res.json()
                 if (cancelled) return
                 if (data.content) {
-                    setSettings({
-                        ...DEFAULT_CONTACT_PAGE_SETTINGS,
-                        ...data.content,
-                    })
+                    setSettings(data.content)
                 }
             } catch {
                 // Keep defaults on failure

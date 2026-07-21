@@ -1,5 +1,5 @@
 import moment from 'moment';
-const colors = ['#1c84ee', '#7f56da', '#ff86c8', '#f9b931', '#4ecac2'];
+const colors = ['#fc9c04', '#7f56da', '#ff86c8', '#f9b931', '#4ecac2'];
 export const basicTimelineOpts = {
   series: [{
     data: [{
@@ -386,7 +386,7 @@ export const groupRowsTimelineOpts = {
       rangeBarGroupRows: true
     }
   },
-  colors: ['#1c84ee', '#7f56da', '#ff86c8', '#f9b931', '#4ecac2'],
+  colors: ['#fc9c04', '#7f56da', '#ff86c8', '#f9b931', '#4ecac2'],
   fill: {
     type: 'solid'
   },

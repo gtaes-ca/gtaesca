@@ -4,30 +4,26 @@ import ComponentContainerCard from '@/components/ComponentContainerCard';
 import { useNotificationContext } from '@/context/useNotificationContext';
 import httpClient from '@/helpers/httpClient';
 
-const ICON_OPTIONS = [
-  { value: 'icon-affordable-price', label: 'Affordable price' },
-  { value: 'icon-setting', label: 'Settings / quality' },
-  { value: 'icon-services', label: 'Services' },
-];
+const HOME_SERVICES_ICON = 'icon-like';
 
 const DEFAULT_ITEMS = [
   {
     title: 'Fair & Transparent Pricing',
     text: 'Honest upfront quotes with no hidden fees on residential and commercial electrical work.',
     link: '/services',
-    icon: 'icon-affordable-price',
+    icon: HOME_SERVICES_ICON,
   },
   {
     title: 'Licensed & Insured',
     text: 'ESA-certified electricians delivering safe, code-compliant work backed by our satisfaction guarantee.',
     link: '/about',
-    icon: 'icon-setting',
+    icon: HOME_SERVICES_ICON,
   },
   {
     title: '24/7 Emergency Service',
     text: 'Available around the clock for urgent electrical repairs across the Greater Toronto Area.',
     link: '/contact',
-    icon: 'icon-services',
+    icon: HOME_SERVICES_ICON,
   },
 ];
 
@@ -39,7 +35,7 @@ function mapItemsFromApi(items = []) {
       title: item.title || fallback.title,
       text: item.text || fallback.text,
       link: item.link || fallback.link,
-      icon: item.icon || fallback.icon,
+      icon: HOME_SERVICES_ICON,
     };
   });
 }
@@ -96,7 +92,7 @@ const HomeServicesForm = () => {
   return (
     <ComponentContainerCard
       title="Homepage — Service Features"
-      description="Manage the three feature cards shown below the hero slider on the homepage."
+      description="Manage the three feature cards shown below the hero slider on the homepage. All cards use the same thumbs-up icon."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
@@ -141,22 +137,6 @@ const HomeServicesForm = () => {
                           placeholder="Honest upfront quotes with no hidden fees..."
                           required
                         />
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Icon</Form.Label>
-                        <Form.Select
-                          value={item.icon}
-                          onChange={(e) => updateItem(index, 'icon', e.target.value)}
-                          required
-                        >
-                          {ICON_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Form.Select>
                       </Form.Group>
                     </Col>
                   </Row>

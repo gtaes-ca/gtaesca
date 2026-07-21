@@ -35,8 +35,7 @@ INSERT INTO web_content_widgets (page, section, content) VALUES
       "primaryButtonLink": "/about",
       "secondaryButtonText": "Free estimate",
       "secondaryButtonLink": "/contact",
-      "backgroundImage": "assets/images/backgrounds/video-one-bg.jpg",
-      "videoId": "vfhzo499OeA"
+      "backgroundImage": ""
     }'::jsonb
   )
 ON CONFLICT (page, section) DO NOTHING;

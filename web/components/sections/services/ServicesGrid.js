@@ -2,17 +2,11 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { serviceDetailPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-const SERVICE_ICONS = [
-    'icon-socket',
-    'icon-ceiling-lamp',
-    'icon-ceiling-lamp-2',
-    'icon-smart-lighting',
-    'icon-settings-1',
-    'icon-services',
-]
+const FEATURED_SERVICES_ICON = 'icon-setting'
 
 const ANIMATION_CLASSES = ['fadeInLeft', 'fadeInUp', 'fadeInRight']
 const ANIMATION_DELAYS = ['100ms', '300ms', '500ms', '700ms', '900ms', '1100ms']
@@ -72,7 +66,7 @@ export default function ServicesGrid() {
                 ) : (
                     <div className="row">
                         {services.map((service, index) => {
-                            const detailLink = `/service-details?id=${service.id}`
+                            const detailLink = serviceDetailPath(service)
                             return (
                                 <div
                                     key={service.id}
@@ -81,7 +75,7 @@ export default function ServicesGrid() {
                                 >
                                     <div className="services-two__single">
                                         <div className="services-two__icon">
-                                            <span className={SERVICE_ICONS[index % SERVICE_ICONS.length]}></span>
+                                            <span className={FEATURED_SERVICES_ICON}></span>
                                         </div>
                                         <p className="services-two__sub-title">{service.categoryName}</p>
                                         <h3 className="services-two__title">

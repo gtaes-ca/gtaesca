@@ -2,12 +2,10 @@
 
 import Link from "next/link"
 import { useEffect, useState } from 'react'
-import { DEFAULT_HOME_SERVICE_FEATURES } from '@/lib/cms'
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 export default function Service() {
-    const [items, setItems] = useState(DEFAULT_HOME_SERVICE_FEATURES)
+    const [items, setItems] = useState([])
 
     useEffect(() => {
         let cancelled = false
@@ -18,11 +16,11 @@ export default function Service() {
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
-                if (Array.isArray(data.content?.items) && data.content.items.length) {
+                if (Array.isArray(data.content?.items)) {
                     setItems(data.content.items)
                 }
             } catch {
-                // Keep defaults on failure
+                // leave empty on failure
             }
         }
 
@@ -47,7 +45,7 @@ export default function Service() {
                             >
                                 <div className="services-one__single">
                                     <div className="services-one__icon">
-                                        <span className={item.icon}></span>
+                                        <span className="icon-like"></span>
                                     </div>
                                     <h3 className="services-one__title"><Link href={item.link}>{item.title}</Link></h3>
                                     <p className="services-one__text">{item.text}</p>

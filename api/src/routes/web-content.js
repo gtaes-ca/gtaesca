@@ -17,6 +17,12 @@ import {
   getServiceDetailsBannerContent,
   getContactBannerContent,
   getPublicContactPageSettingsContent,
+  getFaqBannerContent,
+  getFaqSettingsContent,
+  getPrivacyBannerContent,
+  getPrivacyPageContent,
+  getTermsBannerContent,
+  getTermsPageContent,
   getTopbarContent,
   getWidget,
 } from '../services/webContent.js';
@@ -60,6 +66,36 @@ router.get('/contact/settings', async (_req, res) => {
 
 router.get('/contact/banner', async (_req, res) => {
   const content = await getContactBannerContent();
+  return res.json({ content });
+});
+
+router.get('/faq/banner', async (_req, res) => {
+  const content = await getFaqBannerContent();
+  return res.json({ content });
+});
+
+router.get('/faq/settings', async (_req, res) => {
+  const content = await getFaqSettingsContent();
+  return res.json({ content });
+});
+
+router.get('/terms/banner', async (_req, res) => {
+  const content = await getTermsBannerContent();
+  return res.json({ content });
+});
+
+router.get('/terms/content', async (_req, res) => {
+  const content = await getTermsPageContent();
+  return res.json({ content });
+});
+
+router.get('/privacy/banner', async (_req, res) => {
+  const content = await getPrivacyBannerContent();
+  return res.json({ content });
+});
+
+router.get('/privacy/content', async (_req, res) => {
+  const content = await getPrivacyPageContent();
   return res.json({ content });
 });
 

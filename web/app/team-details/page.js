@@ -16,7 +16,7 @@ function TeamDetailsFallback() {
 
 export default function TeamDetailsPage() {
     return (
-        <div className="dark-home team-details-page">
+        <div className="team-details-page">
             <Layout headerStyle={1} footerStyle={1}>
                 <Suspense fallback={<TeamDetailsFallback />}>
                     <TeamMemberDetails />

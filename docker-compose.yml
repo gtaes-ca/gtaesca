@@ -48,7 +48,7 @@ services:
     volumes:
       - ./api:/app
       - ./db/init:/db/init:ro
-      - api_uploads:/app/uploads
+      - ./api/uploads:/app/uploads
       - api_node_modules:/app/node_modules
     depends_on:
       db:
@@ -93,6 +93,5 @@ services:
 volumes:
   postgres_data:
   api_node_modules:
-  api_uploads:
   admin_node_modules:
   web_node_modules:

@@ -205,7 +205,7 @@ const ProjectsGalleryForm = () => {
   return (
     <ComponentContainerCard
       title="Projects Gallery"
-      description="Manage projects shown on the /projects page. Each item links to its detail page automatically."
+      description="Manage projects shown on the /projects page and the homepage gallery section. Both pages use the same records."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>

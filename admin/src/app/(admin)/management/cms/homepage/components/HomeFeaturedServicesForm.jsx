@@ -158,7 +158,7 @@ const HomeFeaturedServicesForm = () => {
   return (
     <ComponentContainerCard
       title="Homepage — Featured Services"
-      description="Choose which services from your catalog appear in the homepage services section."
+      description="Choose which services from your catalog appear in the homepage services section. All service cards use the same settings icon."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>

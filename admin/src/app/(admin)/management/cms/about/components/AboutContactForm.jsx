@@ -121,7 +121,7 @@ const AboutContactForm = () => {
   return (
     <ComponentContainerCard
       title="Contact With Us"
-      description="Video and text section shown on the About Us page."
+      description="Text and left-side image section shown on the About Us page."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
@@ -134,17 +134,6 @@ const AboutContactForm = () => {
                 <Form.Control
                   value={form.tagline}
                   onChange={(e) => updateField('tagline', e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>YouTube Video ID</Form.Label>
-                <Form.Control
-                  value={form.videoId}
-                  onChange={(e) => updateField('videoId', e.target.value)}
-                  placeholder="vfhzo499OeA"
                   required
                 />
               </Form.Group>
@@ -229,7 +218,7 @@ const AboutContactForm = () => {
             </Col>
 
             <Col xs={12}>
-              <ImagePreview label="Background image" imageUrl={form.backgroundImagePreview} />
+              <ImagePreview label="Left side image" imageUrl={form.backgroundImagePreview} />
               <Form.Control
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"

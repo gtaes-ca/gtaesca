@@ -1,22 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { DEFAULT_TOPBAR, fetchTopbarContent } from '@/lib/cms'
+import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl } from '@/lib/cms'
+import { serviceDetailPath } from '@/lib/paths'
 import ServiceDetailsBanner from '@/components/sections/services/ServiceDetailsBanner'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-const FALLBACK_IMAGE = 'assets/images/services/service-details-img-1.jpg'
-
-function formatPrice(price) {
-    return new Intl.NumberFormat('en-CA', {
-        style: 'currency',
-        currency: 'CAD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-    }).format(price || 0)
-}
 
 function formatDuration(minutes) {
     const value = Number(minutes) || 0
@@ -27,9 +17,7 @@ function formatDuration(minutes) {
     return `${hours} hr ${mins} min`
 }
 
-export default function ServiceDetailView() {
-    const searchParams = useSearchParams()
-    const serviceId = searchParams.get('id')
+export default function ServiceDetailView({ serviceSlug }) {
     const [service, setService] = useState(null)
     const [allServices, setAllServices] = useState([])
     const [topbar, setTopbar] = useState(DEFAULT_TOPBAR)
@@ -78,7 +66,7 @@ export default function ServiceDetailView() {
         let cancelled = false
 
         async function loadService() {
-            if (!serviceId) {
+            if (!serviceSlug) {
                 setNotFound(true)
                 setLoading(false)
                 return
@@ -88,7 +76,7 @@ export default function ServiceDetailView() {
             setNotFound(false)
 
             try {
-                const res = await fetch(`${API_URL}/api/services/items/${serviceId}`)
+                const res = await fetch(`${API_URL}/api/services/slug/${encodeURIComponent(serviceSlug)}`)
                 if (cancelled) return
 
                 if (res.status === 404) {
@@ -122,7 +110,7 @@ export default function ServiceDetailView() {
         return () => {
             cancelled = true
         }
-    }, [serviceId])
+    }, [serviceSlug])
 
     if (loading) {
         return (
@@ -163,9 +151,11 @@ export default function ServiceDetailView() {
                     <div className="row">
                         <div className="col-xl-8 col-lg-7">
                             <div className="service-details__left">
-                                <div className="service-details__img">
-                                    <img src={FALLBACK_IMAGE} alt={service.name}/>
-                                </div>
+                                {service.image ? (
+                                    <div className="service-details__img">
+                                        <img src={resolveCmsAssetUrl(service.image)} alt={service.name}/>
+                                    </div>
+                                ) : null}
                                 <h3 className="service-details__title-1">{service.name}</h3>
                                 {descriptionParagraphs.length ? (
                                     descriptionParagraphs.map((paragraph, index) => (
@@ -179,26 +169,18 @@ export default function ServiceDetailView() {
                                 ) : (
                                     <p className="service-details__text-1">Contact us for more information about this service.</p>
                                 )}
-                                <ul className="service-details__points-list list-unstyled">
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-arrow-right"></span>
-                                        </div>
-                                        <p>Licensed and insured electricians for safe, code-compliant work.</p>
-                                    </li>
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-arrow-right"></span>
-                                        </div>
-                                        <p>Transparent pricing with clear service scope before we begin.</p>
-                                    </li>
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-arrow-right"></span>
-                                        </div>
-                                        <p>Residential and commercial service across the Greater Toronto Area.</p>
-                                    </li>
-                                </ul>
+                                {service.bullets && service.bullets.length ? (
+                                    <ul className="service-details__points-list list-unstyled">
+                                        {service.bullets.map((bullet, i) => (
+                                            <li key={i}>
+                                                <div className="icon">
+                                                    <span className="icon-arrow-right"></span>
+                                                </div>
+                                                <p>{bullet}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : null}
                             </div>
                         </div>
                         <div className="col-xl-4 col-lg-5">
@@ -214,35 +196,30 @@ export default function ServiceDetailView() {
                                             <h4>Duration :</h4>
                                             <p>{formatDuration(service.durationMinutes)}</p>
                                         </li>
-                                        <li>
-                                            <h4>Starting at :</h4>
-                                            <p>{formatPrice(service.price)}</p>
-                                        </li>
                                     </ul>
                                 </div>
                                 {allServices.length ? (
                                     <div className="service-details__services-box">
                                         <h3 className="service-details__services-title">Our Services</h3>
-                                        <ul className="service-details__services-list list-unstyled">
-                                            {allServices.map((item) => {
-                                                const isActive = String(item.id) === String(service.id)
-                                                return (
-                                                    <li key={item.id} className={isActive ? 'active' : ''}>
-                                                        <Link href={`/service-details?id=${item.id}`}>
-                                                            {item.name}
-                                                            <span className="icon-arrow-right"></span>
-                                                        </Link>
-                                                    </li>
-                                                )
-                                            })}
-                                        </ul>
+                                        <div className="service-details__services-list-wrap">
+                                            <ul className="service-details__services-list list-unstyled">
+                                                {allServices.map((item) => {
+                                                    const isActive = item.slug === service.slug
+                                                    return (
+                                                        <li key={item.id} className={isActive ? 'active' : ''}>
+                                                            <Link href={serviceDetailPath(item)}>
+                                                                {item.name}
+                                                                <span className="icon-arrow-right"></span>
+                                                            </Link>
+                                                        </li>
+                                                    )
+                                                })}
+                                            </ul>
+                                        </div>
                                     </div>
                                 ) : null}
                                 <div className="project-details__get-started">
                                     <h3 className="project-details__get-started-title">Get Started Today</h3>
-                                    <p className="project-details__get-started-text">
-                                        Contact us for reliable electrical service across the Greater Toronto Area.
-                                    </p>
                                     <ul className="project-details__get-started-points list-unstyled">
                                         {topbar.email ? (
                                             <li>

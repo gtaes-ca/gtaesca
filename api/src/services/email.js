@@ -164,7 +164,7 @@ function locationLabel(booking) {
 function bookingServicesText(booking) {
   if (booking.services?.length > 1) {
     return booking.services
-      .map((service) => `  - ${service.serviceName} (${formatCurrency(service.price)})`)
+      .map((service) => `  - ${service.serviceName}`)
       .join('\n');
   }
   return booking.serviceName;
@@ -173,7 +173,7 @@ function bookingServicesText(booking) {
 function bookingServicesHtml(booking) {
   if (booking.services?.length > 1) {
     const items = booking.services
-      .map((service) => `<li>${service.serviceName} — ${formatCurrency(service.price)}</li>`)
+      .map((service) => `<li>${service.serviceName}</li>`)
       .join('');
     return `<ul style="margin:0;padding-left:20px;">${items}</ul>`;
   }
@@ -215,28 +215,6 @@ function bookingMaterialsHtml(booking) {
   `;
 }
 
-function bookingChargesText(booking) {
-  const lines = [`Service charge: ${formatCurrency(booking.servicePrice)}`];
-  if (booking.materialsTotal > 0) {
-    lines.push(`Materials: ${formatCurrency(booking.materialsTotal)}`);
-    lines.push(`Total: ${formatCurrency(booking.totalPrice)}`);
-  }
-  return lines.join('\n');
-}
-
-function bookingChargesHtml(booking) {
-  if (!booking.materialsTotal) {
-    return `<tr><td style="padding:8px 0;color:#666;">Service charge</td><td style="padding:8px 0;"><strong>${formatCurrency(booking.servicePrice)}</strong></td></tr>`;
-  }
-
-  return `
-    <tr><td style="padding:8px 0;color:#666;">Services subtotal</td><td style="padding:8px 0;"><strong>${formatCurrency(booking.servicePrice)}</strong></td></tr>
-    <tr><td style="padding:8px 0;color:#666;vertical-align:top;">Materials</td><td style="padding:8px 0;">${bookingMaterialsHtml(booking)}</td></tr>
-    <tr><td style="padding:8px 0;color:#666;">Materials subtotal</td><td style="padding:8px 0;"><strong>${formatCurrency(booking.materialsTotal)}</strong></td></tr>
-    <tr><td style="padding:8px 0;color:#666;">Total charge</td><td style="padding:8px 0;"><strong>${formatCurrency(booking.totalPrice)}</strong></td></tr>
-  `;
-}
-
 export async function sendBookingConfirmationEmail({ booking, activationUrl = null }) {
   const technicianName = [booking.technicianFirstName, booking.technicianLastName].filter(Boolean).join(' ') || 'Assigned team member';
   const areaLabel = locationLabel(booking);
@@ -271,7 +249,6 @@ export async function sendBookingConfirmationEmail({ booking, activationUrl = nu
       `Reference: ${booking.referenceCode}`,
       'Status: Pending review',
       `Service${booking.services?.length > 1 ? 's' : ''}: ${bookingServicesText(booking)}`,
-      `Service charge: ${formatCurrency(booking.servicePrice)}`,
       `Service area: ${areaLabel}`,
       `Preferred technician: ${technicianName}`,
       `Scheduled: ${scheduledLabel}`,
@@ -289,7 +266,6 @@ export async function sendBookingConfirmationEmail({ booking, activationUrl = nu
           <tr><td style="padding:8px 0;color:#666;">Reference</td><td style="padding:8px 0;"><strong>${booking.referenceCode}</strong></td></tr>
           <tr><td style="padding:8px 0;color:#666;">Status</td><td style="padding:8px 0;">Pending</td></tr>
           <tr><td style="padding:8px 0;color:#666;vertical-align:top;">Service${booking.services?.length > 1 ? 's' : ''}</td><td style="padding:8px 0;">${bookingServicesHtml(booking)}</td></tr>
-          <tr><td style="padding:8px 0;color:#666;">Service charge</td><td style="padding:8px 0;"><strong>${formatCurrency(booking.servicePrice)}</strong></td></tr>
           <tr><td style="padding:8px 0;color:#666;">Service area</td><td style="padding:8px 0;">${areaLabel}</td></tr>
           <tr><td style="padding:8px 0;color:#666;">Technician</td><td style="padding:8px 0;">${technicianName}</td></tr>
           <tr><td style="padding:8px 0;color:#666;">Scheduled</td><td style="padding:8px 0;">${scheduledLabel}</td></tr>
@@ -335,7 +311,6 @@ export async function sendBookingStatusEmail({ booking, status }) {
       copy.message,
       `Reference: ${booking.referenceCode}`,
       `Service${booking.services?.length > 1 ? 's' : ''}: ${bookingServicesText(booking)}`,
-      bookingChargesText(booking),
       materialsText ? `Materials used:\n${materialsText}` : '',
       `Service area: ${locationLabel(booking)}`,
       `Technician: ${technicianName}`,
@@ -347,9 +322,6 @@ export async function sendBookingStatusEmail({ booking, status }) {
         <p>${copy.message}</p>
         <p><strong>Reference:</strong> ${booking.referenceCode}</p>
         <p><strong>Service${booking.services?.length > 1 ? 's' : ''}:</strong> ${bookingServicesHtml(booking)}</p>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-          ${bookingChargesHtml(booking)}
-        </table>
         <p><strong>Service area:</strong> ${locationLabel(booking)}</p>
         <p><strong>Technician:</strong> ${technicianName}</p>
         <p><strong>Scheduled:</strong> ${scheduledLabel}</p>

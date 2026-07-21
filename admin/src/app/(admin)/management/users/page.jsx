@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Badge, Button, Form, Modal, Nav, Tab, Table } from 'react-bootstrap';
+import { Badge, Button, Nav, Tab, Table } from 'react-bootstrap';
 import ComponentContainerCard from '@/components/ComponentContainerCard';
 import TechnicianExpertiseOffcanvas from '@/components/technician/TechnicianExpertiseOffcanvas';
+import UserActionsOffcanvas from '@/components/users/UserActionsOffcanvas';
 import UserAvatar from '@/components/UserAvatar';
 import PageMetaData from '@/components/PageTitle';
 import { useNotificationContext } from '@/context/useNotificationContext';
@@ -16,8 +17,8 @@ const UserManagementPage = () => {
   const [activeTab, setActiveTab] = useState(OPERATION_TAB);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [password, setPassword] = useState('');
+  const [actionUser, setActionUser] = useState(null);
+  const [actionSaving, setActionSaving] = useState(false);
   const [expertiseUser, setExpertiseUser] = useState(null);
   const [expandedExpertiseUsers, setExpandedExpertiseUsers] = useState(() => new Set());
 
@@ -75,22 +76,25 @@ const UserManagementPage = () => {
     }
   };
 
-  const changePassword = async () => {
-    if (!selectedUser || password.length < 8) return;
+  const changePassword = async (password) => {
+    if (!actionUser || password.length < 8) return;
+    setActionSaving(true);
     try {
-      await httpClient.patch(`/api/admin/users/${selectedUser.id}/password`, { password });
+      await httpClient.patch(`/api/admin/users/${actionUser.id}/password`, { password });
       showNotification({ message: 'Password updated and sessions revoked', variant: 'success' });
-      setSelectedUser(null);
-      setPassword('');
+      setActionUser(null);
     } catch (e) {
       showNotification({ message: e.response?.data?.error || 'Password update failed', variant: 'danger' });
+    } finally {
+      setActionSaving(false);
     }
   };
 
-  const changeRole = async (user, newRole) => {
-    if (user.role === newRole) return;
+  const changeRole = async (newRole) => {
+    if (!actionUser || actionUser.role === newRole) return;
+    setActionSaving(true);
     try {
-      const res = await httpClient.patch(`/api/admin/users/${user.id}/role`, { role: newRole });
+      const res = await httpClient.patch(`/api/admin/users/${actionUser.id}/role`, { role: newRole });
       const sessionsRevoked = res.data?.sessionsRevoked ?? 0;
       showNotification({
         message: sessionsRevoked > 0
@@ -98,9 +102,12 @@ const UserManagementPage = () => {
           : 'Role updated',
         variant: 'success',
       });
+      setActionUser((prev) => (prev ? { ...prev, role: newRole } : prev));
       loadUsers(activeTab);
     } catch (e) {
       showNotification({ message: e.response?.data?.error || 'Role update failed', variant: 'danger' });
+    } finally {
+      setActionSaving(false);
     }
   };
 
@@ -186,55 +193,19 @@ const UserManagementPage = () => {
               <td>{user.email}</td>
               {!isOperationTab && <td>{renderExpertiseCell(user)}</td>}
               <td>
-                {isOperationTab ? (
-                  <Form.Select
-                    size="sm"
-                    value={user.role}
-                    onChange={(e) => changeRole(user, e.target.value)}
-                  >
-                    {operationRoles.map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </Form.Select>
-                ) : (
-                  'Technician'
-                )}
+                {isOperationTab ? user.role : 'Technician'}
               </td>
               <td>
                 <Badge bg={user.status === 'active' ? 'success' : 'danger'}>{user.status}</Badge>
               </td>
-              <td className="d-flex gap-2 flex-wrap">
-                {!isOperationTab && (
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    onClick={() => setExpertiseUser(user)}
-                  >
-                    Manage Services
-                  </Button>
-                )}
+              <td>
                 <Button
                   size="sm"
                   variant="outline-primary"
-                  onClick={() => {
-                    setSelectedUser(user);
-                    setPassword('');
-                  }}
+                  onClick={() => setActionUser(user)}
                 >
-                  Change Password
+                  Manage
                 </Button>
-                <Button size="sm" variant="outline-warning" onClick={() => revokeSessions(user)}>
-                  Logout All Sessions
-                </Button>
-                {user.status === 'active' ? (
-                  <Button size="sm" variant="outline-danger" onClick={() => updateStatus(user, 'blocked')}>
-                    Block
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="outline-success" onClick={() => updateStatus(user, 'active')}>
-                    Unblock
-                  </Button>
-                )}
               </td>
             </tr>
           ))}
@@ -278,33 +249,29 @@ const UserManagementPage = () => {
         </Tab.Container>
       </ComponentContainerCard>
 
+      <UserActionsOffcanvas
+        show={!!actionUser}
+        user={actionUser}
+        isOperationTab={isOperationTab}
+        operationRoles={operationRoles}
+        saving={actionSaving}
+        onHide={() => setActionUser(null)}
+        onChangePassword={changePassword}
+        onChangeRole={changeRole}
+        onRevokeSessions={revokeSessions}
+        onUpdateStatus={updateStatus}
+        onManageServices={!isOperationTab ? (user) => {
+          setActionUser(null);
+          setExpertiseUser(user);
+        } : undefined}
+      />
+
       <TechnicianExpertiseOffcanvas
         show={!!expertiseUser}
         user={expertiseUser}
         onHide={() => setExpertiseUser(null)}
         onSaved={handleExpertiseSaved}
       />
-
-      <Modal show={!!selectedUser} onHide={() => setSelectedUser(null)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Change Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p className="text-muted">
-            Set a new password for {selectedUser?.email}. All active sessions will be revoked.
-          </p>
-          <Form.Control
-            type="password"
-            placeholder="New password (min 8 chars)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="light" onClick={() => setSelectedUser(null)}>Cancel</Button>
-          <Button onClick={changePassword} disabled={password.length < 8}>Update Password</Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 };

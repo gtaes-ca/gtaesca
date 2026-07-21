@@ -67,7 +67,7 @@ export default function Footer3() {
                     <div className="site-footer-three__bottom-inner">
                         <p className="site-footer-three__bottom-text">Copyright 2024. All rights reserved</p>
                         <div className="site-footer-three__logo">
-                            <Link href="/"><img src="assets/images/resources/footer-logo-1.png" alt=""/></Link>
+                            <Link href="/"><img src="assets/images/resources/footer-logo-1.png" alt="GTA Electric Services" className="site-logo"/></Link>
                         </div>
                         <ul className="list-unstyled site-footer-three__bottom-menu">
                             <li><Link href="contact">Support</Link></li>

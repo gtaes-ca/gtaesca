@@ -15,7 +15,7 @@ export default function Footer4() {
                             <div className="footer-widget__column footer-widget__about">
                                 <div className="footer-widget__logo">
                                     <Link href="/"><img src="assets/images/resources/footer-logo-1.png"
-                                            alt=""/></Link>
+                                            alt="GTA Electric Services" className="site-logo"/></Link>
                                 </div>
                                 <p className="footer-widget__about-text">Secure other greater pleasures, or else he
                                     endures<br/>

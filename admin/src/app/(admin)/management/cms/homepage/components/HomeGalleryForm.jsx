@@ -194,7 +194,7 @@ const HomeGalleryForm = () => {
   return (
     <ComponentContainerCard
       title="Homepage — Our Gallery"
-      description="Manage the gallery section heading and each item image with a short informational title and description."
+      description="Manage the gallery section heading and project cards shown on the homepage and Projects page. Changes apply to both."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>

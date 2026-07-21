@@ -25,7 +25,7 @@ export const basicChartOpts = {
       }
     }
   },
-  colors: ['#1c84ee'],
+  colors: ['#fc9c04'],
   xaxis: {
     categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy', 'France', 'Japan', 'United States', 'China', 'Germany']
   },
@@ -57,7 +57,7 @@ export const groupedBarChartOpts = {
       colors: ['#fff']
     }
   },
-  colors: ['#1c84ee', '#4ecac2'],
+  colors: ['#fc9c04', '#4ecac2'],
   stroke: {
     show: true,
     width: 1,
@@ -139,7 +139,7 @@ export const stackedChartOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#4ecac2', '#22c55e', '#f9b931', '#ff6c2f'],
+  colors: ['#fc9c04', '#4ecac2', '#22c55e', '#f9b931', '#ff6c2f'],
   tooltip: {
     y: {
       formatter: function (val) {
@@ -204,7 +204,7 @@ export const fullStackedChartOpts = {
   xaxis: {
     categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014]
   },
-  colors: ['#1c84ee', '#4ecac2', '#22c55e', '#f9b931', '#ff6c2f'],
+  colors: ['#fc9c04', '#4ecac2', '#22c55e', '#f9b931', '#ff6c2f'],
   tooltip: {
     y: {
       formatter: function (val) {
@@ -243,7 +243,7 @@ export const negativeValueChartOpts = {
       show: false
     }
   },
-  colors: ['#1c84ee', '#4ecac2'],
+  colors: ['#fc9c04', '#4ecac2'],
   plotOptions: {
     bar: {
       horizontal: true,
@@ -431,7 +431,7 @@ export const customDataLabelsChartOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#040505', '#4ecac2'],
+  colors: ['#fc9c04', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#040505', '#4ecac2'],
   dataLabels: {
     enabled: true,
     textAnchor: 'start',
@@ -528,7 +528,7 @@ export const patternChartOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#22c55e', '#040505', '#4ecac2'],
+  colors: ['#fc9c04', '#22c55e', '#040505', '#4ecac2'],
   fill: {
     type: 'pattern',
     opacity: 1,

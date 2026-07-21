@@ -7,7 +7,7 @@ import AboutContact from '@/components/sections/about/AboutContact'
 
 export default function AboutPage() {
     return (
-        <div className="dark-home about-page">
+        <div className="about-page">
             <Layout headerStyle={1} footerStyle={1}>
                 <AboutBanner />
                 <AboutSection variant="about-four" />

@@ -100,7 +100,6 @@ export function mapAboutContactFromApi(content = {}) {
     backgroundImage,
     backgroundImagePreview: resolveCmsAssetUrl(backgroundImage),
     backgroundImageData: null,
-    videoId: content.videoId || '',
   };
 }
 
@@ -115,7 +114,6 @@ export function mapAboutContactForSave(content = {}) {
     secondaryButtonText: content.secondaryButtonText,
     secondaryButtonLink: content.secondaryButtonLink,
     backgroundImage: content.backgroundImage,
-    videoId: content.videoId,
   };
 }
 
@@ -151,6 +149,57 @@ export const mapServiceDetailsBannerFromApi = mapAboutBannerFromApi;
 export const mapServiceDetailsBannerForSave = mapAboutBannerForSave;
 export const mapContactBannerFromApi = mapAboutBannerFromApi;
 export const mapContactBannerForSave = mapAboutBannerForSave;
+export const mapFaqBannerFromApi = mapAboutBannerFromApi;
+export const mapFaqBannerForSave = mapAboutBannerForSave;
+
+export function mapFaqSettingsFromApi(content = {}) {
+  return {
+    tagline: content.tagline || 'FAQ',
+    title: content.title || 'Frequently Asked Questions',
+    introText: content.introText || '',
+  };
+}
+
+export function mapFaqSettingsForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    title: content.title,
+    introText: content.introText,
+  };
+}
+
+export const mapLegalBannerFromApi = mapAboutBannerFromApi;
+export const mapLegalBannerForSave = mapAboutBannerForSave;
+
+export function mapLegalPageContentFromApi(content = {}) {
+  const sections = Array.isArray(content.sections) ? content.sections : [];
+
+  return {
+    title: content.title || '',
+    lastUpdated: content.lastUpdated || '',
+    introText: content.introText || '',
+    sections: sections.map((section, index) => ({
+      id: section.id || crypto.randomUUID(),
+      heading: section.heading || '',
+      body: section.body || '',
+      sortOrder: section.sortOrder ?? index,
+    })),
+  };
+}
+
+export function mapLegalPageContentForSave(content = {}) {
+  return {
+    title: content.title,
+    lastUpdated: content.lastUpdated,
+    introText: content.introText,
+    sections: (content.sections || []).map((section, index) => ({
+      id: section.id,
+      heading: section.heading,
+      body: section.body,
+      sortOrder: section.sortOrder ?? index,
+    })),
+  };
+}
 
 export function mapContactSettingsFromApi(content = {}) {
   return {
@@ -191,6 +240,7 @@ export function mapProjectsGalleryFromApi(content = {}) {
       const image = item.image || '';
       return {
         id: item.id || crypto.randomUUID(),
+        slug: item.slug || '',
         subTitle: item.subTitle || '',
         title: item.title || '',
         text: item.text || '',
@@ -216,6 +266,7 @@ export function mapProjectsGalleryForSave(content = {}) {
     buttonLink: content.buttonLink,
     items: (content.items || []).map((item) => ({
       id: item.id,
+      slug: item.slug,
       subTitle: item.subTitle,
       title: item.title,
       text: item.text,

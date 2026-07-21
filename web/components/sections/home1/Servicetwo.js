@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
+const FEATURED_SERVICES_ICON = 'icon-setting'
+
 const DEFAULT_CONTENT = {
-    tagline: 'Our Services',
-    titleLine1: 'Featured Electrical Services',
-    titleLine2: 'for Your Home & Business',
+    tagline: '',
+    titleLine1: '',
+    titleLine2: '',
     services: [],
 }
 
@@ -29,7 +31,6 @@ export default function Servicetwo() {
                 if (cancelled) return
                 if (data.content) {
                     setContent({
-                        ...DEFAULT_CONTENT,
                         ...data.content,
                         services: Array.isArray(data.content.services) ? data.content.services : [],
                     })
@@ -77,7 +78,7 @@ export default function Servicetwo() {
                         >
                             <div className="services-two__single">
                                 <div className="services-two__icon">
-                                    <span className={service.icon}></span>
+                                    <span className={FEATURED_SERVICES_ICON}></span>
                                 </div>
                                 <p className="services-two__sub-title">{service.categoryName}</p>
                                 <h3 className="services-two__title">

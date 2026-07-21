@@ -1,16 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl } from '@/lib/cms'
+import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl, hasGalleryImage } from '@/lib/cms'
 import ProjectDetailsBanner from '@/components/sections/projects/ProjectDetailsBanner'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-export default function ProjectDetailView() {
-    const searchParams = useSearchParams()
-    const projectId = searchParams.get('id')
+export default function ProjectDetailView({ projectSlug }) {
     const [project, setProject] = useState(null)
     const [topbar, setTopbar] = useState(DEFAULT_TOPBAR)
     const [loading, setLoading] = useState(true)
@@ -36,7 +33,7 @@ export default function ProjectDetailView() {
         let cancelled = false
 
         async function loadProject() {
-            if (!projectId) {
+            if (!projectSlug) {
                 setNotFound(true)
                 setLoading(false)
                 return
@@ -46,7 +43,7 @@ export default function ProjectDetailView() {
             setNotFound(false)
 
             try {
-                const res = await fetch(`${API_URL}/api/projects/items/${projectId}`)
+                const res = await fetch(`${API_URL}/api/projects/slug/${encodeURIComponent(projectSlug)}`)
                 if (cancelled) return
 
                 if (res.status === 404) {
@@ -80,7 +77,7 @@ export default function ProjectDetailView() {
         return () => {
             cancelled = true
         }
-    }, [projectId])
+    }, [projectSlug])
 
     if (loading) {
         return (
@@ -109,7 +106,7 @@ export default function ProjectDetailView() {
         )
     }
 
-    const imageUrl = resolveCmsAssetUrl(project.image)
+    const imageUrl = hasGalleryImage(project.image) ? resolveCmsAssetUrl(project.image) : ''
     const hasSidebarInfo = project.client || project.subTitle || project.date || project.location
 
     return (
@@ -120,9 +117,11 @@ export default function ProjectDetailView() {
                     <div className="row">
                         <div className="col-xl-8 col-lg-7">
                             <div className="project-details__left">
-                                <div className="project-details__img">
-                                    <img src={imageUrl} alt={project.title}/>
-                                </div>
+                                {imageUrl ? (
+                                    <div className="project-details__img">
+                                        <img src={imageUrl} alt={project.title}/>
+                                    </div>
+                                ) : null}
                                 {project.text ? (
                                     <>
                                         <h3 className="project-details__title-1">About The Project Overview</h3>
@@ -178,9 +177,6 @@ export default function ProjectDetailView() {
                                 ) : null}
                                 <div className="project-details__get-started">
                                     <h3 className="project-details__get-started-title">Get Started Today</h3>
-                                    <p className="project-details__get-started-text">
-                                        Contact us for reliable electrical service across the Greater Toronto Area.
-                                    </p>
                                     <ul className="project-details__get-started-points list-unstyled">
                                         {topbar.email ? (
                                             <li>

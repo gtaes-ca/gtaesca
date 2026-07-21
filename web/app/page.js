@@ -7,14 +7,12 @@ import Project from "@/components/sections/home1/Project"
 
 export default function Home() {
     return (
-        <div className="dark-home">
-            <Layout headerStyle={1} footerStyle={1}>
+        <Layout headerStyle={1} footerStyle={1}>
                 <Banner />
                 <Service />
                 <About />
                 <Servicetwo />
                 <Project />
             </Layout>
-        </div>
     )
 }

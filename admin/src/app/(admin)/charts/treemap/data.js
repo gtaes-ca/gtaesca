@@ -41,7 +41,7 @@ export const basicTreemapOpts = {
       y: 29
     }]
   }],
-  colors: ['#1c84ee'],
+  colors: ['#fc9c04'],
   legend: {
     show: false
   },
@@ -156,7 +156,7 @@ export const distributedTreemapOpts = {
     text: 'Distibuted Treemap (different color for each cell)',
     align: 'center'
   },
-  colors: ['#1c84ee', '#ff6c2f', '#f9b931'],
+  colors: ['#fc9c04', '#ff6c2f', '#f9b931'],
   plotOptions: {
     treemap: {
       distributed: true,
@@ -164,7 +164,7 @@ export const distributedTreemapOpts = {
     }
   }
 };
-const colors = ['#1c84ee', '#4ecac2'];
+const colors = ['#fc9c04', '#4ecac2'];
 export const colorRangeTreemapOpts = {
   series: [{
     data: [{

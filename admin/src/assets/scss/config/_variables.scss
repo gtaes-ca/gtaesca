@@ -31,7 +31,10 @@ $black: #000000;
 // scss-docs-end gray-color-variables
 
 // scss-docs-start color-variables
-$blue: #1c84ee;
+// GTA Electric Services brand gold (matches website --erepair-primary)
+$gold: #fc9c04;
+$gold-dark: #c47a03;
+$blue: $gold;
 $indigo: #53389f;
 $purple: #7f56da;
 $pink: #ff86c8;
@@ -44,7 +47,7 @@ $cyan: #4ecac2;
 // scss-docs-end color-variables
 
 // scss-docs-start theme-color-variables
-$primary: $blue;
+$primary: $gold;
 $secondary: $gray-600;
 $blue: $blue;
 $indigo: $indigo;

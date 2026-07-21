@@ -10,11 +10,12 @@ const VerticalNavigationBar = () => {
   const { user } = useAuthContext();
   const menuItems = getMenuItems(user);
   return <div className="main-nav" id="leftside-menu-container">
-      <LogoBox containerClassName="logo-box" squareLogo={{
-      className: 'logo-sm'
-    }} textLogo={{
-      className: 'logo-lg'
-    }} />
+      <LogoBox
+        containerClassName="logo-box"
+        useFullLogo
+        squareLogo={{ className: 'logo-sm', height: 38 }}
+        textLogo={{ className: 'logo-lg', height: 48 }}
+      />
 
       <HoverMenuToggle />
 

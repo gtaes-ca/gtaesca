@@ -14,7 +14,7 @@ export const basicPolarAreaOpts = {
   legend: {
     position: 'bottom'
   },
-  colors: ['#1c84ee', '#f9b931', '#4ecac2'],
+  colors: ['#fc9c04', '#f9b931', '#4ecac2'],
   responsive: [{
     breakpoint: 480,
     options: {

@@ -75,10 +75,13 @@ export function AuthProvider({ children }) {
     refreshSession();
     const interval = setInterval(refreshSession, 30000);
     const onFocus = () => refreshSession();
+    const onBookingModeChanged = () => refreshSession();
     window.addEventListener('focus', onFocus);
+    window.addEventListener('booking-mode-changed', onBookingModeChanged);
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('booking-mode-changed', onBookingModeChanged);
     };
   }, [refreshSession]);
 

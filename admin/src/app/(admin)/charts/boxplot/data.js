@@ -34,7 +34,7 @@ export const basicBoxplotOpts = {
   plotOptions: {
     boxPlot: {
       colors: {
-        upper: '#1c84ee',
+        upper: '#fc9c04',
         lower: '#22c55e'
       }
     }
@@ -93,7 +93,7 @@ export const scatterBoxplotOpts = {
       show: false
     }
   },
-  colors: ['#1c84ee', '#22c55e'],
+  colors: ['#fc9c04', '#22c55e'],
   stroke: {
     colors: ['#a1a9b1']
   },
@@ -120,7 +120,7 @@ export const scatterBoxplotOpts = {
   plotOptions: {
     boxPlot: {
       colors: {
-        upper: '#1c84ee',
+        upper: '#fc9c04',
         lower: '#22c55e'
       }
     }

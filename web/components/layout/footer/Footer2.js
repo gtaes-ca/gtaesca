@@ -15,7 +15,7 @@ export default function Footer2() {
                             <div className="footer-widget-two__column footer-widget-two__about">
                                 <div className="footer-widget-two__logo">
                                     <Link href="/"><img src="assets/images/resources/footer-logo-2.png"
-                                            alt=""/></Link>
+                                            alt="GTA Electric Services" className="site-logo"/></Link>
                                 </div>
                                 <p className="footer-widget-two__about-text">Secure other greater pleasures, or else he
                                     endures<br/>

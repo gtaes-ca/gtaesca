@@ -1681,7 +1681,7 @@ export const missingChartOpts = {
     name: 'David',
     data: [null, null, null, null, 3, 4, 1, 3, 4, 6, 7, 9, 5, null, null, null]
   }],
-  colors: ['#1c84ee', '#ef5f5f', '#4ecac2'],
+  colors: ['#fc9c04', '#ef5f5f', '#4ecac2'],
   labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'],
   grid: {
     row: {
@@ -1731,7 +1731,7 @@ export const dashedLineChartOpts = {
   xaxis: {
     categories: ['01 Jan', '02 Jan', '03 Jan', '04 Jan', '05 Jan', '06 Jan', '07 Jan', '08 Jan', '09 Jan', '10 Jan', '11 Jan', '12 Jan']
   },
-  colors: ['#1c84ee', '#ef5f5f', '#4ecac2'],
+  colors: ['#fc9c04', '#ef5f5f', '#4ecac2'],
   tooltip: {
     y: {
       title: {
@@ -1824,7 +1824,7 @@ export const brushChartOpts2 = {
       }
     }
   },
-  colors: ['#1c84ee'],
+  colors: ['#fc9c04'],
   fill: {
     type: 'gradient',
     gradient: {

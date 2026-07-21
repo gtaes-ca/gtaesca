@@ -2,6 +2,31 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export const DEFAULT_BOOKING_TIMEZONE = 'America/Toronto';
 
+export const BOOKING_MODES = {
+  FULL: 'full',
+  WHATSAPP: 'whatsapp',
+};
+
+export const BOOK_SERVICE_CTA_LABEL = 'Book a Service';
+export const BOOK_WHATSAPP_CTA_LABEL = 'Book via WhatsApp';
+
+export function isWhatsAppBookingMode(bookingMode) {
+  return bookingMode === BOOKING_MODES.WHATSAPP;
+}
+
+export function getBookingCtaLabel(bookingMode) {
+  return isWhatsAppBookingMode(bookingMode) ? BOOK_WHATSAPP_CTA_LABEL : BOOK_SERVICE_CTA_LABEL;
+}
+
+export async function fetchPublicBookingSettings() {
+  const res = await fetch(`${API_URL}/api/bookings/settings`);
+  if (!res.ok) {
+    throw new Error('Failed to load booking settings');
+  }
+  const data = await res.json();
+  return data.settings || {};
+}
+
 export const BOOKING_SOURCE_LABELS = {
   web: 'Web Booking',
   admin: 'Admin Booking',
@@ -53,6 +78,64 @@ export function formatDuration(minutes) {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return mins ? `${hours}h ${mins}m` : `${hours} hour${hours > 1 ? 's' : ''}`;
+}
+
+export function normalizeWhatsAppNumber(number) {
+  return String(number || '').replace(/\D/g, '');
+}
+
+export function buildWhatsAppBookingMessage({
+  services = [],
+  location,
+  technician,
+  scheduledAt,
+  client,
+  notes,
+  timezone = DEFAULT_BOOKING_TIMEZONE,
+}) {
+  const serviceLines = services.map((s) => `- ${s.name}`).join('\n');
+  const totalDuration = services.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+
+  const lines = [
+    'Hello, I would like to book a service:',
+    '',
+    '*Services:*',
+    serviceLines || '- (none selected)',
+    '',
+    `*Service area:* ${location?.label || location?.name || '—'}`,
+    `*Preferred technician:* ${technician ? `${technician.firstName} ${technician.lastName}` : '—'}`,
+    `*Preferred date & time:* ${formatBookingSlot(scheduledAt, timezone)}`,
+    '',
+    '*Contact details:*',
+    `Name: ${client.firstName} ${client.lastName}`.trim(),
+    `Email: ${client.email || '—'}`,
+    `Phone: ${client.phone || '—'}`,
+    `Address: ${client.address || '—'}`,
+  ];
+
+  if (notes?.trim()) {
+    lines.push('', `*Notes:* ${notes.trim()}`);
+  }
+
+  if (services.length > 0) {
+    lines.push('', `Estimated duration: ${formatDuration(totalDuration)}`);
+  }
+
+  return lines.join('\n');
+}
+
+export function buildWhatsAppBookingUrl(number, message) {
+  const digits = normalizeWhatsAppNumber(number);
+  if (!digits) return null;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
+export function openWhatsAppBooking(number, message) {
+  const url = buildWhatsAppBookingUrl(number, message);
+  if (!url) {
+    throw new Error('WhatsApp number is not configured');
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function getDateStrInTimezone(timeZone) {

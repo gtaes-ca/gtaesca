@@ -1,21 +1,67 @@
 import { Link } from 'react-router-dom';
 import logoDark from '@/assets/images/logo-dark.png';
+import logoDarkFull from '@/assets/images/logo-dark-full.png';
 import logoLight from '@/assets/images/logo-light.png';
+import logoLightFull from '@/assets/images/logo-light-full.png';
 import logoSm from '@/assets/images/logo-sm.png';
+
+const LOGO_ASPECT = 512 / 300;
+
 const LogoBox = ({
   containerClassName,
   squareLogo,
-  textLogo
+  textLogo,
+  showSquareLogo = true,
+  useFullLogo = false,
 }) => {
-  return <div className={containerClassName ?? ''}>
+  const logoHeight = textLogo?.height ?? 48;
+  const logoWidth = textLogo?.width ?? Math.round(logoHeight * LOGO_ASPECT);
+  const smSize = squareLogo?.height ?? 38;
+  const darkLogoSrc = useFullLogo ? logoDarkFull : logoDark;
+  const lightLogoSrc = useFullLogo ? logoLightFull : logoLight;
+
+  return (
+    <div className={containerClassName ?? ''}>
       <Link to="/" className="logo-dark">
-        <img src={logoSm} className={squareLogo?.className} height={squareLogo?.height ?? 30} width={squareLogo?.width ?? 19} alt="logo sm" />
-        <img src={logoDark} className={textLogo?.className} height={textLogo?.height ?? 20} width={textLogo?.width ?? 60} alt="logo dark" />
+        {showSquareLogo ? (
+          <img
+            src={logoSm}
+            className={squareLogo?.className ?? 'logo-sm'}
+            height={smSize}
+            alt="GTA Electric Services"
+            style={{ width: 'auto', objectFit: 'contain' }}
+          />
+        ) : null}
+        <img
+          src={darkLogoSrc}
+          className={textLogo?.className ?? 'logo-lg'}
+          height={logoHeight}
+          width={useFullLogo ? undefined : logoWidth}
+          alt="GTA Electric Services"
+          style={{ width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
+        />
       </Link>
       <Link to="/" className="logo-light">
-        <img src={logoSm} className={squareLogo?.className} height={squareLogo?.height ?? 30} width={squareLogo?.width ?? 19} alt="logo sm" />
-        <img src={logoLight} className={textLogo?.className} height={textLogo?.height ?? 20} width={textLogo?.width ?? 60} alt="logo light" />
+        {showSquareLogo ? (
+          <img
+            src={logoSm}
+            className={squareLogo?.className ?? 'logo-sm'}
+            height={smSize}
+            alt="GTA Electric Services"
+            style={{ width: 'auto', objectFit: 'contain' }}
+          />
+        ) : null}
+        <img
+          src={lightLogoSrc}
+          className={textLogo?.className ?? 'logo-lg'}
+          height={logoHeight}
+          width={useFullLogo ? undefined : logoWidth}
+          alt="GTA Electric Services"
+          style={{ width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
+        />
       </Link>
-    </div>;
+    </div>
+  );
 };
+
 export default LogoBox;

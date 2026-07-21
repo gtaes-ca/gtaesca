@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import pool from '../db.js';
 import { saveCmsImage } from './cmsImage.js';
+import { slugify } from '../utils/slug.js';
 
 const DEFAULT_TOPBAR = {
   email: 'example@gamil.com',
@@ -46,25 +47,28 @@ const DEFAULT_SLIDER_SLIDES = [
   },
 ];
 
+const HOME_SERVICES_ICON = 'icon-like';
+const FEATURED_SERVICES_ICON = 'icon-setting';
+
 const DEFAULT_HOME_SERVICES = {
   items: [
     {
       title: 'Fair & Transparent Pricing',
       text: 'Honest upfront quotes with no hidden fees on residential and commercial electrical work.',
       link: '/services',
-      icon: 'icon-affordable-price',
+      icon: HOME_SERVICES_ICON,
     },
     {
       title: 'Licensed & Insured',
       text: 'ESA-certified electricians delivering safe, code-compliant work backed by our satisfaction guarantee.',
       link: '/about',
-      icon: 'icon-setting',
+      icon: HOME_SERVICES_ICON,
     },
     {
       title: '24/7 Emergency Service',
       text: 'Available around the clock for urgent electrical repairs across the Greater Toronto Area.',
       link: '/contact',
-      icon: 'icon-services',
+      icon: HOME_SERVICES_ICON,
     },
   ],
 };
@@ -88,55 +92,12 @@ const DEFAULT_HOME_FEATURED_SERVICES = {
 };
 
 const DEFAULT_HOME_GALLERY = {
-  tagline: 'Our Gallery',
-  titleLine1: 'Your Brightest',
-  titleLine2: 'Choice in Repairs',
-  buttonText: 'All Gallery',
+  tagline: '',
+  titleLine1: '',
+  titleLine2: '',
+  buttonText: '',
   buttonLink: '/projects',
-  items: [
-    {
-      subTitle: 'Home Electrical',
-      title: 'Panel Upgrade & Installation',
-      text: 'Safe electrical panel upgrades to support modern home power needs.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-1.jpg',
-    },
-    {
-      subTitle: 'Lighting',
-      title: 'Indoor & Outdoor Lighting',
-      text: 'Clean lighting installs for homes, exteriors, and landscape areas.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-2.jpg',
-    },
-    {
-      subTitle: 'EV Charging',
-      title: 'EV Charger Installation',
-      text: 'Professional Level 2 charger installs for convenient at-home charging.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-3.jpg',
-    },
-    {
-      subTitle: 'Commercial',
-      title: 'Commercial Lighting Upgrade',
-      text: 'Efficient lighting upgrades for offices, retail, and warehouses.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-4.jpg',
-    },
-    {
-      subTitle: 'Safety',
-      title: 'Smoke & CO Alarm Setup',
-      text: 'Code-compliant smoke and carbon monoxide alarm installations.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-5.jpg',
-    },
-    {
-      subTitle: 'Rewiring',
-      title: 'Home Rewiring Project',
-      text: 'Reliable rewiring for outdated or unsafe electrical systems.',
-      link: '/projects',
-      image: 'assets/images/project/project-1-6.jpg',
-    },
-  ],
+  items: [],
 };
 
 function normalizeSlide(slide = {}, index = 0) {
@@ -178,7 +139,7 @@ export function normalizeHomeServicesContent(content = {}) {
         title: String(item?.title ?? fallback.title).trim(),
         text: String(item?.text ?? fallback.text).trim(),
         link: String(item?.link ?? fallback.link).trim(),
-        icon: String(item?.icon ?? fallback.icon).trim(),
+        icon: HOME_SERVICES_ICON,
       };
     }),
   };
@@ -213,29 +174,29 @@ export function normalizeFeaturedServicesWidgetContent(content = {}) {
 function formatFeaturedService(row) {
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     description: row.description || '',
     categoryName: row.category_name,
-    link: '/services',
-    icon: 'icon-services',
+    link: row.slug ? `/services/${row.slug}` : '/services',
+    icon: FEATURED_SERVICES_ICON,
   };
 }
 
-function normalizeGalleryItem(item = {}, index = 0) {
-  const fallback = DEFAULT_HOME_GALLERY.items[index] || DEFAULT_HOME_GALLERY.items[0];
+function normalizeGalleryItem(item = {}) {
   return {
-    subTitle: String(item?.subTitle ?? fallback.subTitle).trim(),
-    title: String(item?.title ?? fallback.title).trim(),
-    text: String(item?.text ?? fallback.text).trim(),
-    link: String(item?.link ?? fallback.link).trim(),
-    image: String(item?.image ?? fallback.image).trim(),
+    subTitle: String(item?.subTitle ?? '').trim(),
+    title: String(item?.title ?? '').trim(),
+    text: String(item?.text ?? '').trim(),
+    link: String(item?.link ?? '/projects').trim(),
+    image: String(item?.image ?? '').trim(),
   };
 }
 
 export function normalizeHomeGalleryContent(content = {}) {
   const items = Array.isArray(content.items) && content.items.length
-    ? content.items.map((item, index) => normalizeGalleryItem(item, index))
-    : DEFAULT_HOME_GALLERY.items.map((item, index) => normalizeGalleryItem(item, index));
+    ? content.items.map((item) => normalizeGalleryItem(item))
+    : [];
 
   return {
     tagline: String(content.tagline ?? DEFAULT_HOME_GALLERY.tagline).trim(),
@@ -247,6 +208,51 @@ export function normalizeHomeGalleryContent(content = {}) {
   };
 }
 
+function convertHomeGalleryToProjectsContent(homeContent) {
+  const home = normalizeHomeGalleryContent(homeContent);
+
+  return {
+    tagline: home.tagline,
+    titleLine1: home.titleLine1,
+    titleLine2: home.titleLine2,
+    buttonText: home.buttonText,
+    buttonLink: home.buttonLink,
+    items: home.items.map((item, index) => {
+      const id = randomUUID();
+
+      return {
+        id,
+        subTitle: item.subTitle,
+        title: item.title,
+        text: item.text,
+        challengeText: '',
+        resultText: '',
+        client: '',
+        date: '',
+        location: '',
+        image: item.image,
+      };
+    }),
+  };
+}
+
+function mapProjectsGalleryToHomeContent(projectsContent) {
+  return {
+    tagline: projectsContent.tagline,
+    titleLine1: projectsContent.titleLine1,
+    titleLine2: projectsContent.titleLine2,
+    buttonText: projectsContent.buttonText,
+    buttonLink: projectsContent.buttonLink,
+    items: projectsContent.items.map((item) => ({
+      subTitle: item.subTitle,
+      title: item.title,
+      text: item.text,
+      link: item.link,
+      image: item.image,
+    })),
+  };
+}
+
 async function persistGalleryImages(items) {
   return Promise.all(items.map(async (item, index) => {
     const next = { ...item };
@@ -254,14 +260,14 @@ async function persistGalleryImages(items) {
       next.image = saveCmsImage(`home-gallery-${index}`, item.imageData);
     }
     delete next.imageData;
-    return normalizeGalleryItem(next, index);
+    return normalizeGalleryItem(next);
   }));
 }
 
 async function resolveFeaturedServices(serviceIds = []) {
   if (!serviceIds.length) {
     const result = await pool.query(
-      `SELECT s.id, s.name, s.description, c.name AS category_name
+      `SELECT s.id, s.slug, s.name, s.description, c.name AS category_name
        FROM services s
        JOIN service_categories c ON c.id = s.category_id
        ORDER BY s.sort_order, s.id
@@ -271,7 +277,7 @@ async function resolveFeaturedServices(serviceIds = []) {
   }
 
   const result = await pool.query(
-    `SELECT s.id, s.name, s.description, c.name AS category_name
+    `SELECT s.id, s.slug, s.name, s.description, c.name AS category_name
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
      WHERE s.id = ANY($1::int[])
@@ -495,11 +501,12 @@ export async function updateFeaturedServicesContent(content) {
 }
 
 export async function getHomeGalleryContent() {
-  const widget = await getWidget('home', 'gallery');
-  return normalizeHomeGalleryContent(widget?.content || DEFAULT_HOME_GALLERY);
+  const projects = await getProjectsGalleryContent();
+  return mapProjectsGalleryToHomeContent(projects);
 }
 
 export async function updateHomeGalleryContent(content) {
+  const existing = await getProjectsGalleryContent();
   const incomingItems = Array.isArray(content?.items) ? content.items : [];
   if (!incomingItems.length) {
     throw new Error('At least one gallery item is required');
@@ -515,7 +522,24 @@ export async function updateHomeGalleryContent(content) {
     throw new Error('Gallery title is required');
   }
 
-  for (const item of normalized.items) {
+  const mergedItems = itemsWithImages.map((item, index) => {
+    const existingItem = existing.items[index];
+
+    return {
+      id: existingItem?.id || randomUUID(),
+      subTitle: item.subTitle,
+      title: item.title,
+      text: item.text,
+      image: item.image,
+      challengeText: existingItem?.challengeText || '',
+      resultText: existingItem?.resultText || '',
+      client: existingItem?.client || '',
+      date: existingItem?.date || '',
+      location: existingItem?.location || '',
+    };
+  });
+
+  for (const item of mergedItems) {
     if (!item.title) {
       throw new Error('Each gallery item requires a title');
     }
@@ -524,7 +548,14 @@ export async function updateHomeGalleryContent(content) {
     }
   }
 
-  return upsertWidget('home', 'gallery', normalized);
+  return updateProjectsGalleryContent({
+    tagline: normalized.tagline,
+    titleLine1: normalized.titleLine1,
+    titleLine2: normalized.titleLine2,
+    buttonText: normalized.buttonText,
+    buttonLink: normalized.buttonLink,
+    items: mergedItems,
+  });
 }
 
 export async function updateSliderContent(content) {
@@ -575,8 +606,7 @@ const DEFAULT_ABOUT_CONTACT = {
   primaryButtonLink: '/about',
   secondaryButtonText: 'Free estimate',
   secondaryButtonLink: '/contact',
-  backgroundImage: 'assets/images/backgrounds/video-one-bg.jpg',
-  videoId: 'vfhzo499OeA',
+  backgroundImage: '',
 };
 
 export function normalizeAboutBannerContent(content = {}) {
@@ -659,49 +689,54 @@ const DEFAULT_PROJECT_DETAILS_BANNER = {
 };
 
 const DEFAULT_PROJECTS_GALLERY = {
-  tagline: 'Our Gallery',
-  titleLine1: 'Your Brightest',
-  titleLine2: 'Choice in Repairs',
+  tagline: '',
+  titleLine1: '',
+  titleLine2: '',
   buttonText: '',
   buttonLink: '/projects',
-  items: DEFAULT_HOME_GALLERY.items.map((item, index) => ({
-    id: `project-default-${index + 1}`,
-    subTitle: item.subTitle,
-    title: item.title,
-    text: item.text,
-    challengeText: '',
-    resultText: '',
-    client: '',
-    date: '',
-    location: '',
-    image: item.image,
-    link: `/project-details?id=project-default-${index + 1}`,
-  })),
+  items: [],
 };
 
-function normalizeProjectItem(item = {}, index = 0) {
-  const fallback = DEFAULT_PROJECTS_GALLERY.items[index] || DEFAULT_PROJECTS_GALLERY.items[0];
-  const id = String(item?.id ?? fallback?.id ?? randomUUID()).trim();
+function normalizeProjectItem(item = {}, usedSlugs = new Set()) {
+  const id = String(item?.id ?? randomUUID()).trim();
+  const title = String(item?.title ?? '').trim();
+  const existingSlug = slugify(item?.slug || item?.link?.split('/').filter(Boolean).pop());
+  const baseSlug = slugify(title) || `project-${id.slice(0, 8)}`;
+  const slug = existingSlug && !usedSlugs.has(existingSlug)
+    ? existingSlug
+    : (() => {
+      let candidate = baseSlug;
+      let counter = 2;
+      while (usedSlugs.has(candidate)) {
+        candidate = `${baseSlug}-${counter}`;
+        counter += 1;
+      }
+      return candidate;
+    })();
+
+  usedSlugs.add(slug);
 
   return {
     id,
-    subTitle: String(item?.subTitle ?? fallback.subTitle).trim(),
-    title: String(item?.title ?? fallback.title).trim(),
-    text: String(item?.text ?? fallback.text).trim(),
-    challengeText: String(item?.challengeText ?? fallback.challengeText ?? '').trim(),
-    resultText: String(item?.resultText ?? fallback.resultText ?? '').trim(),
-    client: String(item?.client ?? fallback.client ?? '').trim(),
-    date: String(item?.date ?? fallback.date ?? '').trim(),
-    location: String(item?.location ?? fallback.location ?? '').trim(),
-    image: String(item?.image ?? fallback.image).trim(),
-    link: `/project-details?id=${id}`,
+    slug,
+    subTitle: String(item?.subTitle ?? '').trim(),
+    title,
+    text: String(item?.text ?? '').trim(),
+    challengeText: String(item?.challengeText ?? '').trim(),
+    resultText: String(item?.resultText ?? '').trim(),
+    client: String(item?.client ?? '').trim(),
+    date: String(item?.date ?? '').trim(),
+    location: String(item?.location ?? '').trim(),
+    image: String(item?.image ?? '').trim(),
+    link: `/projects/${slug}`,
   };
 }
 
 export function normalizeProjectsGalleryContent(content = {}) {
+  const usedSlugs = new Set();
   const items = Array.isArray(content.items) && content.items.length
-    ? content.items.map((item, index) => normalizeProjectItem(item, index))
-    : DEFAULT_PROJECTS_GALLERY.items.map((item, index) => normalizeProjectItem(item, index));
+    ? content.items.map((item) => normalizeProjectItem(item, usedSlugs))
+    : [];
 
   return {
     tagline: String(content.tagline ?? DEFAULT_PROJECTS_GALLERY.tagline).trim(),
@@ -721,13 +756,22 @@ async function persistProjectImages(items) {
       next.image = saveCmsImage(key, item.imageData);
     }
     delete next.imageData;
-    return normalizeProjectItem(next, index);
+    return normalizeProjectItem(next);
   }));
 }
 
 export async function getProjectsGalleryContent() {
   const widget = await getWidget('projects', 'gallery');
-  return normalizeProjectsGalleryContent(widget?.content || DEFAULT_PROJECTS_GALLERY);
+  if (widget?.content && Array.isArray(widget.content.items) && widget.content.items.length) {
+    return normalizeProjectsGalleryContent(widget.content);
+  }
+
+  const homeWidget = await getWidget('home', 'gallery');
+  if (homeWidget?.content && Array.isArray(homeWidget.content.items) && homeWidget.content.items.length) {
+    return normalizeProjectsGalleryContent(convertHomeGalleryToProjectsContent(homeWidget.content));
+  }
+
+  return normalizeProjectsGalleryContent(DEFAULT_PROJECTS_GALLERY);
 }
 
 export async function updateProjectsGalleryContent(content) {
@@ -761,6 +805,16 @@ export async function updateProjectsGalleryContent(content) {
 export async function getProjectById(projectId) {
   const gallery = await getProjectsGalleryContent();
   return gallery.items.find((item) => item.id === projectId) || null;
+}
+
+export async function getProjectBySlug(slug) {
+  const normalizedSlug = slugify(slug);
+  if (!normalizedSlug) {
+    return null;
+  }
+
+  const gallery = await getProjectsGalleryContent();
+  return gallery.items.find((item) => item.slug === normalizedSlug) || null;
 }
 
 export function normalizeProjectsBannerContent(content = {}) {
@@ -988,7 +1042,6 @@ export function normalizeAboutContactContent(content = {}) {
     secondaryButtonText: String(content.secondaryButtonText ?? DEFAULT_ABOUT_CONTACT.secondaryButtonText).trim(),
     secondaryButtonLink: String(content.secondaryButtonLink ?? DEFAULT_ABOUT_CONTACT.secondaryButtonLink).trim(),
     backgroundImage: String(content.backgroundImage ?? DEFAULT_ABOUT_CONTACT.backgroundImage).trim(),
-    videoId: String(content.videoId ?? DEFAULT_ABOUT_CONTACT.videoId).trim(),
   };
 }
 
@@ -1010,4 +1063,176 @@ export async function updateAboutContactContent(content) {
 
 export async function saveWidgetImage(dataUrl, key) {
   return saveCmsImage(key, dataUrl);
+}
+
+const DEFAULT_FAQ_BANNER = {
+  title: 'FAQ',
+  backgroundImage: '',
+};
+
+const DEFAULT_FAQ_SETTINGS = {
+  tagline: 'FAQ',
+  title: 'Frequently Asked Questions',
+  introText: '',
+};
+
+export function normalizeFaqBannerContent(content = {}) {
+  return {
+    title: String(content.title ?? DEFAULT_FAQ_BANNER.title).trim(),
+    backgroundImage: String(content.backgroundImage ?? DEFAULT_FAQ_BANNER.backgroundImage).trim(),
+  };
+}
+
+export async function getFaqBannerContent() {
+  const widget = await getWidget('faq', 'banner');
+  return normalizeFaqBannerContent(widget?.content || DEFAULT_FAQ_BANNER);
+}
+
+export async function updateFaqBannerContent(content) {
+  const normalized = normalizeFaqBannerContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Banner title is required');
+  }
+
+  const widget = await upsertWidget('faq', 'banner', normalized);
+  return normalizeFaqBannerContent(widget.content);
+}
+
+export function normalizeFaqSettingsContent(content = {}) {
+  return {
+    tagline: String(content.tagline ?? DEFAULT_FAQ_SETTINGS.tagline).trim(),
+    title: String(content.title ?? DEFAULT_FAQ_SETTINGS.title).trim(),
+    introText: String(content.introText ?? DEFAULT_FAQ_SETTINGS.introText).trim(),
+  };
+}
+
+export async function getFaqSettingsContent() {
+  const widget = await getWidget('faq', 'settings');
+  return normalizeFaqSettingsContent(widget?.content || DEFAULT_FAQ_SETTINGS);
+}
+
+export async function updateFaqSettingsContent(content) {
+  const normalized = normalizeFaqSettingsContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Section title is required');
+  }
+
+  const widget = await upsertWidget('faq', 'settings', normalized);
+  return normalizeFaqSettingsContent(widget.content);
+}
+
+const DEFAULT_TERMS_BANNER = {
+  title: 'Terms and Conditions',
+  backgroundImage: '',
+};
+
+const DEFAULT_PRIVACY_BANNER = {
+  title: 'Privacy Policy',
+  backgroundImage: '',
+};
+
+const DEFAULT_TERMS_CONTENT = {
+  title: 'Terms and Conditions',
+  lastUpdated: '',
+  introText: '',
+  sections: [],
+};
+
+const DEFAULT_PRIVACY_CONTENT = {
+  title: 'Privacy Policy',
+  lastUpdated: '',
+  introText: '',
+  sections: [],
+};
+
+function normalizeLegalSection(section = {}, index = 0) {
+  return {
+    id: String(section.id ?? `section-${index + 1}`).trim(),
+    heading: String(section.heading ?? '').trim(),
+    body: String(section.body ?? '').trim(),
+  };
+}
+
+export function normalizeLegalPageContent(content = {}, defaults = DEFAULT_TERMS_CONTENT) {
+  const sections = Array.isArray(content.sections)
+    ? content.sections.map((section, index) => normalizeLegalSection(section, index)).filter((section) => section.heading || section.body)
+    : [];
+
+  return {
+    title: String(content.title ?? defaults.title).trim(),
+    lastUpdated: String(content.lastUpdated ?? defaults.lastUpdated).trim(),
+    introText: String(content.introText ?? defaults.introText).trim(),
+    sections,
+  };
+}
+
+export function normalizeLegalBannerContent(content = {}, defaults = DEFAULT_TERMS_BANNER) {
+  return {
+    title: String(content.title ?? defaults.title).trim(),
+    backgroundImage: String(content.backgroundImage ?? defaults.backgroundImage).trim(),
+  };
+}
+
+export async function getTermsBannerContent() {
+  const widget = await getWidget('terms', 'banner');
+  return normalizeLegalBannerContent(widget?.content || DEFAULT_TERMS_BANNER, DEFAULT_TERMS_BANNER);
+}
+
+export async function updateTermsBannerContent(content) {
+  const normalized = normalizeLegalBannerContent(content, DEFAULT_TERMS_BANNER);
+  if (!normalized.title) {
+    throw new Error('Banner title is required');
+  }
+  const widget = await upsertWidget('terms', 'banner', normalized);
+  return normalizeLegalBannerContent(widget.content, DEFAULT_TERMS_BANNER);
+}
+
+export async function getTermsPageContent() {
+  const widget = await getWidget('terms', 'content');
+  return normalizeLegalPageContent(widget?.content || DEFAULT_TERMS_CONTENT, DEFAULT_TERMS_CONTENT);
+}
+
+export async function updateTermsPageContent(content) {
+  const normalized = normalizeLegalPageContent(content, DEFAULT_TERMS_CONTENT);
+  if (!normalized.title) {
+    throw new Error('Page title is required');
+  }
+  if (!normalized.sections.length) {
+    throw new Error('At least one content section is required');
+  }
+  const widget = await upsertWidget('terms', 'content', normalized);
+  return normalizeLegalPageContent(widget.content, DEFAULT_TERMS_CONTENT);
+}
+
+export async function getPrivacyBannerContent() {
+  const widget = await getWidget('privacy', 'banner');
+  return normalizeLegalBannerContent(widget?.content || DEFAULT_PRIVACY_BANNER, DEFAULT_PRIVACY_BANNER);
+}
+
+export async function updatePrivacyBannerContent(content) {
+  const normalized = normalizeLegalBannerContent(content, DEFAULT_PRIVACY_BANNER);
+  if (!normalized.title) {
+    throw new Error('Banner title is required');
+  }
+  const widget = await upsertWidget('privacy', 'banner', normalized);
+  return normalizeLegalBannerContent(widget.content, DEFAULT_PRIVACY_BANNER);
+}
+
+export async function getPrivacyPageContent() {
+  const widget = await getWidget('privacy', 'content');
+  return normalizeLegalPageContent(widget?.content || DEFAULT_PRIVACY_CONTENT, DEFAULT_PRIVACY_CONTENT);
+}
+
+export async function updatePrivacyPageContent(content) {
+  const normalized = normalizeLegalPageContent(content, DEFAULT_PRIVACY_CONTENT);
+  if (!normalized.title) {
+    throw new Error('Page title is required');
+  }
+  if (!normalized.sections.length) {
+    throw new Error('At least one content section is required');
+  }
+  const widget = await upsertWidget('privacy', 'content', normalized);
+  return normalizeLegalPageContent(widget.content, DEFAULT_PRIVACY_CONTENT);
 }

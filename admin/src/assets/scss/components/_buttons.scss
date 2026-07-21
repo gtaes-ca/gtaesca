@@ -168,6 +168,20 @@ button:focus {
     --#{$prefix}btn-active-border-color: var(--#{$prefix}dark);
 }
 
+.btn-primary {
+    --#{$prefix}btn-hover-bg: #{$gold-dark};
+    --#{$prefix}btn-hover-border-color: #{$gold-dark};
+    --#{$prefix}btn-active-bg: #{$gold-dark};
+    --#{$prefix}btn-active-border-color: #{$gold-dark};
+}
+
+.btn-outline-primary {
+    --#{$prefix}btn-hover-bg: #{$gold};
+    --#{$prefix}btn-hover-border-color: #{$gold};
+    --#{$prefix}btn-active-bg: #{$gold-dark};
+    --#{$prefix}btn-active-border-color: #{$gold-dark};
+}
+
 // Dark Mode
 html[data-bs-theme='dark'] {
     .btn-light {

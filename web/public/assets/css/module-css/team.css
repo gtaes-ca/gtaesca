@@ -150,24 +150,24 @@
 /*--------------------------------------------------------------
 # Team Page
 --------------------------------------------------------------*/
-.team-page {
+section.team-page {
     position: relative;
     display: block;
     padding: 120px 0 90px;
 }
 
-.team-page .row {
+section.team-page .row {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
 }
 
-.team-page .row > [class*='col-'] {
+section.team-page .row > [class*='col-'] {
     display: flex;
     flex-direction: column;
 }
 
-.team-page .team-one__single {
+section.team-page .team-one__single {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -175,7 +175,7 @@
     margin-bottom: 30px;
 }
 
-.team-page .team-one__img-box {
+section.team-page .team-one__img-box {
     position: relative;
     display: flex;
     flex: 1;
@@ -183,7 +183,7 @@
     height: 100%;
 }
 
-.team-page .team-one__img {
+section.team-page .team-one__img {
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 5;
@@ -191,7 +191,7 @@
     border-radius: 20px;
 }
 
-.team-page .team-one__img img {
+section.team-page .team-one__img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -199,7 +199,7 @@
     border-radius: 20px;
 }
 
-.team-page .team-one__content {
+section.team-page .team-one__content {
     left: 24px;
     right: 24px;
     bottom: 24px;
@@ -207,11 +207,11 @@
     min-height: 112px;
 }
 
-.team-page .team-one__single:hover .team-one__content {
+section.team-page .team-one__single:hover .team-one__content {
     padding: 22px 24px 24px;
 }
 
-.team-page .team-one__title {
+section.team-page .team-one__title {
     font-size: 22px;
     line-height: 30px;
     display: -webkit-box;
@@ -220,7 +220,7 @@
     overflow: hidden;
 }
 
-.team-page .team-one__sub-title {
+section.team-page .team-one__sub-title {
     font-size: 16px;
     line-height: 24px;
     margin-top: 8px;
@@ -231,7 +231,7 @@
     overflow: hidden;
 }
 
-.team-page .team-one__single:hover .team-one__sub-title {
+section.team-page .team-one__single:hover .team-one__sub-title {
     margin-bottom: 0;
 }
 

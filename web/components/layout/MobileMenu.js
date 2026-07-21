@@ -1,19 +1,49 @@
 'use client'
 
 import Link from "next/link"
+import { useMemo } from "react"
+import { useAuth } from "@/context/AuthProvider"
+import { useBookingChannel } from "@/hooks/useBookingChannel"
+import { assetUrl } from "@/lib/assets"
 
-const NAV_ITEMS = [
+const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
+
+const BASE_NAV_ITEMS = [
     { label: 'Home', href: '/' },
     { label: 'About Us', href: '/about' },
     { label: 'Team', href: '/team' },
     { label: 'Projects', href: '/projects' },
     { label: 'Services', href: '/services' },
-    { label: 'Book a Service', href: '/book' },
+    { label: 'FAQ', href: '/faq' },
+    { labelKey: 'book', href: '/book' },
     { label: 'Contact', href: '/contact' },
-    { label: 'Sign In', href: '/account/login' },
 ]
 
 const MobileMenu = ({ handleMobileMenu }) => {
+    const { isAuthenticated, sessionChecked } = useAuth()
+    const { label: bookLabel, isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
+
+    const menuItems = useMemo(() => {
+        const navItems = BASE_NAV_ITEMS.map((item) => {
+            if (item.labelKey === 'book') {
+                return { label: bookLabel, href: item.href }
+            }
+            return item
+        })
+
+        if (!sessionChecked || !channelLoaded || isWhatsAppMode) {
+            return navItems
+        }
+
+        return [
+            ...navItems,
+            {
+                label: isAuthenticated ? 'My Bookings' : 'Sign In',
+                href: isAuthenticated ? '/account/bookings' : '/account/login?redirectTo=/account/bookings',
+            },
+        ]
+    }, [bookLabel, channelLoaded, isAuthenticated, isWhatsAppMode, sessionChecked])
+
     return (
         <div className="mobile-nav__wrapper">
             <div className="mobile-nav__overlay mobile-nav__toggler" onClick={handleMobileMenu} />
@@ -24,14 +54,14 @@ const MobileMenu = ({ handleMobileMenu }) => {
 
                 <div className="logo-box">
                     <Link href="/" aria-label="logo image">
-                        <img src="assets/images/resources/logo-1.png" width="150" alt="" />
+                        <img src={LOGO_SRC} width="150" alt="GTA Electric Services" className="site-logo" />
                     </Link>
                 </div>
 
                 <div className="mobile-nav__container">
                     <div className="collapse navbar-collapse show clearfix" id="navbarSupportedContent">
                         <ul className="main-menu__list">
-                            {NAV_ITEMS.map((item) => (
+                            {menuItems.map((item) => (
                                 <li key={item.href}>
                                     <Link href={item.href} onClick={handleMobileMenu}>{item.label}</Link>
                                 </li>

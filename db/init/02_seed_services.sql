@@ -4,8 +4,13 @@ INSERT INTO service_categories (name, sort_order) VALUES
   ('Commercial Electrical Services', 3)
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO services (category_id, name, description, sort_order)
-SELECT c.id, s.name, s.description, s.sort_order
+INSERT INTO services (category_id, name, slug, description, sort_order)
+SELECT
+  c.id,
+  s.name,
+  coalesce(nullif(slugify_text(s.name), ''), 'service-' || md5(s.category_name || ':' || s.name)),
+  s.description,
+  s.sort_order
 FROM (VALUES
   ('Home Electrical Services', 'Smoke & Carbon Monoxide Alarms', 'Installation, replacement, and upgrades for smoke detectors and carbon monoxide alarms.', 1),
   ('Home Electrical Services', 'EV Charger Installation', 'Professional installation of Level 2 electric vehicle chargers for convenient at-home charging.', 2),

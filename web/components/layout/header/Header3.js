@@ -1,54 +1,30 @@
 import Menu from "../Menu"
 import Link from "next/link"
 import MobileMenu from "../MobileMenu"
-export default function Header3({ scroll, handlePopup, handleMobileMenu  }) {
+import BookServiceLink from "@/components/booking/BookServiceLink"
+import { useAuth } from "@/context/AuthProvider"
+import { useBookingChannel } from "@/hooks/useBookingChannel"
+import { assetUrl } from "@/lib/assets"
+
+const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
+
+export default function Header3({ scroll, handleMobileMenu  }) {
+    const { isAuthenticated, sessionChecked } = useAuth()
+    const { isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
+    const showAccountLink = sessionChecked && channelLoaded && !isWhatsAppMode
+    const accountHref = isAuthenticated ? "/account/bookings" : "/account/login?redirectTo=/account/bookings"
+    const accountLabel = isAuthenticated ? "My Bookings" : "Sign In"
+
     return (
         <>
         
         <header className="main-header-three">
-            <div className="main-menu-three__top">
-                <div className="main-menu-three__top-inner">
-                    <ul className="list-unstyled main-menu-three__contact-list">
-                        <li>
-                            <div className="icon">
-                                <i className="icon-call"></i>
-                            </div>
-                            <div className="text">
-                                <p> <span>Talk to us</span> <Link href="tel:9288006780">+92 ( 8800 ) - 6780</Link></p>
-                            </div>
-                        </li>
-                        <li>
-                            <div className="icon">
-                                <i className="icon-envelope"></i>
-                            </div>
-                            <div className="text">
-                                <p> <span>Mail us</span> <Link href="mailto:info@fonisa24.com">example@gamil.com</Link>
-                                </p>
-                            </div>
-                        </li>
-                    </ul>
-                    <div className="main-menu-three__top-right">
-                        <div className="main-menu-three__social">
-                            <Link href="#"><i className="icon-facebook"></i></Link>
-                            <Link href="#"><i className="icon-xpa"></i></Link>
-                            <Link href="#"><i className="icon-link-in"></i></Link>
-                            <Link href="#"><i className="icon-instagram"></i></Link>
-                        </div>
-                        <div className="main-menu-three__search-box">
-                            <Link href="#" className="main-menu-three__search search-toggler">
-                                <p className="main-menu-three__search-text">Search</p>
-                                <span className="icon-search-interface-symbol" onClick={handlePopup}></span>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <nav className="main-menu main-menu-three">
                 <div className="main-menu-three__wrapper">
                     <div className="main-menu-three__wrapper-inner">
                         <div className="main-menu-three__left">
                             <div className="main-menu-three__logo">
-                                <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                             </div>
                             <div className="main-menu-three__main-menu-box">
                                 <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -61,16 +37,18 @@ export default function Header3({ scroll, handlePopup, handleMobileMenu  }) {
                                     <Link href="#"><span className="fas fa-shopping-cart"></span></Link>
                                 </div>
                                 <div className="main-menu-three__btn-box">
-                                    <Link href="/book" className="main-menu-three__btn thm-btn">Book a Service</Link>
+                                    <BookServiceLink className="main-menu-three__btn thm-btn" />
                                 </div>
-                                <div className="main-menu-three__login-box">
-                                    <div className="main-menu-three__login-icon">
-                                        <span className="icon-user"></span>
+                                {showAccountLink ? (
+                                    <div className="main-menu-three__login-box">
+                                        <div className="main-menu-three__login-icon">
+                                            <span className="icon-user"></span>
+                                        </div>
+                                        <p className="main-menu-three__login-text">
+                                            <Link href={accountHref}>{accountLabel}</Link>
+                                        </p>
                                     </div>
-                                    <p className="main-menu-three__login-text">
-                                        <Link href="/account/login">Sign In</Link>
-                                    </p>
-                                </div>
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -83,7 +61,7 @@ export default function Header3({ scroll, handlePopup, handleMobileMenu  }) {
                     <div className="main-menu-three__wrapper-inner">
                         <div className="main-menu-three__left">
                             <div className="main-menu-three__logo">
-                                <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                             </div>
                             <div className="main-menu-three__main-menu-box">
                                 <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -96,16 +74,18 @@ export default function Header3({ scroll, handlePopup, handleMobileMenu  }) {
                                     <Link href="#"><span className="fas fa-shopping-cart"></span></Link>
                                 </div>
                                 <div className="main-menu-three__btn-box">
-                                    <Link href="/book" className="main-menu-three__btn thm-btn">Book a Service</Link>
+                                    <BookServiceLink className="main-menu-three__btn thm-btn" />
                                 </div>
-                                <div className="main-menu-three__login-box">
-                                    <div className="main-menu-three__login-icon">
-                                        <span className="icon-user"></span>
+                                {showAccountLink ? (
+                                    <div className="main-menu-three__login-box">
+                                        <div className="main-menu-three__login-icon">
+                                            <span className="icon-user"></span>
+                                        </div>
+                                        <p className="main-menu-three__login-text">
+                                            <Link href={accountHref}>{accountLabel}</Link>
+                                        </p>
                                     </div>
-                                    <p className="main-menu-three__login-text">
-                                        <Link href="/account/login">Sign In</Link>
-                                    </p>
-                                </div>
+                                ) : null}
                             </div>
                         </div>
                     </div>

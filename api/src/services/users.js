@@ -1,5 +1,6 @@
 import pool from '../db.js';
 import { getAllowedPagesForUser } from './pageAccess.js';
+import { getBookingSettings } from './bookingSettings.js';
 
 function formatUser(row, allowedPages = undefined) {
   if (!row) return null;
@@ -39,8 +40,15 @@ export async function findUserById(id) {
 export async function getPublicUser(id) {
   const user = await findUserById(id);
   if (!user) return null;
-  const allowedPages = await getAllowedPagesForUser(formatUser(user));
-  return formatUser(user, allowedPages);
+  const formatted = formatUser(user);
+  const [allowedPages, bookingSettings] = await Promise.all([
+    getAllowedPagesForUser(formatted),
+    getBookingSettings(),
+  ]);
+  return {
+    ...formatUser(user, allowedPages),
+    bookingMode: bookingSettings.bookingMode,
+  };
 }
 
 export { formatUser };

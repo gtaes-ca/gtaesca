@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate, requirePageAccess } from '../../middleware/auth.js';
+import { getAllowedPagesForUser } from '../../services/pageAccess.js';
 import {
   getAboutBannerContent,
   getAboutContactContent,
@@ -18,6 +19,12 @@ import {
   getServiceDetailsBannerContent,
   getContactBannerContent,
   getContactPageSettingsContent,
+  getFaqBannerContent,
+  getFaqSettingsContent,
+  getPrivacyBannerContent,
+  getPrivacyPageContent,
+  getTermsBannerContent,
+  getTermsPageContent,
   getTopbarContent,
   getWidget,
   saveWidgetImage,
@@ -37,6 +44,12 @@ import {
   updateServiceDetailsBannerContent,
   updateContactBannerContent,
   updateContactPageSettingsContent,
+  updateFaqBannerContent,
+  updateFaqSettingsContent,
+  updatePrivacyBannerContent,
+  updatePrivacyPageContent,
+  updateTermsBannerContent,
+  updateTermsPageContent,
   updateTopbarContent,
   upsertWidget,
 } from '../../services/webContent.js';
@@ -45,20 +58,28 @@ const router = Router();
 
 router.use(authenticate);
 
-function requireCmsAccess(req, res, next) {
+const CMS_PAGE_KEYS = [
+  'management.cms',
+  'management.cms.about',
+  'management.cms.team',
+  'management.cms.projects',
+  'management.cms.services',
+  'management.cms.contact',
+  'management.cms.faq',
+  'management.cms.legal',
+];
+
+function hasAnyCmsPageAccess(allowedPages) {
+  return CMS_PAGE_KEYS.some((pageKey) => allowedPages.includes(pageKey));
+}
+
+async function requireAnyCmsAccess(req, res, next) {
   if (req.user?.userType === 'super_admin') {
     return next();
   }
 
-  const allowedPages = req.user?.allowedPages || [];
-  if (
-    allowedPages.includes('management.cms')
-    || allowedPages.includes('management.cms.about')
-    || allowedPages.includes('management.cms.team')
-    || allowedPages.includes('management.cms.projects')
-    || allowedPages.includes('management.cms.services')
-    || allowedPages.includes('management.cms.contact')
-  ) {
+  const allowedPages = await getAllowedPagesForUser(req.user);
+  if (hasAnyCmsPageAccess(allowedPages)) {
     return next();
   }
 
@@ -107,32 +128,12 @@ router.put('/home/services', requirePageAccess('management.cms'), async (req, re
   }
 });
 
-function requireHomeOrAboutCmsAccess(req, res, next) {
-  if (req.user?.userType === 'super_admin') {
-    return next();
-  }
-
-  const allowedPages = req.user?.allowedPages || [];
-  if (
-    allowedPages.includes('management.cms')
-    || allowedPages.includes('management.cms.about')
-    || allowedPages.includes('management.cms.team')
-    || allowedPages.includes('management.cms.projects')
-    || allowedPages.includes('management.cms.services')
-    || allowedPages.includes('management.cms.contact')
-  ) {
-    return next();
-  }
-
-  return res.status(403).json({ error: 'You do not have access to this page' });
-}
-
-router.get('/home/about', requireHomeOrAboutCmsAccess, async (_req, res) => {
+router.get('/home/about', requireAnyCmsAccess, async (_req, res) => {
   const content = await getHomeAboutContent();
   return res.json({ content });
 });
 
-router.put('/home/about', requireHomeOrAboutCmsAccess, async (req, res) => {
+router.put('/home/about', requireAnyCmsAccess, async (req, res) => {
   try {
     const widget = await updateHomeAboutContent(req.body?.content || req.body);
     return res.json({ widget, content: widget.content });
@@ -296,6 +297,90 @@ router.put('/contact/banner', requirePageAccess('management.cms.contact'), async
   }
 });
 
+router.get('/faq/banner', requirePageAccess('management.cms.faq'), async (_req, res) => {
+  const content = await getFaqBannerContent();
+  return res.json({ content });
+});
+
+router.put('/faq/banner', requirePageAccess('management.cms.faq'), async (req, res) => {
+  try {
+    const content = await updateFaqBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/faq/settings', requirePageAccess('management.cms.faq'), async (_req, res) => {
+  const content = await getFaqSettingsContent();
+  return res.json({ content });
+});
+
+router.put('/faq/settings', requirePageAccess('management.cms.faq'), async (req, res) => {
+  try {
+    const content = await updateFaqSettingsContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/terms/banner', requirePageAccess('management.cms.legal'), async (_req, res) => {
+  const content = await getTermsBannerContent();
+  return res.json({ content });
+});
+
+router.put('/terms/banner', requirePageAccess('management.cms.legal'), async (req, res) => {
+  try {
+    const content = await updateTermsBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/terms/content', requirePageAccess('management.cms.legal'), async (_req, res) => {
+  const content = await getTermsPageContent();
+  return res.json({ content });
+});
+
+router.put('/terms/content', requirePageAccess('management.cms.legal'), async (req, res) => {
+  try {
+    const content = await updateTermsPageContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/privacy/banner', requirePageAccess('management.cms.legal'), async (_req, res) => {
+  const content = await getPrivacyBannerContent();
+  return res.json({ content });
+});
+
+router.put('/privacy/banner', requirePageAccess('management.cms.legal'), async (req, res) => {
+  try {
+    const content = await updatePrivacyBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/privacy/content', requirePageAccess('management.cms.legal'), async (_req, res) => {
+  const content = await getPrivacyPageContent();
+  return res.json({ content });
+});
+
+router.put('/privacy/content', requirePageAccess('management.cms.legal'), async (req, res) => {
+  try {
+    const content = await updatePrivacyPageContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/about/banner', requirePageAccess('management.cms.about'), async (_req, res) => {
   const content = await getAboutBannerContent();
   return res.json({ content });
@@ -324,7 +409,7 @@ router.put('/about/contact', requirePageAccess('management.cms.about'), async (r
   }
 });
 
-router.post('/upload-image', requireCmsAccess, async (req, res) => {
+router.post('/upload-image', requireAnyCmsAccess, async (req, res) => {
   try {
     const { dataUrl, key } = req.body || {};
     if (!dataUrl || !key) {

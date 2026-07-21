@@ -6,10 +6,11 @@ import { useAuth } from '@/context/AuthProvider'
 import {
   addDaysToDateStr,
   bookingFetch,
+  buildWhatsAppBookingMessage,
   formatBookingSlot,
-  formatCurrency,
   formatDuration,
   getDateStrInTimezone,
+  openWhatsAppBooking,
 } from '@/lib/booking'
 
 const STEPS = [
@@ -24,7 +25,7 @@ const STEPS = [
 
 const GTA_TAB = 'gta'
 const NEARBY_TAB = 'nearby'
-const SERVICE_PAGE_SIZE = 8
+const SERVICE_PAGE_SIZE = 4
 
 const defaultClient = {
   firstName: '',
@@ -123,11 +124,6 @@ export default function BookingWizard({ initialServiceIds = [] }) {
     [selectedServices]
   )
 
-  const totalServicePrice = useMemo(
-    () => selectedServices.reduce((sum, service) => sum + (service.price || 0), 0),
-    [selectedServices]
-  )
-
   const allCatalogServices = useMemo(
     () => (catalog.categories || []).flatMap((category) =>
       (category.services || []).map((service) => ({
@@ -191,7 +187,23 @@ export default function BookingWizard({ initialServiceIds = [] }) {
     lookaheadDays: 30,
     timezone: 'America/Toronto',
     workingDays: [1, 2, 3, 4, 5],
+    bookingMode: 'full',
   }
+
+  const isWhatsAppMode = bookingSettings.bookingMode === 'whatsapp'
+
+  const activeSteps = useMemo(() => {
+    if (isWhatsAppMode || loadingCatalog) {
+      return STEPS.filter((item) => item.key !== 'auth')
+    }
+    return STEPS
+  }, [isWhatsAppMode, loadingCatalog])
+
+  const currentStep = activeSteps[step] || activeSteps[0]
+
+  useEffect(() => {
+    setStep((current) => Math.min(current, Math.max(activeSteps.length - 1, 0)))
+  }, [activeSteps.length])
 
   const minDate = useMemo(
     () => getDateStrInTimezone(bookingSettings.timezone),
@@ -279,22 +291,23 @@ export default function BookingWizard({ initialServiceIds = [] }) {
   }, [])
 
   useEffect(() => {
-    if (STEPS[step]?.key === 'technician' && selectedServiceIds.length) loadTechnicians()
-  }, [step, selectedServiceIds, loadTechnicians])
+    if (currentStep?.key === 'technician' && selectedServiceIds.length) loadTechnicians()
+  }, [currentStep?.key, selectedServiceIds, loadTechnicians])
 
   useEffect(() => {
-    if (STEPS[step]?.key === 'schedule' && selectedTechnicianId && selectedDate) loadSlots()
-  }, [step, selectedTechnicianId, selectedDate, loadSlots])
+    if (currentStep?.key === 'schedule' && selectedTechnicianId && selectedDate) loadSlots()
+  }, [currentStep?.key, selectedTechnicianId, selectedDate, loadSlots])
 
   const skipAuthStep = (index) => {
-    if (STEPS[index]?.key === 'auth' && isAuthenticated) {
-      return index < STEPS.length - 1 ? index + 1 : index
+    const stepKey = activeSteps[index]?.key
+    if (stepKey === 'auth' && (isAuthenticated || isWhatsAppMode)) {
+      return index < activeSteps.length - 1 ? index + 1 : index
     }
     return index
   }
 
   const canNext = () => {
-    switch (STEPS[step].key) {
+    switch (currentStep?.key) {
       case 'service':
         return selectedServiceIds.length > 0
       case 'area':
@@ -315,14 +328,14 @@ export default function BookingWizard({ initialServiceIds = [] }) {
   const goNext = () => {
     if (!canNext()) return
     setError('')
-    setStep((current) => skipAuthStep(Math.min(current + 1, STEPS.length - 1)))
+    setStep((current) => skipAuthStep(Math.min(current + 1, activeSteps.length - 1)))
   }
 
   const goBack = () => {
     setError('')
     setStep((current) => {
       let prev = Math.max(current - 1, 0)
-      if (STEPS[prev]?.key === 'auth' && isAuthenticated) {
+      if (activeSteps[prev]?.key === 'auth' && (isAuthenticated || isWhatsAppMode)) {
         prev = Math.max(prev - 1, 0)
       }
       return prev
@@ -384,6 +397,25 @@ export default function BookingWizard({ initialServiceIds = [] }) {
     setSubmitting(true)
     setError('')
     try {
+      if (isWhatsAppMode) {
+        const whatsappNumber = bookingSettings.companyWhatsappNumber
+        if (!whatsappNumber) {
+          throw new Error('WhatsApp booking is not configured. Please contact us directly.')
+        }
+        const message = buildWhatsAppBookingMessage({
+          services: selectedServices,
+          location: selectedLocation,
+          technician: selectedTechnician,
+          scheduledAt: selectedSlot,
+          client,
+          notes: client.notes,
+          timezone: bookingSettings.timezone,
+        })
+        openWhatsAppBooking(whatsappNumber, message)
+        router.push('/book/confirmation?whatsapp=1')
+        return
+      }
+
       const data = await bookingFetch('/api/bookings', {
         method: 'POST',
         body: JSON.stringify({
@@ -408,27 +440,102 @@ export default function BookingWizard({ initialServiceIds = [] }) {
     }
   }
 
-  const progress = ((step + 1) / STEPS.length) * 100
+  const progress = ((step + 1) / activeSteps.length) * 100
   const servicePageFrom = filteredCatalogServices.length === 0
     ? 0
     : (servicePage - 1) * SERVICE_PAGE_SIZE + 1
   const servicePageTo = Math.min(servicePage * SERVICE_PAGE_SIZE, filteredCatalogServices.length)
 
+  const stepNavDisabled = loadingCatalog || (currentStep?.key === 'auth' && !sessionChecked)
+  const isReviewStep = currentStep?.key === 'review'
+
+  const renderStepNav = (className) => (
+    <div className={className}>
+      <button
+        type="button"
+        className="booking-wizard__btn booking-wizard__btn--ghost"
+        onClick={goBack}
+        disabled={step === 0 || submitting}
+      >
+        Back
+      </button>
+      {isReviewStep ? (
+        <button
+          type="button"
+          className="booking-wizard__btn thm-btn"
+          onClick={handleSubmit}
+          disabled={submitting || !selectedSlot}
+        >
+          {submitting ? (isWhatsAppMode ? 'Opening WhatsApp...' : 'Submitting...') : (isWhatsAppMode ? 'Send via WhatsApp' : 'Submit Booking')}
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="booking-wizard__btn thm-btn"
+          onClick={goNext}
+          disabled={!canNext() || stepNavDisabled}
+        >
+          Continue
+        </button>
+      )}
+    </div>
+  )
+
+  const renderStepAction = (direction) => {
+    if (direction === 'prev') {
+      return (
+        <button
+          type="button"
+          className="booking-wizard__step-action booking-wizard__step-action--prev"
+          onClick={goBack}
+          disabled={step === 0 || submitting}
+          aria-label="Previous step"
+        >
+          <span className="icon-angle-left" aria-hidden="true" />
+        </button>
+      )
+    }
+
+    return (
+      <button
+        type="button"
+        className="booking-wizard__step-action booking-wizard__step-action--next"
+        onClick={isReviewStep ? handleSubmit : goNext}
+        disabled={isReviewStep ? (submitting || !selectedSlot) : (!canNext() || stepNavDisabled)}
+        aria-label={isReviewStep ? 'Submit booking' : 'Next step'}
+      >
+        <span className={isReviewStep ? 'icon-check' : 'icon-angle-right'} aria-hidden="true" />
+      </button>
+    )
+  }
+
   return (
     <div className="booking-wizard">
       <div className="booking-wizard__header">
         <h1 className="booking-wizard__title">Book a Service</h1>
-        <p className="booking-wizard__subtitle">Step {step + 1} of {STEPS.length} — {STEPS[step].label}</p>
-        <div className="booking-wizard__steps">
-          {STEPS.map((item, idx) => (
-            <div
-              key={item.key}
-              className={`booking-wizard__step-indicator ${idx <= step ? 'is-active' : ''}`}
-            >
-              <span>{idx + 1}</span>
-              <small>{item.label}</small>
-            </div>
-          ))}
+        <p className="booking-wizard__subtitle">Step {step + 1} of {activeSteps.length} — {currentStep?.label}</p>
+        <div className="booking-wizard__steps-toolbar">
+          {renderStepAction('prev')}
+          <div className="booking-wizard__steps">
+            {activeSteps.map((item, idx) => {
+              const isInMobileWindow = idx >= step - 1 && idx <= step + 1
+              return (
+                <div
+                  key={item.key}
+                  className={[
+                    'booking-wizard__step-indicator',
+                    idx <= step ? 'is-active' : '',
+                    idx === step ? 'is-current' : '',
+                    !isInMobileWindow ? 'is-hidden-mobile' : '',
+                  ].filter(Boolean).join(' ')}
+                >
+                  <span>{idx + 1}</span>
+                  <small>{item.label}</small>
+                </div>
+              )
+            })}
+          </div>
+          {renderStepAction('next')}
         </div>
         <div className="booking-wizard__progress">
           <div className="booking-wizard__progress-bar" style={{ width: `${progress}%` }} />
@@ -442,7 +549,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
           <p className="booking-wizard__loading">Loading services...</p>
         ) : (
           <>
-            {STEPS[step].key === 'service' && (
+            {currentStep?.key === 'service' && (
               <div className="booking-wizard__panel">
                 <h2>Choose services</h2>
                 <p className="booking-wizard__help">Select one or more services. Duration and pricing are combined for scheduling.</p>
@@ -473,7 +580,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
                                 <span className="booking-wizard__service-check">{checked ? '✓' : ''}</span>
                                 <span className="booking-wizard__service-content">
                                   <strong>{service.name}</strong>
-                                  <span>{formatDuration(service.durationMinutes)} · {formatCurrency(service.price)}</span>
+                                  <span>{formatDuration(service.durationMinutes)}</span>
                                   {service.description ? <small>{service.description}</small> : null}
                                 </span>
                               </button>
@@ -497,13 +604,12 @@ export default function BookingWizard({ initialServiceIds = [] }) {
                   <div className="booking-wizard__summary-inline">
                     <strong>{selectedServices.length} service{selectedServices.length > 1 ? 's' : ''} selected</strong>
                     <span>Total duration: {formatDuration(totalDurationMinutes)}</span>
-                    <span>Total charge: {formatCurrency(totalServicePrice)}</span>
                   </div>
                 ) : null}
               </div>
             )}
 
-            {STEPS[step].key === 'area' && (
+            {currentStep?.key === 'area' && (
               <div className="booking-wizard__panel">
                 <h2>Select service area</h2>
                 <p className="booking-wizard__help">Choose the coverage community for this job.</p>
@@ -527,7 +633,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
               </div>
             )}
 
-            {STEPS[step].key === 'technician' && (
+            {currentStep?.key === 'technician' && (
               <div className="booking-wizard__panel">
                 <h2>Choose technician</h2>
                 <p className="booking-wizard__help">
@@ -558,11 +664,11 @@ export default function BookingWizard({ initialServiceIds = [] }) {
               </div>
             )}
 
-            {STEPS[step].key === 'schedule' && (
+            {currentStep?.key === 'schedule' && (
               <div className="booking-wizard__panel">
                 <h2>Date & time</h2>
                 <p className="booking-wizard__help">
-                  Combined appointment: {formatDuration(totalDurationMinutes)} · {formatCurrency(totalServicePrice)}
+                  Combined appointment: {formatDuration(totalDurationMinutes)}
                 </p>
                 <label className="booking-wizard__field">
                   <span>Date</span>
@@ -597,7 +703,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
               </div>
             )}
 
-            {STEPS[step].key === 'auth' && (
+            {currentStep?.key === 'auth' && !isWhatsAppMode && (
               <div className="booking-wizard__panel">
                 <h2>Sign in to continue</h2>
                 <p className="booking-wizard__help">
@@ -724,7 +830,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
               </div>
             )}
 
-            {STEPS[step].key === 'details' && (
+            {currentStep?.key === 'details' && (
               <div className="booking-wizard__panel">
                 <h2>Your details</h2>
                 {clientLookupMessage ? (
@@ -759,7 +865,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
               </div>
             )}
 
-            {STEPS[step].key === 'review' && (
+            {currentStep?.key === 'review' && (
               <div className="booking-wizard__panel">
                 <h2>Review booking</h2>
                 <div className="booking-wizard__review">
@@ -767,11 +873,10 @@ export default function BookingWizard({ initialServiceIds = [] }) {
                   <ul>
                     {selectedServices.map((service) => (
                       <li key={service.id}>
-                        {service.name} ({service.categoryName}) — {formatDuration(service.durationMinutes)} · {formatCurrency(service.price)}
+                        {service.name} ({service.categoryName}) — {formatDuration(service.durationMinutes)}
                       </li>
                     ))}
                   </ul>
-                  <p><strong>Total charge:</strong> {formatCurrency(totalServicePrice)}</p>
                   <p><strong>Area:</strong> {selectedLocation?.label}</p>
                   <p><strong>Technician:</strong> {selectedTechnician?.firstName} {selectedTechnician?.lastName}</p>
                   <p><strong>Scheduled:</strong> {formatBookingSlot(selectedSlot, bookingSettings.timezone)}</p>
@@ -779,10 +884,16 @@ export default function BookingWizard({ initialServiceIds = [] }) {
                   <p><strong>Email:</strong> {client.email}</p>
                   <p><strong>Phone:</strong> {client.phone || '—'}</p>
                   <p><strong>Address:</strong> {client.address || '—'}</p>
-                  <p><strong>Booking type:</strong> <span className="booking-source-badge booking-source-badge--web">Web Booking</span></p>
+                  {!isWhatsAppMode ? (
+                    <p><strong>Booking type:</strong> <span className="booking-source-badge booking-source-badge--web">Web Booking</span></p>
+                  ) : null}
                 </div>
                 <p className="booking-wizard__help">
-                  This will be submitted as a <strong>Web Booking</strong>. A confirmation email will be sent to {client.email}.
+                  {isWhatsAppMode ? (
+                    <>Tap below to send your booking request via WhatsApp. Our team will confirm availability.</>
+                  ) : (
+                    <>This will be submitted as a <strong>Web Booking</strong>. A confirmation email will be sent to {client.email}.</>
+                  )}
                 </p>
               </div>
             )}
@@ -790,25 +901,7 @@ export default function BookingWizard({ initialServiceIds = [] }) {
         )}
       </div>
 
-      <div className="booking-wizard__footer">
-        <button type="button" className="booking-wizard__btn booking-wizard__btn--ghost" onClick={goBack} disabled={step === 0 || submitting}>
-          Back
-        </button>
-        {STEPS[step].key === 'review' ? (
-          <button type="button" className="booking-wizard__btn thm-btn" onClick={handleSubmit} disabled={submitting || !selectedSlot}>
-            {submitting ? 'Submitting...' : 'Submit Booking'}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="booking-wizard__btn thm-btn"
-            onClick={goNext}
-            disabled={!canNext() || loadingCatalog || (STEPS[step].key === 'auth' && !sessionChecked)}
-          >
-            Continue
-          </button>
-        )}
-      </div>
+      {renderStepNav('booking-wizard__footer')}
     </div>
   )
 }

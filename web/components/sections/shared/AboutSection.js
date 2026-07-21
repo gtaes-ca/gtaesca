@@ -19,10 +19,7 @@ export default function AboutSection({ variant = '' }) {
                 const data = await res.json()
                 if (cancelled) return
                 if (data.content) {
-                    setContent({
-                        ...DEFAULT_HOME_ABOUT,
-                        ...data.content,
-                    })
+                    setContent(data.content)
                 }
             } catch {
                 // Keep defaults on failure
@@ -57,7 +54,7 @@ export default function AboutSection({ variant = '' }) {
                                 <div className="col-xl-6">
                                     <div className="about-one__cirtified">
                                         <div className="icon">
-                                            <span className="icon-certified"></span>
+                                            <span className="icon-check"></span>
                                         </div>
                                         <h3>We are certified<br/> company since 1997</h3>
                                     </div>

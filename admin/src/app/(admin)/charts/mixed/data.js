@@ -22,7 +22,7 @@ const lineColumnChartOpts = {
   xaxis: {
     type: 'datetime'
   },
-  colors: ['#1c84ee', '#4ecac2'],
+  colors: ['#fc9c04', '#4ecac2'],
   yaxis: [{
     title: {
       text: 'Website Blog'
@@ -71,7 +71,7 @@ const multipleYAxisChartOpts = {
     type: 'line',
     data: [20, 29, 37, 36, 44, 45, 50, 58]
   }],
-  colors: ['#1c84ee', '#4ecac2', '#f9b931'],
+  colors: ['#fc9c04', '#4ecac2', '#f9b931'],
   xaxis: {
     categories: [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016]
   },
@@ -81,11 +81,11 @@ const multipleYAxisChartOpts = {
     },
     axisBorder: {
       show: true,
-      color: '#1c84ee'
+      color: '#fc9c04'
     },
     labels: {
       style: {
-        colors: ['#1c84ee']
+        colors: ['#fc9c04']
       }
     },
     title: {
@@ -190,7 +190,7 @@ const lineAreaChartOpts = {
   legend: {
     offsetY: 7
   },
-  colors: ['#4ecac2', '#1c84ee'],
+  colors: ['#4ecac2', '#fc9c04'],
   yaxis: [{
     title: {
       text: 'Series A'

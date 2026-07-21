@@ -60,7 +60,7 @@ export const simpleChartOpts = {
       type: 'none'
     }
   },
-  colors: ['#1c84ee', '#7f56da'],
+  colors: ['#fc9c04', '#7f56da'],
   xaxis: {
     tickAmount: 12,
     type: 'category'
@@ -117,7 +117,7 @@ export const bubbleChart3DOpts = {
   fill: {
     type: 'gradient'
   },
-  colors: ['#1c84ee', '#7f56da', '#ff6c2f', '#4ecac2'],
+  colors: ['#fc9c04', '#7f56da', '#ff6c2f', '#4ecac2'],
   xaxis: {
     tickAmount: 12,
     type: 'datetime',

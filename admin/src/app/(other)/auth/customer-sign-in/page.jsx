@@ -1,5 +1,6 @@
 import { Card, CardBody, Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import AuthFormFooter from '@/components/AuthFormFooter';
 import LogoBox from '@/components/LogoBox';
 import PageMetaData from '@/components/PageTitle';
 import TextFormInput from '@/components/form/TextFormInput';
@@ -10,26 +11,29 @@ const CustomerSignInPage = () => (
   <>
     <PageMetaData title="Customer Sign In" />
     <Card className="auth-card">
-      <CardBody className="p-4">
-        <div className="mx-auto mb-4 text-center auth-logo">
-          <LogoBox
-            textLogo={{ height: 24, width: 73 }}
-            squareLogo={{ className: 'me-1' }}
-            containerClassName="mx-auto mb-4 text-center auth-logo"
-          />
+      <CardBody className="p-0">
+        <div className="p-4">
+          <div className="mx-auto mb-4 text-center auth-logo">
+            <LogoBox
+              textLogo={{ height: 24, width: 73 }}
+              squareLogo={{ className: 'me-1' }}
+              containerClassName="mx-auto mb-4 text-center auth-logo"
+            />
+          </div>
+          <h2 className="fw-bold text-center fs-18">Customer Sign In</h2>
+          <p className="text-muted text-center mt-1 mb-4">
+            View your service bookings and itemized charges.
+          </p>
+          <Row className="justify-content-center">
+            <Col xs={12} md={8}>
+              <CustomerLoginForm />
+              <p className="text-center mt-3 mb-0 small text-muted">
+                Staff member? <Link to="/auth/sign-in">Team sign in</Link>
+              </p>
+            </Col>
+          </Row>
         </div>
-        <h2 className="fw-bold text-center fs-18">Customer Sign In</h2>
-        <p className="text-muted text-center mt-1 mb-4">
-          View your service bookings and itemized charges.
-        </p>
-        <Row className="justify-content-center">
-          <Col xs={12} md={8}>
-            <CustomerLoginForm />
-            <p className="text-center mt-3 mb-0 small text-muted">
-              Staff member? <Link to="/auth/sign-in">Team sign in</Link>
-            </p>
-          </Col>
-        </Row>
+        <AuthFormFooter />
       </CardBody>
     </Card>
   </>

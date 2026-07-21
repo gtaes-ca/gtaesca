@@ -1,0 +1,51 @@
+.hashmark-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--#{$prefix}secondary-color);
+}
+
+.hashmark-brand:hover {
+    color: var(--#{$prefix}primary);
+}
+
+.hashmark-brand__text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.hashmark-brand__logo {
+    display: block;
+    width: auto;
+    height: 28px;
+    max-width: none;
+    object-fit: contain;
+    border-radius: 4px;
+    animation: hashmark-logo-beat 1.6s ease-in-out infinite;
+    transform-origin: center center;
+}
+
+@keyframes hashmark-logo-beat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    12% {
+        transform: scale(1.14);
+    }
+    24% {
+        transform: scale(1);
+    }
+    36% {
+        transform: scale(1.1);
+    }
+    48% {
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hashmark-brand__logo {
+        animation: none;
+    }
+}

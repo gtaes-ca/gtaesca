@@ -1198,7 +1198,7 @@ export const spilineChart = {
     width: 3,
     curve: 'smooth'
   },
-  colors: ['#1c84ee', '#22c55e'],
+  colors: ['#fc9c04', '#22c55e'],
   series: [{
     name: 'Series 1',
     data: [92, 88, 98, 72, 92, 100, 122]
@@ -1224,7 +1224,7 @@ export const spilineChart = {
       // takes an array which will be repeated on columns
       opacity: 0.2
     },
-    borderColor: '#1c84ee',
+    borderColor: '#fc9c04',
     padding: {
       bottom: 5
     }
@@ -1514,7 +1514,7 @@ export const stackedChartOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#7f56da', '#4ecac2'],
+  colors: ['#fc9c04', '#7f56da', '#4ecac2'],
   dataLabels: {
     enabled: false
   },
@@ -1604,7 +1604,7 @@ export const irregularTimeSeriesOpts = {
     name: 'Product C',
     data: dataSet[2]
   }],
-  colors: ['#1c84ee', '#7f56da', '#ef5f5f'],
+  colors: ['#fc9c04', '#7f56da', '#ef5f5f'],
   markers: {
     size: 0
     // style: 'full',

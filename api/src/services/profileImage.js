@@ -26,6 +26,11 @@ export function getUploadsDir() {
   return uploadsDir;
 }
 
+export function ensureUploadsDirs() {
+  fs.mkdirSync(path.join(uploadsDir, 'avatars'), { recursive: true });
+  fs.mkdirSync(path.join(uploadsDir, 'cms'), { recursive: true });
+}
+
 export function saveProfileImage(userId, dataUrl) {
   const match = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
   if (!match) {

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import { getPublicServiceById, listPublicServices } from '../services/publicServices.js';
+import { getPublicServiceById, getPublicServiceBySlug, listPublicServices } from '../services/publicServices.js';
 
 const router = Router();
 
@@ -11,6 +11,14 @@ router.get('/list', async (_req, res) => {
 
 router.get('/items/:id', async (req, res) => {
   const service = await getPublicServiceById(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: 'Service not found' });
+  }
+  return res.json({ service });
+});
+
+router.get('/slug/:slug', async (req, res) => {
+  const service = await getPublicServiceBySlug(req.params.slug);
   if (!service) {
     return res.status(404).json({ error: 'Service not found' });
   }

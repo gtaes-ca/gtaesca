@@ -88,6 +88,6 @@ export const multipleSeriesOpts = {
   legend: {
     offsetY: -10
   },
-  colors: ['#1c84ee', '#ef5f5f', '#4ecac2'],
+  colors: ['#fc9c04', '#ef5f5f', '#4ecac2'],
   labels: ['2011', '2012', '2013', '2014', '2015', '2016']
 };

@@ -39,7 +39,7 @@ export const scatterXYOpts = {
   yaxis: {
     tickAmount: 7
   },
-  colors: ['#1c84ee', '#f9b931', '#4ecac2'],
+  colors: ['#fc9c04', '#f9b931', '#4ecac2'],
   grid: {
     borderColor: '#f1f3fa',
     padding: {
@@ -108,7 +108,7 @@ export const dateTimeOpts = {
   dataLabels: {
     enabled: false
   },
-  colors: ['#1c84ee', '#7f56da', '#ef5f5f', '#f9b931', '#22c55e'],
+  colors: ['#fc9c04', '#7f56da', '#ef5f5f', '#f9b931', '#22c55e'],
   grid: {
     borderColor: '#f1f3fa',
     padding: {
@@ -162,7 +162,7 @@ export const scatterWithImagesOpts = {
       show: false
     }
   },
-  colors: ['#1c84ee', '#7f56da', '#ef5f5f', '#f9b931', '#22c55e'],
+  colors: ['#fc9c04', '#7f56da', '#ef5f5f', '#f9b931', '#22c55e'],
   series: [{
     name: 'Dribbble',
     data: [[16.4, 5.4], [21.7, 4], [25.4, 3], [19, 2], [10.9, 1], [13.6, 3.2], [10.9, 7], [10.9, 8.2], [16.4, 4], [13.6, 4.3], [13.6, 12], [29.9, 3], [10.9, 5.2], [16.4, 6.5], [10.9, 8], [24.5, 7.1], [10.9, 7], [8.1, 4.7], [19, 10], [27.1, 10], [24.5, 8], [27.1, 3], [29.9, 11.5], [27.1, 0.8], [22.1, 2]]

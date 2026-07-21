@@ -19,10 +19,7 @@ export default function ServiceDetailsBanner({ serviceName = '' }) {
                 const data = await res.json()
                 if (cancelled) return
                 if (data.content) {
-                    setContent({
-                        ...DEFAULT_SERVICE_DETAILS_BANNER,
-                        ...data.content,
-                    })
+                    setContent(data.content)
                 }
             } catch {
                 // Keep defaults on failure

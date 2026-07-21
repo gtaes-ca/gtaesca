@@ -1,6 +1,11 @@
 import { verifyAccessToken, validateSession } from '../services/sessions.js';
 import { canAccessAdminPanel, isSuperAdmin } from '../constants.js';
 import { getAllowedPagesForUser } from '../services/pageAccess.js';
+import {
+  BOOKING_SYSTEM_PAGE_KEYS,
+  getBookingSettings,
+  isWhatsAppBookingMode,
+} from '../services/bookingSettings.js';
 
 export async function authenticate(req, res, next) {
   const header = req.headers.authorization || '';
@@ -69,6 +74,13 @@ export function requirePageAccess(pageKey) {
   return async (req, res, next) => {
     if (isSuperAdmin(req.user)) {
       return next();
+    }
+
+    if (BOOKING_SYSTEM_PAGE_KEYS.includes(pageKey)) {
+      const settings = await getBookingSettings();
+      if (isWhatsAppBookingMode(settings)) {
+        return res.status(403).json({ error: 'Booking system is disabled' });
+      }
     }
 
     const allowedPages = await getAllowedPagesForUser(req.user);

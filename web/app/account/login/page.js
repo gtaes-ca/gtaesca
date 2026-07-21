@@ -53,7 +53,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="dark-home account-page">
+    <div className="account-page">
       <Layout headerStyle={1} footerStyle={1}>
         <section className="account">
           <div className="container">

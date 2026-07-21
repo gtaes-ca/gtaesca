@@ -9,8 +9,8 @@ export const MENU_ITEMS = [{
   url: '/dashboard/analytics',
   pageKey: 'dashboard.analytics'
 }, {
-  key: 'gtaes-management',
-  label: 'GTA Electric Services',
+  key: 'people',
+  label: 'PEOPLE',
   isTitle: true
 }, {
   key: 'team',
@@ -43,25 +43,29 @@ export const MENU_ITEMS = [{
   pageKey: 'management.customers'
 }, {
   key: 'services',
+  label: 'SERVICES',
+  isTitle: true
+}, {
+  key: 'services-menu',
   icon: 'iconamoon:lightning-1-duotone',
   label: 'Services',
   children: [{
     key: 'services-categories',
     label: 'Service Categories',
     url: '/management/service-categories',
-    parentKey: 'services',
+    parentKey: 'services-menu',
     pageKey: 'management.service-categories'
   }, {
     key: 'services-catalog',
     label: 'Services',
     url: '/management/services',
-    parentKey: 'services',
+    parentKey: 'services-menu',
     pageKey: 'management.services'
   }, {
     key: 'services-materials',
     label: 'Materials',
     url: '/management/materials',
-    parentKey: 'services',
+    parentKey: 'services-menu',
     pageKey: 'management.materials'
   }]
 }, {
@@ -72,21 +76,29 @@ export const MENU_ITEMS = [{
   pageKey: 'management.service-locations'
 }, {
   key: 'bookings',
+  label: 'BOOKINGS',
+  isTitle: true
+}, {
+  key: 'bookings-menu',
   icon: 'iconamoon:calendar-1-duotone',
   label: 'Bookings',
   children: [{
     key: 'bookings-list',
     label: 'Bookings',
     url: '/management/bookings',
-    parentKey: 'bookings',
+    parentKey: 'bookings-menu',
     pageKey: 'management.bookings'
   }, {
     key: 'bookings-settings',
     label: 'Booking Settings',
     url: '/management/booking-settings',
-    parentKey: 'bookings',
+    parentKey: 'bookings-menu',
     pageKey: 'management.booking-settings'
   }]
+}, {
+  key: 'website',
+  label: 'WEBSITE',
+  isTitle: true
 }, {
   key: 'website-cms',
   icon: 'iconamoon:file-document-duotone',
@@ -127,7 +139,24 @@ export const MENU_ITEMS = [{
     url: '/management/cms/contact',
     parentKey: 'website-cms',
     pageKey: 'management.cms.contact'
+  }, {
+    key: 'cms-faq',
+    label: 'FAQ Page',
+    url: '/management/cms/faq',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.faq'
+  }, {
+    key: 'cms-legal',
+    label: 'Legal Pages',
+    url: '/management/cms/legal',
+    parentKey: 'website-cms',
+    pageKey: 'management.cms.legal'
   }]
+}, {
+  key: 'technician',
+  label: 'TECHNICIAN',
+  isTitle: true,
+  technicianOnly: true
 }, {
   key: 'technician-jobs',
   icon: 'iconamoon:tools-duotone',

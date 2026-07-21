@@ -202,7 +202,7 @@ export const stackedChartOpts = {
   xaxis: {
     categories: ['2011 Q1', '2011 Q2', '2011 Q3', '2011 Q4', '2012 Q1', '2012 Q2', '2012 Q3', '2012 Q4']
   },
-  colors: ['#1c84ee', '#f9b931', '#4ecac2'],
+  colors: ['#fc9c04', '#f9b931', '#4ecac2'],
   fill: {
     opacity: 1
   },
@@ -255,7 +255,7 @@ export const fullStackedChartOpts = {
   legend: {
     offsetY: 7
   },
-  colors: ['#e3eaef', '#1c84ee', '#323a46'],
+  colors: ['#e3eaef', '#fc9c04', '#323a46'],
   grid: {
     row: {
       colors: ['transparent', 'transparent'],
@@ -412,7 +412,7 @@ export const groupLabelChartOpts = {
       columnWidth: '45%'
     }
   },
-  colors: ['#1c84ee', '#fa5c7c'],
+  colors: ['#fc9c04', '#fa5c7c'],
   xaxis: {
     type: 'category',
     labels: {
@@ -587,7 +587,7 @@ export const distributedColumnOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e'],
+  colors: ['#fc9c04', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e'],
   plotOptions: {
     bar: {
       columnWidth: '45%',
@@ -604,7 +604,7 @@ export const distributedColumnOpts = {
     categories: ['John', 'Joe', 'Jake', 'Amber', 'Peter', 'Mary', 'David', 'Lily'],
     labels: {
       style: {
-        colors: ['#1c84ee', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e'],
+        colors: ['#fc9c04', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e'],
         fontSize: '14px'
       }
     }
@@ -640,7 +640,7 @@ export const rangeColumnOpts = {
   legend: {
     offsetY: 7
   },
-  colors: ['#1c84ee', '#7f56da'],
+  colors: ['#fc9c04', '#7f56da'],
   series: [{
     name: 'Product A',
     data: [{

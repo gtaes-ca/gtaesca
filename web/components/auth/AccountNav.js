@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthProvider'
+import { useBookingChannel } from '@/hooks/useBookingChannel'
 
 export default function AccountNav() {
-  const { user, isAuthenticated, sessionChecked } = useAuth()
+  const { isAuthenticated, sessionChecked } = useAuth()
+  const { isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
 
-  if (!sessionChecked) {
+  if (!sessionChecked || !channelLoaded || isWhatsAppMode) {
     return null
   }
 

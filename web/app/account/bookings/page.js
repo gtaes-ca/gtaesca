@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Layout from '@/components/layout/Layout'
 import { useAuth } from '@/context/AuthProvider'
 import { authFetch } from '@/lib/auth'
-import { DEFAULT_BOOKING_TIMEZONE, formatBookingDateTime, formatBookingSource, formatCurrency } from '@/lib/booking'
+import { DEFAULT_BOOKING_TIMEZONE, formatBookingDateTime, formatBookingSource } from '@/lib/booking'
 
 const STATUS_LABEL = {
   pending: 'Pending',
@@ -61,7 +61,7 @@ export default function CustomerBookingsPage() {
   }
 
   return (
-    <div className="dark-home account-page">
+    <div className="account-page">
       <Layout headerStyle={1} footerStyle={1}>
         <section className="account account--bookings">
           <div className="container">
@@ -69,7 +69,7 @@ export default function CustomerBookingsPage() {
               <div className="account__bookings-header">
                 <div>
                   <h3 className="account__title">My Bookings</h3>
-                  <p className="account__subtitle">View your scheduled services and charges.</p>
+                  <p className="account__subtitle">View your scheduled services.</p>
                 </div>
                 <div className="account__bookings-actions">
                   <Link href="/book" className="thm-btn">Book a Service</Link>
@@ -94,7 +94,6 @@ export default function CustomerBookingsPage() {
                           <th>Service</th>
                           <th>Scheduled</th>
                           <th>Status</th>
-                          <th>Total</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -109,12 +108,11 @@ export default function CustomerBookingsPage() {
                             <td>{booking.serviceName}</td>
                             <td>{formatBookingDateTime(booking.scheduledAt, timezone)}</td>
                             <td><span className={statusClass(booking.status)}>{STATUS_LABEL[booking.status] || booking.status}</span></td>
-                            <td>{formatCurrency(booking.totalPrice ?? booking.servicePrice)}</td>
                           </tr>
                         ))}
                         {bookings.length === 0 ? (
                           <tr>
-                            <td colSpan={6}>No bookings linked to your account yet.</td>
+                            <td colSpan={5}>No bookings linked to your account yet.</td>
                           </tr>
                         ) : null}
                       </tbody>

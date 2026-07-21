@@ -39,6 +39,9 @@ const LoginForm = () => {
           Sign In
         </Button>
       </div>
+      <p className="text-muted text-center small mt-3 mb-0">
+        Team members are invited by email.
+      </p>
     </form>;
 };
 export default LoginForm;

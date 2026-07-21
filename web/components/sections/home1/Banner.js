@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { useEffect, useState } from 'react'
-import { DEFAULT_SLIDER_SLIDES, resolveCmsAssetUrl } from '@/lib/cms'
+import { resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -34,7 +34,7 @@ function slideBackgroundStyle(slide) {
 }
 
 export default function Banner() {
-    const [slides, setSlides] = useState(DEFAULT_SLIDER_SLIDES)
+    const [slides, setSlides] = useState([])
 
     useEffect(() => {
         let cancelled = false
@@ -45,11 +45,11 @@ export default function Banner() {
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
-                if (Array.isArray(data.content?.slides) && data.content.slides.length) {
+                if (Array.isArray(data.content?.slides)) {
                     setSlides(data.content.slides)
                 }
             } catch {
-                // Keep defaults on failure
+                // leave empty on failure
             }
         }
 

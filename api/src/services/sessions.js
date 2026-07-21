@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../db.js';
 import { formatUser } from './users.js';
 import { getAllowedPagesForUser } from './pageAccess.js';
+import { getBookingSettings } from './bookingSettings.js';
 import { hashValue } from '../utils/crypto.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'gtaes-dev-secret-change-in-production';
@@ -39,12 +40,15 @@ export async function createSession(userId, userAgent, ipAddress) {
     [sessionId, userId, tokenHash, userAgent || null, ipAddress || null, expiresAt]
   );
 
+  const bookingSettings = await getBookingSettings();
+
   return {
     accessToken,
     sessionId,
     user: {
       ...formatUser(user),
       allowedPages: await getAllowedPagesForUser(formatUser(user)),
+      bookingMode: bookingSettings.bookingMode,
     },
   };
 }

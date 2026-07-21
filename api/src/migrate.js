@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import pool from './db.js';
 import { ROLES, USER_TYPES } from './constants.js';
+import { getProjectsGalleryContent, upsertWidget } from './services/webContent.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const initDir = process.env.DB_INIT_DIR || path.resolve(__dirname, '../../db/init');
@@ -18,8 +19,32 @@ async function runSqlFile(relativePath) {
   await pool.query(sql);
 }
 
+async function backfillProjectSlugs() {
+  try {
+    const existing = await pool.query(
+      `SELECT content FROM web_content_widgets WHERE page = 'projects' AND section = 'gallery' LIMIT 1`
+    );
+
+    if (existing.rowCount === 0) {
+      return;
+    }
+
+    const rawItems = existing.rows[0].content?.items || [];
+    const needsUpdate = rawItems.some((item) => !item?.slug);
+    if (!needsUpdate) {
+      return;
+    }
+
+    const gallery = await getProjectsGalleryContent();
+    await upsertWidget('projects', 'gallery', gallery);
+  } catch (error) {
+    console.warn(`Project slug backfill skipped: ${error.message}`);
+  }
+}
+
 export async function migrate() {
   await runSqlFile('01_schema.sql');
+  await runSqlFile('01b_slugify_function.sql');
   await runSqlFile('02_seed_services.sql');
   await runSqlFile('03_add_profile_image.sql');
   await runSqlFile('04_add_user_bio.sql');
@@ -45,6 +70,12 @@ export async function migrate() {
   await runSqlFile('31_cms_services_page.sql');
   await runSqlFile('32_cms_contact_page.sql');
   await runSqlFile('33_booking_source.sql');
+  await runSqlFile('34_booking_mode_whatsapp.sql');
+  await runSqlFile('35_cms_faq_page.sql');
+  await runSqlFile('36_service_slugs.sql');
+  await runSqlFile('37_cms_legal_pages.sql');
+
+  await backfillProjectSlugs();
 
   const email = process.env.SUPER_ADMIN_EMAIL || 'superadmin@gtaes.local';
   const password = process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin123!';

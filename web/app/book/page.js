@@ -24,7 +24,7 @@ function BookPageContent() {
 
 export default function BookPage() {
   return (
-    <div className="dark-home book-page">
+    <div className="book-page">
       <Layout headerStyle={1} footerStyle={1}>
         <Suspense fallback={<section className="booking-page"><div className="container"><p>Loading booking...</p></div></section>}>
           <BookPageContent />

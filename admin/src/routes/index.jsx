@@ -144,6 +144,8 @@ const TeamCmsPage = lazy(() => import('@/app/(admin)/management/cms/team/page'))
 const ProjectsCmsPage = lazy(() => import('@/app/(admin)/management/cms/projects/page'));
 const ServicesCmsPage = lazy(() => import('@/app/(admin)/management/cms/services/page'));
 const ContactCmsPage = lazy(() => import('@/app/(admin)/management/cms/contact/page'));
+const FaqCmsPage = lazy(() => import('@/app/(admin)/management/cms/faq/page'));
+const LegalCmsPage = lazy(() => import('@/app/(admin)/management/cms/legal/page'));
 const PageAccess = lazy(() => import('../app/(admin)/management/page-access/page.jsx'));
 const BookService = lazy(() => import('@/app/(public)/book/page'));
 const TechnicianOnboarding = lazy(() => import('../app/(admin)/management/technician-onboarding/page'));
@@ -248,6 +250,16 @@ const managementRoutes = [{
   name: 'Contact Page',
   element: <ContactCmsPage />,
   pageKey: 'management.cms.contact'
+}, {
+  path: '/management/cms/faq',
+  name: 'FAQ Page',
+  element: <FaqCmsPage />,
+  pageKey: 'management.cms.faq'
+}, {
+  path: '/management/cms/legal',
+  name: 'Legal Pages',
+  element: <LegalCmsPage />,
+  pageKey: 'management.cms.legal'
 }, {
   path: '/management/page-access',
   name: 'Page Access',

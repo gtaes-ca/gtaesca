@@ -23,7 +23,7 @@ export const basicHeatmapOpts = {
   dataLabels: {
     enabled: false
   },
-  colors: ['#1c84ee'],
+  colors: ['#fc9c04'],
   series: [{
     name: 'Metric 1',
     data: generateData(20, {
@@ -94,7 +94,7 @@ export const multipleHeatmapOpts = {
   dataLabels: {
     enabled: false
   },
-  colors: ['#1c84ee', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#4ecac2'],
+  colors: ['#fc9c04', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#4ecac2'],
   series: [{
     name: 'Metric 1',
     data: generateData(20, {
@@ -170,7 +170,7 @@ export const colorRangeHeatmapOpts = {
           from: -30,
           to: 5,
           name: 'Low',
-          color: '#1c84ee'
+          color: '#fc9c04'
         }, {
           from: 6,
           to: 20,
@@ -268,7 +268,7 @@ export const rangeWithoutShadeOpts = {
         ranges: [{
           from: 0,
           to: 50,
-          color: '#1c84ee'
+          color: '#fc9c04'
         }, {
           from: 51,
           to: 100,
@@ -277,7 +277,7 @@ export const rangeWithoutShadeOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#4ecac2'],
+  colors: ['#fc9c04', '#4ecac2'],
   dataLabels: {
     enabled: true,
     style: {

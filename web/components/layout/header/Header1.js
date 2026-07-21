@@ -1,21 +1,22 @@
 import Link from "next/link"
 import Menu from "../Menu"
 import MobileMenu from "../MobileMenu"
-import TopBar from "./TopBar"
 import AccountNav from "@/components/auth/AccountNav"
+import BookServiceLink from "@/components/booking/BookServiceLink"
+import { assetUrl } from "@/lib/assets"
+
+const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
 
 export default function Header1({ scroll, handleMobileMenu }) {
     return (
         <>
-            
             <header className="main-header">
-            <TopBar />
             <nav className="main-menu">
                 <div className="main-menu__wrapper">
                     <div className="main-menu__wrapper-inner">
                         <div className="main-menu__left">
                             <div className="main-menu__logo">
-                                <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                             </div>
                             <div className="main-menu__main-menu-box">
                                 <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -25,7 +26,7 @@ export default function Header1({ scroll, handleMobileMenu }) {
                         <div className="main-menu__right">
                             <AccountNav />
                             <div className="main-menu__btn-box">
-                                <Link href="/book" className="main-menu__btn thm-btn">Book a Service</Link>
+                                <BookServiceLink className="main-menu__btn thm-btn" />
                             </div>
                         </div>
                     </div>
@@ -39,7 +40,7 @@ export default function Header1({ scroll, handleMobileMenu }) {
                     <div className="main-menu__wrapper-inner">
                         <div className="main-menu__left">
                             <div className="main-menu__logo">
-                                <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                             </div>
                             <div className="main-menu__main-menu-box">
                                 <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -49,7 +50,7 @@ export default function Header1({ scroll, handleMobileMenu }) {
                         <div className="main-menu__right">
                             <AccountNav />
                             <div className="main-menu__btn-box">
-                                <Link href="/book" className="main-menu__btn thm-btn">Book a Service</Link>
+                                <BookServiceLink className="main-menu__btn thm-btn" />
                             </div>
                         </div>
                     </div>

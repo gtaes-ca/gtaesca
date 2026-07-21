@@ -46,7 +46,7 @@ export const scheduleData = [{
   duration: '09:00 - 10:00'
 }, {
   time: '10:00',
-  title: 'Design Review - Reback Admin',
+  title: 'Design Review - GTA Electric Services Admin',
   variant: 'success',
   duration: '10:00 - 10:30'
 }, {

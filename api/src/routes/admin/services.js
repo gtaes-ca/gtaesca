@@ -1,18 +1,22 @@
 import { Router } from 'express';
 import pool from '../../db.js';
 import { authenticate, requirePageAccess } from '../../middleware/auth.js';
-
-const router = Router();
-
 import { parsePrice } from '../../utils/currency.js';
+import {
+  generateUniqueServiceSlug,
+  resolveServiceSlug,
+} from '../../services/publicServices.js';
 import {
   getServiceMaterialDefaults,
   replaceServiceMaterialDefaults,
 } from '../../services/serviceMaterialDefaults.js';
 
+const router = Router();
+
 function formatService(row) {
   return {
     id: row.id,
+    slug: row.slug,
     categoryId: row.category_id,
     categoryName: row.category_name,
     name: row.name,
@@ -80,7 +84,7 @@ router.get('/', authenticate, requirePageAccess('management.services'), async (r
 
   const listParams = [...params, pageSize, offset];
   const result = await pool.query(
-    `SELECT s.id, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
+    `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
             c.name AS category_name
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
@@ -103,7 +107,7 @@ router.get('/', authenticate, requirePageAccess('management.services'), async (r
 
 router.get('/:id', authenticate, requirePageAccess('management.services'), async (req, res) => {
   const result = await pool.query(
-    `SELECT s.id, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
+    `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
             c.name AS category_name
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
@@ -143,7 +147,7 @@ router.put('/:id/material-defaults', authenticate, requirePageAccess('management
 });
 
 router.post('/', authenticate, requirePageAccess('management.services'), async (req, res) => {
-  const { categoryId, name, description, sortOrder, durationMinutes, price } = req.body;
+  const { categoryId, name, description, sortOrder, durationMinutes, price, slug } = req.body;
 
   if (!categoryId || !name?.trim()) {
     return res.status(400).json({ error: 'Category and service name are required' });
@@ -166,12 +170,21 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
     return res.status(400).json({ error: 'Category not found' });
   }
 
+  let serviceSlug;
+  try {
+    serviceSlug = slug?.trim()
+      ? await resolveServiceSlug({ slug, name })
+      : await generateUniqueServiceSlug(name.trim());
+  } catch (error) {
+    return res.status(409).json({ error: error.message });
+  }
+
   try {
     const result = await pool.query(
-      `INSERT INTO services (category_id, name, description, duration_minutes, price, sort_order)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, category_id, name, description, duration_minutes, price, sort_order, created_at`,
-      [categoryId, name.trim(), description?.trim() || null, duration, servicePrice, Number(sortOrder) || 0]
+      `INSERT INTO services (category_id, name, slug, description, duration_minutes, price, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, slug, category_id, name, description, duration_minutes, price, sort_order, created_at`,
+      [categoryId, name.trim(), serviceSlug, description?.trim() || null, duration, servicePrice, Number(sortOrder) || 0]
     );
 
     const categoryName = await pool.query(
@@ -187,18 +200,35 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
     });
   } catch (error) {
     if (error.code === '23505') {
-      return res.status(409).json({ error: 'A service with this name already exists in the category' });
+      return res.status(409).json({ error: error.message.includes('slug') ? 'A service with this slug already exists' : 'A service with this name already exists in the category' });
     }
     throw error;
   }
 });
 
 router.patch('/:id', authenticate, requirePageAccess('management.services'), async (req, res) => {
-  const { categoryId, name, description, sortOrder, durationMinutes, price } = req.body;
+  const { categoryId, name, description, sortOrder, durationMinutes, price, slug } = req.body;
 
-  const existing = await pool.query('SELECT id FROM services WHERE id = $1', [req.params.id]);
+  const existing = await pool.query('SELECT id, name, slug FROM services WHERE id = $1', [req.params.id]);
   if (existing.rowCount === 0) {
     return res.status(404).json({ error: 'Service not found' });
+  }
+
+  const current = existing.rows[0];
+  let serviceSlug;
+
+  if (slug !== undefined) {
+    try {
+      serviceSlug = slug?.trim()
+        ? await resolveServiceSlug({
+          slug,
+          name: name?.trim() || current.name,
+          serviceId: req.params.id,
+        })
+        : await generateUniqueServiceSlug(name?.trim() || current.name, req.params.id);
+    } catch (error) {
+      return res.status(409).json({ error: error.message });
+    }
   }
 
   if (durationMinutes !== undefined) {
@@ -229,15 +259,17 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
       `UPDATE services
        SET category_id = COALESCE($1, category_id),
            name = COALESCE($2, name),
-           description = COALESCE($3, description),
-           duration_minutes = COALESCE($4, duration_minutes),
-           price = COALESCE($5, price),
-           sort_order = COALESCE($6, sort_order)
-       WHERE id = $7
-       RETURNING id, category_id, name, description, duration_minutes, price, sort_order, created_at`,
+           slug = COALESCE($3, slug),
+           description = COALESCE($4, description),
+           duration_minutes = COALESCE($5, duration_minutes),
+           price = COALESCE($6, price),
+           sort_order = COALESCE($7, sort_order)
+       WHERE id = $8
+       RETURNING id, slug, category_id, name, description, duration_minutes, price, sort_order, created_at`,
       [
         categoryId || null,
         name?.trim() || null,
+        serviceSlug || null,
         description !== undefined ? (description?.trim() || null) : null,
         durationMinutes !== undefined ? Number(durationMinutes) : null,
         price !== undefined ? servicePrice : null,
@@ -259,7 +291,7 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
     });
   } catch (error) {
     if (error.code === '23505') {
-      return res.status(409).json({ error: 'A service with this name already exists in the category' });
+      return res.status(409).json({ error: error.message.includes('slug') ? 'A service with this slug already exists' : 'A service with this name already exists in the category' });
     }
     throw error;
   }

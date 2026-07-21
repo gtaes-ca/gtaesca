@@ -6,7 +6,7 @@ import ProjectsGrid from '@/components/sections/projects/ProjectsGrid'
 
 export default function ProjectsPage() {
     return (
-        <div className="dark-home projects-page">
+        <div className="projects-page">
             <Layout headerStyle={1} footerStyle={1}>
                 <ProjectsBanner />
                 <ProjectsGrid />

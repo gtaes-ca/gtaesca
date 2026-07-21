@@ -6,20 +6,42 @@
 .logo-box {
     position: sticky;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     white-space: nowrap;
     transition: all 0.3s ease-in-out;
     line-height: $topbar-height;
-    padding: 0 calc($main-nav-width-sm * 0.5 - $logo-sm-height * 0.5);
+    min-height: $topbar-height;
+    padding: 10px calc($main-nav-item-padding-x * 0.75);
+    background: $logo-box-bg;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    width: 100%;
+    box-sizing: border-box;
+
+    .logo-dark,
+    .logo-light {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
 
     .logo-sm {
-        display: inline-block;
+        display: none;
         height: $logo-sm-height;
+        width: auto;
     }
 
     .logo-lg {
-        margin-left: 6px;
+        display: inline-block;
+        margin-left: 0;
         height: $logo-lg-height;
+        width: auto;
     }
 
     .logo-light {
@@ -27,7 +49,22 @@
     }
 
     .logo-dark {
-        display: block;
+        display: inline-flex;
+    }
+}
+
+@mixin collapsed-logo-box {
+    padding: 10px calc((100% - #{$logo-collapsed-width}) / 2);
+
+    .logo-sm {
+        display: none !important;
+    }
+
+    .logo-lg {
+        display: inline-block !important;
+        width: $logo-collapsed-width !important;
+        height: auto !important;
+        max-width: $logo-collapsed-width;
     }
 }
 
@@ -214,11 +251,9 @@ html[data-menu-size='condensed'] {
         .logo-box {
             top: 0;
             z-index: 1020 !important;
-            background: $main-nav-bg;
-
-            .logo-lg {
-                display: none;
-            }
+            background: $logo-box-bg;
+            width: 100%;
+            @include collapsed-logo-box;
         }
 
         .menu-title {
@@ -438,9 +473,9 @@ html[data-menu-size='sm-hover'] {
         min-width: $main-nav-width-sm;
 
         .logo-box {
-            .logo-lg {
-                display: none;
-            }
+            background: $logo-box-bg;
+            width: 100%;
+            @include collapsed-logo-box;
         }
 
         .nav-item {
@@ -480,6 +515,7 @@ html[data-menu-size='sm-hover'] {
         min-width: $main-nav-width;
 
         .logo-box {
+            background: $logo-box-bg;
             text-align: left;
         }
 
@@ -508,6 +544,7 @@ html[data-menu-size='sm-hover-active'] {
 
     .main-nav {
         .logo-box {
+            background: $logo-box-bg;
             text-align: left;
         }
 
@@ -546,12 +583,14 @@ html[data-menu-color='dark'],
 html[data-menu-color='brand'] {
     .main-nav {
         .logo-box {
+            background: $logo-box-bg;
+
             .logo-light {
-                display: block;
+                display: none;
             }
 
             .logo-dark {
-                display: none;
+                display: inline-flex;
             }
         }
     }

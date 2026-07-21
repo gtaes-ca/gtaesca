@@ -35,7 +35,7 @@ export const multipleRadialBarsOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#7f56da', '#ff6c2f', '#4ecac2'],
+  colors: ['#fc9c04', '#7f56da', '#ff6c2f', '#4ecac2'],
   series: [44, 55, 67, 83],
   labels: ['Apples', 'Oranges', 'Bananas', 'Berries'],
   responsive: [{
@@ -76,7 +76,7 @@ export const customAngleOpts = {
       }
     }
   },
-  colors: ['#1c84ee', '#7f56da', '#ff6c2f', '#4ecac2'],
+  colors: ['#fc9c04', '#7f56da', '#ff6c2f', '#4ecac2'],
   series: [76, 67, 61, 90],
   labels: ['Vimeo', 'Messenger', 'Facebook', 'LinkedIn'],
   legend: {
@@ -306,6 +306,6 @@ export const semiCircleGaugeOpts = {
       top: -10
     }
   },
-  colors: ['#1c84ee'],
+  colors: ['#fc9c04'],
   labels: ['Average Results']
 };

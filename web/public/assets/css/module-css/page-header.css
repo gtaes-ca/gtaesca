@@ -50,7 +50,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(18, 18, 18, 0.72);
+    background: rgba(18, 18, 18, 0.28);
 }
 
 .about-banner .page-header__inner {
@@ -63,25 +63,68 @@
     z-index: 1;
 }
 
+/* Compact text overlays when banner has a background image */
+.about-banner .page-header__bg ~ .container .page-header__inner h3 {
+    display: inline-block;
+    max-width: 100%;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: rgba(18, 18, 18, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--erepair-white);
+}
+
+.about-banner .page-header__bg ~ .container .thm-breadcrumb__inner {
+    display: inline-block;
+    max-width: 100%;
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(18, 18, 18, 0.38);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.about-banner .page-header__bg ~ .container .thm-breadcrumb li,
+.about-banner .page-header__bg ~ .container .thm-breadcrumb li a {
+    color: var(--erepair-white);
+}
+
+.about-banner .page-header__bg ~ .container .thm-breadcrumb li:hover a {
+    color: var(--erepair-base);
+}
+
+.about-banner .page-header__bg ~ .container .thm-breadcrumb li span {
+    color: var(--erepair-base);
+}
+
 .page-header__inner {
     position: relative;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
     padding: 173px 0 167px;
     z-index: 15;
 }
 
 .page-header__inner h3 {
+    display: block;
     font-size: 60px;
     color: var(--erepair-black);
     line-height: 70px;
     font-weight: 600;
     letter-spacing: -1.8px;
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .thm-breadcrumb__inner {
     position: relative;
     display: block;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
 }
 
 .thm-breadcrumb {
@@ -127,6 +170,18 @@
 .thm-breadcrumb li span {
     font-size: 12px;
     color: var(--erepair-base);
+}
+
+@media (max-width: 767px) {
+    .about-banner .page-header__bg ~ .container .page-header__inner h3 {
+        padding: 8px 14px;
+        font-size: 35px;
+        line-height: 45px;
+    }
+
+    .about-banner .page-header__bg ~ .container .thm-breadcrumb__inner {
+        padding: 6px 12px;
+    }
 }
 
 

@@ -19,11 +19,13 @@ function TopBarContent() {
                 const data = await res.json()
                 if (cancelled) return
                 setContent({
-                    ...DEFAULT_TOPBAR,
-                    ...data.content,
+                    email: data.content?.email || '',
+                    address: data.content?.address || '',
                     social: {
-                        ...DEFAULT_TOPBAR.social,
-                        ...(data.content?.social || {}),
+                        facebook: data.content?.social?.facebook || '',
+                        twitter: data.content?.social?.twitter || '',
+                        linkedin: data.content?.social?.linkedin || '',
+                        instagram: data.content?.social?.instagram || '',
                     },
                 })
             } catch {

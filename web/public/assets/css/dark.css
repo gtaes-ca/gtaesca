@@ -128,6 +128,41 @@
     color: var(--erepair-white);
 }
 
+.dark-home .mobile-nav__content {
+    background-color: var(--erepair-black);
+    box-shadow: none;
+}
+
+.dark-home .mobile-nav__close {
+    color: var(--erepair-white);
+}
+
+.dark-home .mobile-nav__content .main-menu__list > li:not(:last-child),
+.dark-home .mobile-nav__content .main-menu__list > li > ul > li:not(:last-child),
+.dark-home .mobile-nav__content .main-menu__list > li > ul > li > ul > li:not(:last-child) {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-home .mobile-nav__content .main-menu__list > li > ul,
+.dark-home .mobile-nav__content .main-menu__list > li > ul > li > ul {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-home .mobile-nav__content .main-menu__list > li > a,
+.dark-home .mobile-nav__content .main-menu__list > li > ul > li > a,
+.dark-home .mobile-nav__content .main-menu__list > li > ul > li > ul > li > a {
+    color: #ffffff;
+}
+
+.dark-home .mobile-nav__container {
+    border-top-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-home .mobile-nav__social a {
+    color: var(--erepair-white);
+}
+
 .dark-home .project-one {
     padding-bottom: 40px;
 }
@@ -187,12 +222,12 @@
 }
 
 /* Team page */
-.dark-home.team-page .team-page {
+.dark-home.team-page section.team-page {
     background-color: #121212;
     padding-bottom: 40px;
 }
 
-.dark-home.team-page .team-page > .container > p {
+.dark-home.team-page section.team-page > .container > p {
     color: #82878b;
 }
 

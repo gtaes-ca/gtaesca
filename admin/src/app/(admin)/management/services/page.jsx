@@ -12,6 +12,7 @@ import { formatCurrency } from '@/utils/currency';
 const defaultForm = {
   categoryId: '',
   name: '',
+  slug: '',
   description: '',
   durationMinutes: 120,
   price: '0',
@@ -173,6 +174,7 @@ const ServicesPage = () => {
     setForm({
       categoryId: String(service.categoryId),
       name: service.name,
+      slug: service.slug || '',
       description: service.description || '',
       durationMinutes: service.durationMinutes ?? 120,
       price: String(service.price ?? 0),
@@ -191,6 +193,7 @@ const ServicesPage = () => {
         durationMinutes: Number(form.durationMinutes),
         price: Number(form.price),
         sortOrder: Number(form.sortOrder),
+        slug: form.slug.trim() || undefined,
       };
       if (editingId) {
         await httpClient.patch(`/api/admin/services/${editingId}`, payload);
@@ -425,6 +428,17 @@ const ServicesPage = () => {
                 placeholder="e.g. EV Charger Installation"
                 required
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>URL Slug</Form.Label>
+              <Form.Control
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                placeholder="auto-generated from name if left blank"
+              />
+              <Form.Text className="text-muted">
+                Public URL: /services/{form.slug || 'your-service-slug'}
+              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>

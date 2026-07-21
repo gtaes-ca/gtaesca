@@ -380,6 +380,56 @@
     display: block;
 }
 
+.contact-booking-cta {
+    position: relative;
+    display: block;
+    padding: 0 0 60px;
+}
+
+.contact-booking-cta__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 32px 36px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(var(--erepair-base-rgb), 0.12), rgba(var(--erepair-black-rgb), 0.04));
+    border: 1px solid rgba(var(--erepair-base-rgb), 0.25);
+}
+
+.contact-booking-cta__tag {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(var(--erepair-base-rgb), 0.15);
+    color: var(--erepair-base);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.contact-booking-cta__content h3 {
+    margin-bottom: 10px;
+}
+
+.contact-booking-cta__content p {
+    margin: 0;
+    max-width: 640px;
+}
+
+.contact-booking-cta__action {
+    flex-shrink: 0;
+}
+
+@media (max-width: 991px) {
+    .contact-booking-cta__inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 
 
 

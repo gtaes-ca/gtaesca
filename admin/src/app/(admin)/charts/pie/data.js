@@ -2,7 +2,7 @@ import small1 from '@/assets/images/small/img-1.jpg';
 import small2 from '@/assets/images/small/img-2.jpg';
 import small3 from '@/assets/images/small/img-3.jpg';
 import small5 from '@/assets/images/small/img-5.jpg';
-const colors1 = ['#1c84ee', '#7f56da', '#ff6c2f', '#f9b931', '#4ecac2'];
+const colors1 = ['#fc9c04', '#7f56da', '#ff6c2f', '#f9b931', '#4ecac2'];
 export const simplePieOpts = {
   chart: {
     height: 320,
@@ -50,7 +50,7 @@ export const simpleDonutOpts = {
     offsetY: 7
   },
   labels: ['Series 1', 'Series 2', 'Series 3', 'Series 4', 'Series 5'],
-  colors: ['#7f56da', '#1c84ee', '#ff6c2f', '#4ecac2', '#f9b931'],
+  colors: ['#7f56da', '#fc9c04', '#ff6c2f', '#4ecac2', '#f9b931'],
   responsive: [{
     breakpoint: 600,
     options: {
@@ -148,7 +148,7 @@ export const patternedDonutOpts = {
     width: 2
   },
   series: [44, 55, 41, 17, 15],
-  colors: ['#7f56da', '#1c84ee', '#ff6c2f', '#4ecac2', '#f9b931'],
+  colors: ['#7f56da', '#fc9c04', '#ff6c2f', '#4ecac2', '#f9b931'],
   labels: ['Comedy', 'Action', 'SciFi', 'Drama', 'Horror'],
   dataLabels: {
     dropShadow: {
@@ -245,7 +245,7 @@ export const donutUpdateOpts = {
     enabled: false
   },
   series: [44, 55, 13, 33],
-  colors: ['#1c84ee', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#040505', '#4ecac2'],
+  colors: ['#fc9c04', '#53389f', '#7f56da', '#ff86c8', '#ef5f5f', '#ff6c2f', '#f9b931', '#22c55e', '#040505', '#4ecac2'],
   legend: {
     show: true,
     position: 'bottom',

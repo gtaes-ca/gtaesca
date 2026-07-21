@@ -1,54 +1,23 @@
-
 import Link from "next/link"
 import Menu from "../Menu"
 import MobileMenu from "../MobileMenu"
+import BookServiceLink from "@/components/booking/BookServiceLink"
+import { assetUrl } from "@/lib/assets"
+
+const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
 
 export default function Header2({ scroll, handleMobileMenu }) {
     return (
         <>
 
         <header className="main-header-two">
-            <div className="main-menu-two__top">
-                <div className="container">
-                    <div className="main-menu-two__top-inner">
-                        <div className="main-menu-two__top-left">
-                            <div className="main-menu-two__social">
-                                <Link href="#"><i className="icon-facebook"></i></Link>
-                                <Link href="#"><i className="icon-xpa"></i></Link>
-                                <Link href="#"><i className="icon-link-in"></i></Link>
-                                <Link href="#"><i className="icon-instagram"></i></Link>
-                            </div>
-                            <p className="main-menu-two__text">Welcome to Our Car Repair Agency</p>
-                        </div>
-                        <ul className="list-unstyled main-menu-two__contact-list">
-                            <li>
-                                <div className="icon">
-                                    <i className="icon-location"></i>
-                                </div>
-                                <div className="text">
-                                    <p>12 Green Road, 05 New York</p>
-                                </div>
-                            </li>
-                            <li>
-                                <div className="icon">
-                                    <i className="icon-envelope"></i>
-                                </div>
-                                <div className="text">
-                                    <p><Link href="mailto:info@fonisa24.com">example@gamil.com</Link>
-                                    </p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
             <nav className="main-menu main-menu-two">
                 <div className="main-menu-two__wrapper">
                     <div className="container">
                         <div className="main-menu-two__wrapper-inner">
                             <div className="main-menu-two__left">
                                 <div className="main-menu-two__logo">
-                                    <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                    <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                                 </div>
                                 <div className="main-menu-two__main-menu-box">
                                     <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -67,7 +36,7 @@ export default function Header2({ scroll, handleMobileMenu }) {
                                         </div>
                                     </div>
                                     <div className="main-menu-two__btn-box">
-                                        <Link href="/book" className="main-menu-two__btn thm-btn">Book a Service</Link>
+                                        <BookServiceLink className="main-menu-two__btn thm-btn" />
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +52,7 @@ export default function Header2({ scroll, handleMobileMenu }) {
                         <div className="main-menu-two__wrapper-inner">
                             <div className="main-menu-two__left">
                                 <div className="main-menu-two__logo">
-                                    <Link href="/"><img src="assets/images/resources/logo-1.png" alt=""/></Link>
+                                    <Link href="/"><img src={LOGO_SRC} alt="GTA Electric Services" className="site-logo"/></Link>
                                 </div>
                                 <div className="main-menu-two__main-menu-box">
                                     <Link href="#" className="mobile-nav__toggler" onClick={handleMobileMenu}><i className="fa fa-bars"></i></Link>
@@ -102,7 +71,7 @@ export default function Header2({ scroll, handleMobileMenu }) {
                                         </div>
                                     </div>
                                     <div className="main-menu-two__btn-box">
-                                        <Link href="/book" className="main-menu-two__btn thm-btn">Book a Service</Link>
+                                        <BookServiceLink className="main-menu-two__btn thm-btn" />
                                     </div>
                                 </div>
                             </div>

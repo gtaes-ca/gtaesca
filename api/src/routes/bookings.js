@@ -18,7 +18,7 @@ import {
   normalizeServiceIds,
   parseServiceIdsFromQuery,
 } from '../services/bookings.js';
-import { getBookingSettings } from '../services/bookingSettings.js';
+import { getBookingSettings, getPublicBookingSettings, isWhatsAppBookingMode } from '../services/bookingSettings.js';
 import { resolveCustomerForBooking, lookupClientByEmail } from '../services/customers.js';
 import { sendBookingConfirmationEmail } from '../services/email.js';
 import { notifyBookingCreated } from '../services/notifications.js';
@@ -77,16 +77,18 @@ router.get('/catalog', async (_req, res) => {
     if (row.region === 'nearby') locations.nearby.push(item);
   }
 
+  const bookingSettings = await getBookingSettings();
+
   return res.json({
     categories: Array.from(categoriesMap.values()),
     locations,
-    bookingSettings: await getBookingSettings(),
+    bookingSettings: getPublicBookingSettings(bookingSettings),
   });
 });
 
 router.get('/settings', async (_req, res) => {
   const settings = await getBookingSettings();
-  return res.json({ settings });
+  return res.json({ settings: getPublicBookingSettings(settings) });
 });
 
 router.get('/technicians', async (req, res) => {
@@ -137,6 +139,13 @@ router.get('/availability', async (req, res) => {
 });
 
 router.post('/', optionalAuthenticate, async (req, res) => {
+  const settings = await getBookingSettings();
+  if (isWhatsAppBookingMode(settings)) {
+    return res.status(403).json({
+      error: 'Online booking is disabled. Please send your request via WhatsApp.',
+    });
+  }
+
   const {
     serviceIds: serviceIdsBody,
     serviceId,

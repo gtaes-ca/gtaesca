@@ -3,5 +3,6 @@ dist
 .next
 .env
 .DS_Store
-api/uploads/*
-!api/uploads/.gitkeep
+api/uploads/**
+!api/uploads/**/
+!api/uploads/**/.gitkeep
