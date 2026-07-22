@@ -1,3 +1,8 @@
+# LOCAL DEVELOPMENT ONLY — starts db, api, admin, and web together.
+# Production droplet (api + db + nginx only): use deploy/droplet/docker-compose.yml
+#
+#   cd deploy/droplet && docker compose up -d --build
+
 services:
   db:
     image: postgres:16-alpine

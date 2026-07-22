@@ -43,6 +43,9 @@ sudo usermod -aG docker "$USER"
 
 ### Deploy API stack
 
+> **Important:** run all commands from `deploy/droplet`, **not** the repo root.
+> The root `docker-compose.yml` builds admin + web for local dev and will take much longer on a droplet.
+
 ```bash
 git clone https://github.com/Hashmarkai/gta-electric-services-1.git /opt/gtaes
 cd /opt/gtaes/deploy/droplet
@@ -165,11 +168,36 @@ Uploads are served at `https://gtaes.nicheye.com/uploads/...` (proxied through n
 
 ## 7. Troubleshooting
 
-**502 Bad Gateway** — API not ready:
+**Building admin/web on the droplet** — you ran compose from the repo root. Stop it and use the droplet stack:
 
 ```bash
-docker compose logs api
+cd /opt/gtaes
+docker compose down
+
+cd /opt/gtaes/deploy/droplet
+cp .env.example .env   # if not done yet
+docker compose up -d --build
+```
+
+You should only see **db**, **api**, and **nginx** building (API uses `Dockerfile.prod`).
+
+**502 Bad Gateway / API restarting** — API crashed on boot (nginx is up, API is not):
+
+```bash
+docker compose logs api --tail 100
 docker compose ps
+```
+
+Common causes:
+- migration SQL error
+- bad DB password / connection (prefer discrete `DB_*` vars; avoid special chars like `@ # $` in `POSTGRES_PASSWORD` if possible)
+- missing `.env` values (`JWT_SECRET`, `SUPER_ADMIN_*`)
+
+After fixing `.env`:
+
+```bash
+docker compose up -d --build api
+docker compose logs -f api
 ```
 
 **CORS errors from Vercel** — add exact frontend origins to `CORS_ORIGINS` (no trailing slash).
