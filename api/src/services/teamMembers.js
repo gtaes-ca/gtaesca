@@ -35,9 +35,8 @@ export async function listPublicTeamMembers() {
      FROM users u
      LEFT JOIN technician_profiles tp ON tp.user_id = u.id
      WHERE u.status = 'active'
-       AND u.user_type IN ('technician', 'operation_team')
+       AND u.user_type = 'technician'
      ORDER BY
-       CASE WHEN u.user_type = 'technician' THEN 0 ELSE 1 END,
        tp.onboarding_completed DESC NULLS LAST,
        u.first_name,
        u.last_name`
@@ -78,7 +77,7 @@ export async function getPublicTeamMemberById(id) {
      LEFT JOIN technician_profiles tp ON tp.user_id = u.id
      WHERE u.id = $1
        AND u.status = 'active'
-       AND u.user_type IN ('technician', 'operation_team')`,
+       AND u.user_type = 'technician'`,
     [id]
   );
 
