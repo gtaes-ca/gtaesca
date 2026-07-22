@@ -102,23 +102,33 @@ const UserActionsOffcanvas = ({
               </div>
             )}
 
-            <form onSubmit={handlePasswordSubmit} className="mb-4">
-              <Form.Label>Change Password</Form.Label>
-              <p className="text-muted small">
-                Set a new password for this user. All active sessions will be revoked.
-              </p>
-              <Form.Control
-                type="password"
-                placeholder="New password (min 8 chars)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={saving}
-                className="mb-3"
-              />
-              <Button type="submit" disabled={saving || password.length < 8}>
-                {saving ? 'Updating...' : 'Update Password'}
-              </Button>
-            </form>
+            {user.userType === 'super_admin' ? (
+              <div className="mb-4">
+                <Form.Label>Change Password</Form.Label>
+                <p className="text-muted small mb-0">
+                  Super admin password cannot be changed from the admin panel.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handlePasswordSubmit} className="mb-4">
+                <Form.Label>Change Password</Form.Label>
+                <p className="text-muted small">
+                  Set a new password for this user. All active sessions will be revoked.
+                </p>
+                <Form.Control
+                  type="password"
+                  placeholder="New password (min 8 chars)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={saving}
+                  className="mb-3"
+                  autoComplete="new-password"
+                />
+                <Button type="submit" disabled={saving || password.length < 8}>
+                  {saving ? 'Updating...' : 'Update Password'}
+                </Button>
+              </form>
+            )}
 
             <div className="border-top pt-4 mt-auto">
               <Form.Label className="d-block mb-3">Account Actions</Form.Label>

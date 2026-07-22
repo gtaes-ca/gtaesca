@@ -7,9 +7,15 @@ import { useNotificationContext } from '@/context/useNotificationContext';
 import httpClient from '@/helpers/httpClient';
 
 const defaultForm = {
+  method: 'email',
   email: '',
   userType: 'operation_team',
   role: 'support',
+  firstName: '',
+  lastName: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
 };
 
 const TeamInvitationsPage = () => {
@@ -47,18 +53,59 @@ const TeamInvitationsPage = () => {
     { value: 'viewer', label: 'Viewer' },
   ];
 
+  const openForm = () => {
+    setForm(defaultForm);
+    setShowFormSheet(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (form.method === 'manual') {
+      if (!form.firstName.trim() || !form.lastName.trim()) {
+        showNotification({ message: 'First and last name are required', variant: 'danger' });
+        return;
+      }
+      if (form.password.length < 8) {
+        showNotification({ message: 'Password must be at least 8 characters', variant: 'danger' });
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        showNotification({ message: 'Passwords do not match', variant: 'danger' });
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      await httpClient.post('/api/invitations', form);
-      showNotification({ message: 'Invitation sent successfully', variant: 'success' });
+      if (form.method === 'email') {
+        await httpClient.post('/api/invitations', {
+          email: form.email,
+          userType: form.userType,
+          role: form.role,
+        });
+        showNotification({ message: 'Invitation sent successfully', variant: 'success' });
+      } else {
+        await httpClient.post('/api/invitations/create-account', {
+          email: form.email,
+          userType: form.userType,
+          role: form.role,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          phone: form.phone.trim() || undefined,
+          password: form.password,
+        });
+        showNotification({
+          message: 'Account created successfully. The user can sign in now.',
+          variant: 'success',
+        });
+      }
       setForm(defaultForm);
       setShowFormSheet(false);
       loadInvitations();
     } catch (err) {
       showNotification({
-        message: err.response?.data?.error || 'Failed to send invitation',
+        message: err.response?.data?.error || 'Failed to process request',
         variant: 'danger',
       });
     } finally {
@@ -106,18 +153,20 @@ const TeamInvitationsPage = () => {
     return 'warning';
   };
 
+  const isManual = form.method === 'manual';
+
   return (
     <>
       <PageMetaData title="Team Invitations" />
 
       <ComponentContainerCard
         title="Team Invitations"
-        description="Manage pending, accepted, and expired team invitations."
+        description="Invite by email link, or create an account manually with a password."
       >
         <div className="d-flex justify-content-end mb-3">
-          <Button variant="primary" onClick={() => setShowFormSheet(true)}>
+          <Button variant="primary" onClick={openForm}>
             <IconifyIcon icon="bx:plus" className="me-1" />
-            Send Invitation
+            Add Team Member
           </Button>
         </div>
 
@@ -172,7 +221,7 @@ const TeamInvitationsPage = () => {
               {invitations.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-muted">
-                    No invitations yet. Use Send Invitation to invite a team member.
+                    No invitations yet. Use Add Team Member to invite or create an account.
                   </td>
                 </tr>
               )}
@@ -184,17 +233,36 @@ const TeamInvitationsPage = () => {
       <Offcanvas
         placement="end"
         show={showFormSheet}
-        onHide={() => setShowFormSheet(false)}
+        onHide={() => !submitting && setShowFormSheet(false)}
         className="border-0"
       >
         <Offcanvas.Header closeButton className="border-bottom">
-          <Offcanvas.Title>Send Invitation</Offcanvas.Title>
+          <Offcanvas.Title>Add Team Member</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <p className="text-muted">
-            Invite Operation or Technician members by email. They will receive a link and OTP to complete signup.
-          </p>
           <form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Method</Form.Label>
+              <div className="d-flex flex-column gap-2">
+                <Form.Check
+                  type="radio"
+                  id="invite-method-email"
+                  name="inviteMethod"
+                  label="Email invitation (activation link + OTP)"
+                  checked={form.method === 'email'}
+                  onChange={() => setForm({ ...form, method: 'email' })}
+                />
+                <Form.Check
+                  type="radio"
+                  id="invite-method-manual"
+                  name="inviteMethod"
+                  label="Manual account (set password now)"
+                  checked={form.method === 'manual'}
+                  onChange={() => setForm({ ...form, method: 'manual' })}
+                />
+              </div>
+            </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -203,8 +271,10 @@ const TeamInvitationsPage = () => {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="name@example.com"
                 required
+                autoComplete="off"
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Team Type</Form.Label>
               <Form.Select
@@ -221,7 +291,8 @@ const TeamInvitationsPage = () => {
                 <option value="technician">Technicians</option>
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-4">
+
+            <Form.Group className="mb-3">
               <Form.Label>Role</Form.Label>
               <Form.Select
                 value={form.role}
@@ -239,11 +310,86 @@ const TeamInvitationsPage = () => {
                 )}
               </Form.Select>
             </Form.Group>
+
+            {isManual && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>First Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    required
+                    autoComplete="off"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    required
+                    autoComplete="off"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Phone (optional)</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    autoComplete="off"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder="Min 8 characters"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-4">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={form.confirmPassword}
+                    onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+                </Form.Group>
+              </>
+            )}
+
+            {!isManual && (
+              <p className="text-muted small mb-4">
+                They will receive an email with an activation link and OTP to set their own password.
+              </p>
+            )}
+
             <div className="d-flex gap-2">
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Sending...' : 'Send Invitation'}
+                {submitting
+                  ? isManual
+                    ? 'Creating...'
+                    : 'Sending...'
+                  : isManual
+                    ? 'Create Account'
+                    : 'Send Invitation'}
               </Button>
-              <Button variant="light" type="button" onClick={() => setShowFormSheet(false)}>
+              <Button
+                variant="light"
+                type="button"
+                disabled={submitting}
+                onClick={() => setShowFormSheet(false)}
+              >
                 Cancel
               </Button>
             </div>

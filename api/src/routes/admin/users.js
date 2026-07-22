@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import pool from '../../db.js';
 import { authenticate, requirePageAccess } from '../../middleware/auth.js';
-import { formatUser } from '../../services/users.js';
+import { formatUser, createTeamUser } from '../../services/users.js';
 import { revokeAllUserSessions } from '../../services/sessions.js';
 import {
   isValidRoleForUserType,
@@ -259,9 +259,16 @@ router.patch('/:id/password', authenticate, requirePageAccess('management.users'
     return res.status(400).json({ error: 'Password must be at least 8 characters' });
   }
 
-  const user = await pool.query('SELECT id FROM users WHERE id = $1', [req.params.id]);
+  const user = await pool.query(
+    'SELECT id, user_type, role FROM users WHERE id = $1',
+    [req.params.id]
+  );
   if (user.rowCount === 0) {
     return res.status(404).json({ error: 'User not found' });
+  }
+
+  if (user.rows[0].user_type === USER_TYPES.SUPER_ADMIN) {
+    return res.status(403).json({ error: 'Super admin password cannot be changed' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -272,6 +279,55 @@ router.patch('/:id/password', authenticate, requirePageAccess('management.users'
   await revokeAllUserSessions(req.params.id);
 
   return res.json({ message: 'Password updated and all sessions revoked' });
+});
+
+router.post('/', authenticate, requirePageAccess('management.users'), async (req, res) => {
+  const { email, userType, role, firstName, lastName, password, phone } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
+  if (existingUser.rowCount > 0) {
+    return res.status(409).json({ error: 'A user with this email already exists' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const user = await createTeamUser({
+      email: normalizedEmail,
+      password,
+      firstName,
+      lastName,
+      userType,
+      role: userType === USER_TYPES.TECHNICIAN ? ROLES.TECHNICIAN : role,
+      phone,
+      client,
+    });
+
+    await client.query(
+      `DELETE FROM team_invitations
+       WHERE email = $1 AND accepted_at IS NULL`,
+      [normalizedEmail]
+    );
+
+    await client.query('COMMIT');
+
+    return res.status(201).json({
+      message: 'User account created successfully',
+      user: formatUser(user),
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'A user with this email already exists' });
+    }
+    return res.status(error.status || 500).json({
+      error: error.message || 'Failed to create user',
+    });
+  } finally {
+    client.release();
+  }
 });
 
 router.post('/:id/revoke-sessions', authenticate, requirePageAccess('management.users'), async (req, res) => {

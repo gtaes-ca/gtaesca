@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import bcrypt from 'bcryptjs';
 import pool from '../db.js';
 import { authenticate, requirePageAccess } from '../middleware/auth.js';
 import {
@@ -9,7 +8,7 @@ import {
 } from '../constants.js';
 import { generateOtp, generateToken, hashValue } from '../utils/crypto.js';
 import { sendInvitationEmail } from '../services/email.js';
-import { formatUser } from '../services/users.js';
+import { createTeamUser, formatUser } from '../services/users.js';
 
 const router = Router();
 
@@ -72,6 +71,55 @@ router.post('/', authenticate, requirePageAccess('management.invitations'), asyn
     },
     message: 'Invitation sent successfully',
   });
+});
+
+router.post('/create-account', authenticate, requirePageAccess('management.invitations'), async (req, res) => {
+  const { email, userType, role, firstName, lastName, password, phone } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
+  if (existingUser.rowCount > 0) {
+    return res.status(409).json({ error: 'A user with this email already exists' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const user = await createTeamUser({
+      email: normalizedEmail,
+      password,
+      firstName,
+      lastName,
+      userType,
+      role: userType === USER_TYPES.TECHNICIAN ? 'technician' : role,
+      phone,
+      client,
+    });
+
+    await client.query(
+      `DELETE FROM team_invitations
+       WHERE email = $1 AND accepted_at IS NULL`,
+      [normalizedEmail]
+    );
+
+    await client.query('COMMIT');
+
+    return res.status(201).json({
+      message: 'User account created successfully. They can sign in with the password you set.',
+      user: formatUser(user),
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.code === '23505') {
+      return res.status(409).json({ error: 'A user with this email already exists' });
+    }
+    return res.status(error.status || 500).json({
+      error: error.message || 'Failed to create user',
+    });
+  } finally {
+    client.release();
+  }
 });
 
 router.get('/', authenticate, requirePageAccess('management.invitations'), async (_req, res) => {
@@ -254,41 +302,27 @@ router.post('/accept', async (req, res) => {
     return res.status(400).json({ error: 'Invalid OTP' });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  await pool.query('BEGIN');
+  const client = await pool.connect();
   try {
-    const userResult = await pool.query(
-      `INSERT INTO users
-        (email, password_hash, first_name, last_name, user_type, role, status, email_verified_at, phone)
-       VALUES ($1, $2, $3, $4, $5, $6, 'active', NOW(), $7)
-       RETURNING *`,
-      [
-        invitation.email,
-        passwordHash,
-        firstName,
-        lastName,
-        invitation.user_type,
-        invitation.role,
-        phone || null,
-      ]
-    );
+    await client.query('BEGIN');
 
-    const user = userResult.rows[0];
+    const user = await createTeamUser({
+      email: invitation.email,
+      password,
+      firstName,
+      lastName,
+      userType: invitation.user_type,
+      role: invitation.role,
+      phone,
+      client,
+    });
 
-    if (invitation.user_type === USER_TYPES.TECHNICIAN) {
-      await pool.query(
-        `INSERT INTO technician_profiles (user_id) VALUES ($1)`,
-        [user.id]
-      );
-    }
-
-    await pool.query(
+    await client.query(
       `UPDATE team_invitations SET accepted_at = NOW() WHERE id = $1`,
       [invitation.id]
     );
 
-    await pool.query('COMMIT');
+    await client.query('COMMIT');
 
     return res.status(201).json({
       message: 'Account created successfully. Please sign in.',
@@ -296,11 +330,16 @@ router.post('/accept', async (req, res) => {
       requiresOnboarding: invitation.user_type === USER_TYPES.TECHNICIAN,
     });
   } catch (error) {
-    await pool.query('ROLLBACK');
+    await client.query('ROLLBACK');
     if (error.code === '23505') {
       return res.status(409).json({ error: 'A user with this email already exists' });
     }
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
     throw error;
+  } finally {
+    client.release();
   }
 });
 

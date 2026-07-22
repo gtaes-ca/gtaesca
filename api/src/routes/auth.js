@@ -146,7 +146,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 
   const user = await findUserByEmail(email.toLowerCase());
-  if (user) {
+  if (user && user.user_type !== USER_TYPES.SUPER_ADMIN) {
     const otp = generateOtp();
     const otpHash = hashValue(otp);
     const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
@@ -177,7 +177,7 @@ router.post('/reset-password', async (req, res) => {
   }
 
   const user = await findUserByEmail(email.toLowerCase());
-  if (!user) {
+  if (!user || user.user_type === USER_TYPES.SUPER_ADMIN) {
     return res.status(400).json({ error: 'Invalid reset request' });
   }
 
