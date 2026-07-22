@@ -4,7 +4,9 @@ export function resolveCmsAssetUrl(url) {
   if (!url) return '';
   if (url.startsWith('http') || url.startsWith('data:')) return url;
   if (url.startsWith('/uploads')) return `${API_URL}${url}`;
-  return url;
+  // Root-absolute so CSS url() resolves from the site root, not /_next/static/css/
+  if (url.startsWith('/')) return url;
+  return `/${url.replace(/^\/+/, '')}`;
 }
 
 export function hasGalleryImage(image) {

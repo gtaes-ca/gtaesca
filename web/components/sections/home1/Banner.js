@@ -27,9 +27,11 @@ function slideBackgroundStyle(slide) {
     const desktop = resolveCmsAssetUrl(slide.backgroundImage)
     const mobile = resolveCmsAssetUrl(slide.backgroundImageMobile || slide.backgroundImage)
 
+    if (!desktop && !mobile) return undefined
+
     return {
-        '--slider-bg-desktop': `url(${desktop})`,
-        '--slider-bg-mobile': `url(${mobile})`,
+        ...(mobile ? { '--slider-bg-mobile': `url("${mobile}")` } : {}),
+        ...(desktop ? { '--slider-bg-desktop': `url("${desktop}")` } : {}),
     }
 }
 
