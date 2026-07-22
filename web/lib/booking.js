@@ -94,7 +94,6 @@ export function buildWhatsAppBookingMessage({
   timezone = DEFAULT_BOOKING_TIMEZONE,
 }) {
   const serviceLines = services.map((s) => `- ${s.name}`).join('\n');
-  const totalDuration = services.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
 
   const lines = [
     'Hello, I would like to book a service:',
@@ -115,10 +114,6 @@ export function buildWhatsAppBookingMessage({
 
   if (notes?.trim()) {
     lines.push('', `*Notes:* ${notes.trim()}`);
-  }
-
-  if (services.length > 0) {
-    lines.push('', `Estimated duration: ${formatDuration(totalDuration)}`);
   }
 
   return lines.join('\n');
