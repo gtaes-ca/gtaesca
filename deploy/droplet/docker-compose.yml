@@ -1,0 +1,93 @@
+# Production stack for DigitalOcean droplet: PostgreSQL + API + Nginx (HTTPS).
+# Admin and web are deployed separately on Vercel.
+#
+# Usage (from this directory):
+#   cp .env.example .env   # fill in secrets and Vercel URLs
+#   docker compose up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gtaes-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../../api
+      dockerfile: Dockerfile.prod
+    container_name: gtaes-api
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DB_HOST: db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      DB_PORT: 5432
+      DB_INIT_DIR: /db/init
+      UPLOADS_DIR: /app/uploads
+    volumes:
+      - ../../db/init:/db/init:ro
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: gtaes-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-conf:/etc/letsencrypt:ro
+    depends_on:
+      - api
+    networks:
+      - internal
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: gtaes-certbot
+    profiles:
+      - ssl
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - nginx
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads_data:
+  certbot-www:
+  certbot-conf:
+
+networks:
+  internal:
+    driver: bridge

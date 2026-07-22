@@ -2,6 +2,7 @@ node_modules
 dist
 .next
 .env
+deploy/droplet/.env
 .DS_Store
 api/uploads/**
 !api/uploads/**/

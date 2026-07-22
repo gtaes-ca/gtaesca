@@ -33,7 +33,18 @@ const app = express();
 const port = Number(process.env.PORT) || 3001;
 const jsonBodyLimit = process.env.JSON_BODY_LIMIT || '15mb';
 
-app.use(cors());
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.set('trust proxy', 1);
+app.use(
+  cors({
+    origin: corsOrigins.length ? corsOrigins : true,
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: jsonBodyLimit }));
 app.use('/uploads', express.static(getUploadsDir()));
 
