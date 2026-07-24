@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { SitePhoneLink, SiteAddress } from '@/components/contact/SiteContact'
 
 export default function Footer2() {
     return (
@@ -27,7 +28,7 @@ export default function Footer2() {
                                         </div>
                                         <div className="content">
                                             <h3>Contact</h3>
-                                            <p><Link href="tel:885747546027">(88) 574 7546 027</Link></p>
+                                            <p><SitePhoneLink /></p>
                                         </div>
                                     </li>
                                     <li>
@@ -36,7 +37,7 @@ export default function Footer2() {
                                         </div>
                                         <div className="content">
                                             <h3>Location</h3>
-                                            <p>4517 Washington Ave. Manchester, 95</p>
+                                            <SiteAddress />
                                         </div>
                                     </li>
                                 </ul>

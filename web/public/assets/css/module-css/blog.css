@@ -907,7 +907,7 @@
 }
 
 .comment-one__content h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     line-height: 30px;
     color: #232323;
@@ -1235,7 +1235,7 @@
 }
 
 .sidebar__post-content h3 {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     line-height: 28px;
 }

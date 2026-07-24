@@ -93,7 +93,7 @@
 }
 
 .testimonial-one__client-info h3 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 34px;
     letter-spacing: -0.72px;
@@ -213,7 +213,7 @@
 }
 
 .testimonial-two__client-info h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     text-transform: capitalize;
     margin-top: 20px;

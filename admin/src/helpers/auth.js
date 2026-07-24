@@ -15,6 +15,7 @@ export const BOOKING_SYSTEM_PAGE_KEYS = [
   'management.customers',
   'management.bookings',
   'management.booking-settings',
+  'management.materials',
 ];
 
 export const PAGE_PATH_BY_KEY = {
@@ -61,10 +62,13 @@ export function canAccessManagement(user) {
 
 export function canAccessPage(user, pageKey) {
   if (!user || !pageKey) return true;
-  if (isSuperAdmin(user)) return true;
   if (BOOKING_SYSTEM_PAGE_KEYS.includes(pageKey) && isWhatsAppBookingMode(user)) {
-    return false;
+    // Super admin still needs booking settings to switch modes back.
+    if (pageKey !== 'management.booking-settings' || !isSuperAdmin(user)) {
+      return false;
+    }
   }
+  if (isSuperAdmin(user)) return true;
   return Array.isArray(user.allowedPages) && user.allowedPages.includes(pageKey);
 }
 

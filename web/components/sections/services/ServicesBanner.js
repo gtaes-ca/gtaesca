@@ -6,7 +6,7 @@ import { DEFAULT_SERVICES_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-export default function ServicesBanner() {
+export default function ServicesBanner({ pageKey = 'residential' }) {
     const [content, setContent] = useState(DEFAULT_SERVICES_BANNER)
 
     useEffect(() => {
@@ -14,7 +14,7 @@ export default function ServicesBanner() {
 
         async function loadBanner() {
             try {
-                const res = await fetch(`${API_URL}/api/web-content/services/banner`)
+                const res = await fetch(`${API_URL}/api/web-content/${pageKey}/banner`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
@@ -30,7 +30,7 @@ export default function ServicesBanner() {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [pageKey])
 
     const backgroundImage = resolveCmsAssetUrl(content.backgroundImage)
 

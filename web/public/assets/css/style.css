@@ -50,16 +50,44 @@
   --erepair-gray-rgb: 110, 119, 125;
   --erepair-white: #ffffff;
   --erepair-white-rgb: 255, 255, 255;
+  /* Logo navy — primary brand / structure */
+  --erepair-navy: #243c5a;
+  --erepair-navy-rgb: 36, 60, 90;
+  --erepair-navy-deep: #1a2d44;
+  --erepair-navy-deep-rgb: 26, 45, 68;
+  /* Premium gold — accent / CTAs / highlights */
   --erepair-base: #fc9c04;
   --erepair-base-rgb: 252, 156, 4;
-  --erepair-black: #171717;
-  --erepair-black-rgb: 23, 23, 23;
+  --erepair-gold-deep: #c47a03;
+  --erepair-gold-deep-rgb: 196, 122, 3;
+  /* Dark text & panels use logo navy for brand consistency */
+  --erepair-black: #243c5a;
+  --erepair-black-rgb: 36, 60, 90;
   --erepair-primary: #fc9c04;
   --erepair-primary-rgb: 252, 156, 4;
+  /* Soft warm wash that pairs with gold + navy */
   --erepair-extra: #FFF6E8;
   --erepair-extra-rgb: 255, 246, 232;
   --erepair-bdr-color: #DDDDDD;
   --erepair-bdr-color-rgb: 221, 221, 221;
+  /* Site-wide typeface (homepage standard) */
+  --erepair-font-2: var(--erepair-font);
+  --erepair-font-3: var(--erepair-font);
+  --erepair-font-two: var(--erepair-font);
+  --thm-font: var(--erepair-font);
+  --thm-font-2: var(--erepair-font);
+  --bs-font-sans-serif: var(--erepair-font), "Roboto", sans-serif;
+  /* Homepage typography scale — use everywhere */
+  --font-size-body: 16px;
+  --font-line-body: 29px;
+  --font-size-tagline: 18px;
+  --font-line-tagline: 20px;
+  --font-size-heading: 50px;
+  --font-line-heading: 60px;
+  --font-size-heading-sm: 26px;
+  --font-line-heading-sm: 36px;
+  --font-size-page-title: var(--font-size-heading);
+  --font-line-page-title: var(--font-line-heading);
 }
 
 .row {
@@ -71,12 +99,24 @@
 }
 
 body {
-  font-family: var(--erepair-font);
-  font-size: 16px;
-  line-height: 29px;
+  font-family: var(--erepair-font), "Roboto", sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--font-line-body);
   font-weight: 400;
   color: var(--erepair-gray);
   background-color: var(--erepair-white);
+}
+
+body,
+button,
+input,
+textarea,
+select,
+.thm-btn,
+.main-menu__btn,
+.main-menu__list,
+.main-menu__list a {
+  font-family: var(--erepair-font), "Roboto", sans-serif;
 }
 
 body.locked {
@@ -137,7 +177,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--erepair-font-2);
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   color: var(--erepair-black);
   margin: 0;
 }
@@ -270,11 +310,11 @@ ul {
 .section-title__tagline {
   position: relative;
   display: inline-block;
-  font-size: 16px;
-  line-height: 16px;
+  font-size: var(--font-size-tagline);
+  line-height: var(--font-line-tagline);
   color: var(--erepair-base);
   font-weight: 700;
-  font-family: var(--erepair-font-2);
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: uppercase;
 }
 
@@ -285,9 +325,10 @@ ul {
 
 .section-title__title {
   color: var(--erepair-black);
-  font-size: 48px;
-  line-height: 58px;
+  font-size: var(--font-size-heading);
+  line-height: var(--font-line-heading);
   font-weight: 600;
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: capitalize !important;
   margin: 8px 0 0;
   letter-spacing: -1.44px;
@@ -311,11 +352,11 @@ ul {
 .section-title-two__tagline {
   position: relative;
   display: inline-block;
-  font-size: 16px;
-  line-height: 16px;
+  font-size: var(--font-size-tagline);
+  line-height: var(--font-line-tagline);
   color: var(--erepair-base);
   font-weight: 400;
-  font-family: var(--erepair-font-2);
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: capitalize;
   border: 1px solid var(--erepair-bdr-color);
   padding: 9px 14px 9px;
@@ -329,9 +370,10 @@ ul {
 
 .section-title-two__title {
   color: var(--erepair-black);
-  font-size: 48px;
-  line-height: 58px;
+  font-size: var(--font-size-heading);
+  line-height: var(--font-line-heading);
   font-weight: 600;
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: capitalize !important;
   margin: 8px 0 0;
   letter-spacing: -1.44px;
@@ -361,11 +403,11 @@ ul {
 .section-title-three__tagline {
   position: relative;
   display: inline-block;
-  font-size: 16px;
-  line-height: 16px;
+  font-size: var(--font-size-tagline);
+  line-height: var(--font-line-tagline);
   color: var(--erepair-base);
   font-weight: 700;
-  font-family: var(--erepair-font-2);
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: uppercase;
 }
 
@@ -379,9 +421,10 @@ ul {
 
 .section-title-three__title {
   color: var(--erepair-black);
-  font-size: 48px;
-  line-height: 58px;
+  font-size: var(--font-size-heading);
+  line-height: var(--font-line-heading);
   font-weight: 600;
+  font-family: var(--erepair-font), "Roboto", sans-serif;
   text-transform: capitalize !important;
   margin: 15px 0 0;
   letter-spacing: -1.44px;
@@ -671,7 +714,7 @@ ul {
 .xs-sidebar-group .content-inner h4 {
   position: relative;
   display: block;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 30px;
   color: #fff;
   font-weight: 600;
@@ -868,7 +911,7 @@ ul {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  background-color: #c47a03;
+  background-color: var(--erepair-navy);
   padding: 5px 150px;
 }
 
@@ -1103,12 +1146,31 @@ ul {
 
 .main-menu__btn-box {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .main-menu__btn {
   background-color: var(--erepair-base);
   color: var(--erepair-white);
+}
+
+.main-menu__btn--call {
+  background-color: transparent;
+  color: var(--erepair-navy);
+  border: 2px solid var(--erepair-navy);
+}
+
+.main-menu__btn--call:hover {
+  color: var(--erepair-white);
+  background-color: var(--erepair-navy);
+}
+
+.main-menu__btn--call:before,
+.main-menu__btn--call:after {
+  background-color: var(--erepair-navy);
 }
 
 .main-menu__btn:hover {
@@ -2003,7 +2065,7 @@ ul {
 }
 
 .main-menu-two__call-number h5 {
-  font-size: 16px;
+  font-size: 12px;
   line-height: 16px;
   font-weight: 700;
 }
@@ -2057,7 +2119,7 @@ ul {
 .main-menu-three__top {
   position: relative;
   display: block;
-  background-color: #c47a03;
+  background-color: var(--erepair-navy);
 }
 
 .main-menu-three__top-inner {
@@ -2583,7 +2645,7 @@ ul {
   }
 
   .project-one__title {
-      font-size: 25px;
+      font-size: 23px;
   }
 
   .blog-one__content {
@@ -2611,7 +2673,7 @@ ul {
   }
 
   .faq-one__right .section-title-two__title {
-      font-size: 38px;
+      font-size: 36px;
       line-height: 48px;
   }
 
@@ -2804,7 +2866,7 @@ ul {
   }
 
   .about-three__right .section-title-three__title {
-      font-size: 40px;
+      font-size: 38px;
       line-height: 50px;
   }
 
@@ -2817,7 +2879,7 @@ ul {
   }
 
   .skill-one__left .section-title-three__title {
-      font-size: 35px;
+      font-size: 33px;
       line-height: 45px;
   }
 
@@ -2855,7 +2917,7 @@ ul {
   }
 
   .contact-two__single h3 {
-      font-size: 20px;
+      font-size: 16px;
       line-height: 30px;
   }
 
@@ -3297,7 +3359,7 @@ ul {
 
   /*===== Checkout =====*/
   .checkout-page-one-title h3 {
-      font-size: 20px;
+      font-size: 16px;
       line-height: 20px;
   }
 
@@ -3351,8 +3413,8 @@ ul {
 /* Mobile Layout: 320px. */
 @media only screen and (max-width: 767px) {
   .section-title__title {
-      font-size: 25px;
-      line-height: 35px;
+      font-size: var(--font-size-heading-sm);
+      line-height: var(--font-line-heading-sm);
   }
 
   .section-title__title br {
@@ -3360,8 +3422,8 @@ ul {
   }
 
   .section-title-two__title {
-      font-size: 25px;
-      line-height: 35px;
+      font-size: var(--font-size-heading-sm);
+      line-height: var(--font-line-heading-sm);
   }
 
   .section-title-two__title br {
@@ -3446,7 +3508,7 @@ ul {
   }
 
   .services-two__title {
-      font-size: 20px;
+      font-size: 18px;
       line-height: 30px;
   }
 
@@ -3487,7 +3549,7 @@ ul {
   }
 
   .project-one__title {
-      font-size: 25px;
+      font-size: 23px;
   }
 
   .pricing-one__price-pack {
@@ -3643,7 +3705,7 @@ ul {
   }
 
   .faq-one__right .section-title-two__title {
-      font-size: 25px;
+      font-size: 23px;
       line-height: 35px;
   }
 
@@ -3716,8 +3778,8 @@ ul {
   }
 
   .section-title-three__title {
-      font-size: 25px;
-      line-height: 35px;
+      font-size: var(--font-size-heading-sm);
+      line-height: var(--font-line-heading-sm);
   }
 
   .section-title-three__title br {
@@ -3949,7 +4011,7 @@ ul {
   }
 
   .contact-two__single h3 {
-      font-size: 20px;
+      font-size: 16px;
       line-height: 30px;
   }
 
@@ -3960,7 +4022,7 @@ ul {
   }
 
   .contact-three__form-title {
-      font-size: 35px;
+      font-size: 33px;
       line-height: 45px;
   }
 
@@ -4031,7 +4093,7 @@ ul {
   }
 
   .page-header__inner h3 {
-      font-size: 35px;
+      font-size: 29px;
       line-height: 45px;
   }
 
@@ -4077,7 +4139,7 @@ ul {
   }
 
   .shop-details-page1__title h2 {
-      font-size: 28px;
+      font-size: 24px;
       line-height: 38px;
   }
 
@@ -4134,7 +4196,7 @@ ul {
   }
 
   .checkout-page-one-title h3 {
-      font-size: 20px;
+      font-size: 16px;
       line-height: 20px;
   }
 
@@ -4392,7 +4454,7 @@ ul {
 
 @media only screen and (min-width: 768px) and (max-width: 991px) {
   .main-slider__title {
-      font-size: 80px;
+      font-size: 78px;
       line-height: 100px;
   }
 
@@ -4475,7 +4537,7 @@ ul {
 
 @media only screen and (max-width: 767px) {
   .main-slider__title {
-      font-size: 35px;
+      font-size: 33px;
       line-height: 50px;
   }
 

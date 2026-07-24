@@ -5,7 +5,7 @@ import 'swiper/css'
 // import "swiper/css/navigation"
 import "swiper/css/pagination"
 import 'swiper/css/free-mode';
-import { archivo, titilliumWeb, pacifico } from '@/lib/font'
+import { roboto } from '@/lib/font'
 import Providers from './providers'
 export const metadata = {
     title: 'GTA Electric Services',
@@ -23,8 +23,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en" className={`${archivo.variable} ${titilliumWeb.variable} ${pacifico.variable}`}>
-            <body>
+        <html lang="en" className={roboto.variable}>
+            <body className={roboto.className}>
                 <Providers>{children}</Providers>
             </body>
         </html>

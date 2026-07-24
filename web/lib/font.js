@@ -1,21 +1,10 @@
-import { Archivo, Titillium_Web, Pacifico } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 
-export const archivo = Archivo({
-    weight: ['400', '500', '600', '700', '800', '900'],
+export const roboto = Roboto({
+    weight: ['300', '400', '500', '700', '900'],
     subsets: ['latin'],
-    variable: "--erepair-font",
+    variable: '--erepair-font',
     display: 'swap',
+    // Keep a stable family name fallback for CSS var usage across all pages
+    fallback: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],
 })
-export const titilliumWeb = Titillium_Web({
-    weight: ['400', '600', '700', '900'],
-    subsets: ['latin'],
-    variable: "--erepair-font-2",
-    display: 'swap',
-})
-export const pacifico = Pacifico({
-    weight: ['400'],
-    subsets: ['latin'],
-    variable: "--erepair-font-3",
-    display: 'swap',
-})
-

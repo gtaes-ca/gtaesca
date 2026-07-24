@@ -215,7 +215,7 @@
 }
 
 .footer-widget__contact-list li h3 {
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 26px;
     text-transform: uppercase;
@@ -243,7 +243,8 @@
 .site-footer__bottom {
     position: relative;
     display: block;
-    border-top: 1px solid var(--erepair-bdr-color);
+    background-color: var(--erepair-navy);
+    border-top: 0;
 }
 
 .site-footer__bottom-inner {
@@ -256,7 +257,7 @@
 }
 
 .site-footer__bottom-text {
-    color: var(--erepair-gray);
+    color: rgba(var(--erepair-white-rgb), 0.78);
 }
 
 .site-footer__bottom-menu {
@@ -279,7 +280,7 @@
     display: flex;
     align-items: center;
     font-size: 16px;
-    color: var(--erepair-gray);
+    color: rgba(var(--erepair-white-rgb), 0.78);
     -webkit-transition: all 500ms ease;
     transition: all 500ms ease;
 }
@@ -308,7 +309,7 @@
 .site-footer__hashmark-text {
     font-size: 14px;
     font-weight: 600;
-    color: var(--erepair-gray);
+    color: rgba(var(--erepair-white-rgb), 0.78);
     letter-spacing: 0.02em;
     transition: color 500ms ease;
 }
@@ -435,7 +436,7 @@
 }
 
 .footer-widget-two__contact li .content h3 {
-    font-size: 15px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 25px;
     text-transform: uppercase;
@@ -773,7 +774,7 @@
 }
 
 .footer-widget-three__about-content h4 {
-    font-size: 20px;
+    font-size: 16px;
     color: var(--erepair-black);
     line-height: 30px;
     font-weight: 500;

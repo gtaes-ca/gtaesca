@@ -59,7 +59,7 @@
 }
 
 .counter-one__count-box h3 {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 600;
     line-height: 48px !important;
     font-family: var(--erepair-font-2) !important;
@@ -216,7 +216,7 @@
 }
 
 .counter-two__count-box h3 {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 600;
     line-height: 48px !important;
     font-family: var(--erepair-font-2) !important;

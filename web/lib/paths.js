@@ -1,8 +1,20 @@
+export function serviceCategoryPath(categoryName = '') {
+  const name = String(categoryName || '').toLowerCase();
+  if (name.includes('commercial')) return '/commercial';
+  return '/residential';
+}
+
+export function serviceCategoryLabel(categoryName = '') {
+  const name = String(categoryName || '').toLowerCase();
+  if (name.includes('commercial')) return 'Commercial';
+  return 'Residential';
+}
+
 export function serviceDetailPath(service) {
-  if (!service) return '/services';
+  if (!service) return '/residential';
   if (typeof service === 'string') return `/services/${service}`;
   if (service.slug) return `/services/${service.slug}`;
-  return '/services';
+  return serviceCategoryPath(service.categoryName);
 }
 
 export function projectDetailPath(project) {

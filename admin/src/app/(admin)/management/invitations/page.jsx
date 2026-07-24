@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Form, Offcanvas, Table } from 'react-bootstrap';
 import IconifyIcon from '@/components/wrappers/IconifyIcon';
 import ComponentContainerCard from '@/components/ComponentContainerCard';
 import PageMetaData from '@/components/PageTitle';
+import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
+import { isWhatsAppBookingMode } from '@/helpers/auth';
 import httpClient from '@/helpers/httpClient';
 
 const defaultForm = {
@@ -19,6 +21,7 @@ const defaultForm = {
 };
 
 const TeamInvitationsPage = () => {
+  const { user } = useAuthContext();
   const { showNotification } = useNotificationContext();
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +30,7 @@ const TeamInvitationsPage = () => {
   const [resendingId, setResendingId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [form, setForm] = useState(defaultForm);
+  const whatsAppMode = isWhatsAppBookingMode(user);
 
   const loadInvitations = async () => {
     setLoading(true);
@@ -54,7 +58,11 @@ const TeamInvitationsPage = () => {
   ];
 
   const openForm = () => {
-    setForm(defaultForm);
+    setForm({
+      ...defaultForm,
+      userType: 'operation_team',
+      role: 'support',
+    });
     setShowFormSheet(true);
   };
 
@@ -78,18 +86,23 @@ const TeamInvitationsPage = () => {
 
     setSubmitting(true);
     try {
+      const userType = whatsAppMode ? 'operation_team' : form.userType;
+      const role = whatsAppMode
+        ? (form.role === 'technician' ? 'support' : form.role)
+        : form.role;
+
       if (form.method === 'email') {
         await httpClient.post('/api/invitations', {
           email: form.email,
-          userType: form.userType,
-          role: form.role,
+          userType,
+          role,
         });
         showNotification({ message: 'Invitation sent successfully', variant: 'success' });
       } else {
         await httpClient.post('/api/invitations/create-account', {
           email: form.email,
-          userType: form.userType,
-          role: form.role,
+          userType,
+          role,
           firstName: form.firstName.trim(),
           lastName: form.lastName.trim(),
           phone: form.phone.trim() || undefined,
@@ -155,13 +168,22 @@ const TeamInvitationsPage = () => {
 
   const isManual = form.method === 'manual';
 
+  const visibleInvitations = useMemo(() => {
+    if (!whatsAppMode) return invitations;
+    return invitations.filter((invite) => invite.userType === 'operation_team');
+  }, [invitations, whatsAppMode]);
+
   return (
     <>
       <PageMetaData title="Team Invitations" />
 
       <ComponentContainerCard
         title="Team Invitations"
-        description="Invite by email link, or create an account manually with a password."
+        description={
+          whatsAppMode
+            ? 'Invite or create Operation Team accounts. Technician accounts are unavailable in WhatsApp booking mode.'
+            : 'Invite by email link, or create an account manually with a password.'
+        }
       >
         <div className="d-flex justify-content-end mb-3">
           <Button variant="primary" onClick={openForm}>
@@ -185,7 +207,7 @@ const TeamInvitationsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {invitations.map((invite) => (
+              {visibleInvitations.map((invite) => (
                 <tr key={invite.id}>
                   <td>{invite.email}</td>
                   <td>{invite.userType === 'operation_team' ? 'Operation' : 'Technician'}</td>
@@ -218,7 +240,7 @@ const TeamInvitationsPage = () => {
                   </td>
                 </tr>
               ))}
-              {invitations.length === 0 && (
+              {visibleInvitations.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-muted">
                     No invitations yet. Use Add Team Member to invite or create an account.
@@ -277,19 +299,23 @@ const TeamInvitationsPage = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Team Type</Form.Label>
-              <Form.Select
-                value={form.userType}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    userType: e.target.value,
-                    role: e.target.value === 'technician' ? 'technician' : 'support',
-                  })
-                }
-              >
-                <option value="operation_team">Operation Team</option>
-                <option value="technician">Technicians</option>
-              </Form.Select>
+              {whatsAppMode ? (
+                <Form.Control value="Operation Team" readOnly />
+              ) : (
+                <Form.Select
+                  value={form.userType}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      userType: e.target.value,
+                      role: e.target.value === 'technician' ? 'technician' : 'support',
+                    })
+                  }
+                >
+                  <option value="operation_team">Operation Team</option>
+                  <option value="technician">Technicians</option>
+                </Form.Select>
+              )}
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -299,7 +325,7 @@ const TeamInvitationsPage = () => {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 disabled={form.userType === 'technician'}
               >
-                {form.userType === 'technician' ? (
+                {form.userType === 'technician' && !whatsAppMode ? (
                   <option value="technician">Technician</option>
                 ) : (
                   operationRoles.map((role) => (

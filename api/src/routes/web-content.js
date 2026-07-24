@@ -14,6 +14,9 @@ import {
   getProjectsGalleryContent,
   getProjectDetailsBannerContent,
   getServicesBannerContent,
+  getServiceCategoryBannerContent,
+  getServiceCategoryDetailsContent,
+  getServiceCategoryGalleryContent,
   getServiceDetailsBannerContent,
   getContactBannerContent,
   getPublicContactPageSettingsContent,
@@ -101,6 +104,36 @@ router.get('/privacy/content', async (_req, res) => {
 
 router.get('/services/banner', async (_req, res) => {
   const content = await getServicesBannerContent();
+  return res.json({ content });
+});
+
+router.get('/residential/banner', async (_req, res) => {
+  const content = await getServiceCategoryBannerContent('residential');
+  return res.json({ content });
+});
+
+router.get('/residential/details', async (_req, res) => {
+  const content = await getServiceCategoryDetailsContent('residential');
+  return res.json({ content });
+});
+
+router.get('/residential/gallery', async (_req, res) => {
+  const content = await getServiceCategoryGalleryContent('residential');
+  return res.json({ content });
+});
+
+router.get('/commercial/banner', async (_req, res) => {
+  const content = await getServiceCategoryBannerContent('commercial');
+  return res.json({ content });
+});
+
+router.get('/commercial/details', async (_req, res) => {
+  const content = await getServiceCategoryDetailsContent('commercial');
+  return res.json({ content });
+});
+
+router.get('/commercial/gallery', async (_req, res) => {
+  const content = await getServiceCategoryGalleryContent('commercial');
   return res.json({ content });
 });
 

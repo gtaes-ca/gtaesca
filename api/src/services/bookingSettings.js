@@ -10,6 +10,7 @@ export const BOOKING_SYSTEM_PAGE_KEYS = [
   'management.customers',
   'management.bookings',
   'management.booking-settings',
+  'management.materials',
 ];
 
 const DEFAULT_SETTINGS = {

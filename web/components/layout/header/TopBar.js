@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from "next/link"
-import { DEFAULT_TOPBAR } from '@/lib/cms'
+import { DEFAULT_TOPBAR, toTelHref } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -19,6 +19,7 @@ function TopBarContent() {
                 const data = await res.json()
                 if (cancelled) return
                 setContent({
+                    phone: data.content?.phone || '',
                     email: data.content?.email || '',
                     address: data.content?.address || '',
                     social: {
@@ -50,24 +51,40 @@ function TopBarContent() {
         <div className="main-menu__top">
             <div className="main-menu__top-inner">
                 <ul className="list-unstyled main-menu__contact-list">
-                    <li>
-                        <div className="icon">
-                            <i className="icon-envelope"></i>
-                        </div>
-                        <div className="text">
-                            <p>
-                                <Link href={`mailto:${content.email}`}>{content.email}</Link>
-                            </p>
-                        </div>
-                    </li>
-                    <li>
-                        <div className="icon">
-                            <i className="icon-location"></i>
-                        </div>
-                        <div className="text">
-                            <p>{content.address}</p>
-                        </div>
-                    </li>
+                    {content.email ? (
+                        <li>
+                            <div className="icon">
+                                <i className="icon-envelope"></i>
+                            </div>
+                            <div className="text">
+                                <p>
+                                    <Link href={`mailto:${content.email}`}>{content.email}</Link>
+                                </p>
+                            </div>
+                        </li>
+                    ) : null}
+                    {content.phone ? (
+                        <li>
+                            <div className="icon">
+                                <i className="icon-call"></i>
+                            </div>
+                            <div className="text">
+                                <p>
+                                    <Link href={toTelHref(content.phone)}>{content.phone}</Link>
+                                </p>
+                            </div>
+                        </li>
+                    ) : null}
+                    {content.address ? (
+                        <li>
+                            <div className="icon">
+                                <i className="icon-location"></i>
+                            </div>
+                            <div className="text">
+                                <p>{content.address}</p>
+                            </div>
+                        </li>
+                    ) : null}
                 </ul>
                 <div className="main-menu__top-right">
                     <div className="main-menu__social">

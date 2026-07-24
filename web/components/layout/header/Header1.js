@@ -3,6 +3,7 @@ import Menu from "../Menu"
 import MobileMenu from "../MobileMenu"
 import AccountNav from "@/components/auth/AccountNav"
 import BookServiceLink from "@/components/booking/BookServiceLink"
+import CallNowLink from "@/components/booking/CallNowLink"
 import { assetUrl } from "@/lib/assets"
 
 const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
@@ -26,6 +27,7 @@ export default function Header1({ scroll, handleMobileMenu }) {
                         <div className="main-menu__right">
                             <AccountNav />
                             <div className="main-menu__btn-box">
+                                <CallNowLink className="main-menu__btn main-menu__btn--call thm-btn" />
                                 <BookServiceLink className="main-menu__btn thm-btn" />
                             </div>
                         </div>
@@ -50,6 +52,7 @@ export default function Header1({ scroll, handleMobileMenu }) {
                         <div className="main-menu__right">
                             <AccountNav />
                             <div className="main-menu__btn-box">
+                                <CallNowLink className="main-menu__btn main-menu__btn--call thm-btn" />
                                 <BookServiceLink className="main-menu__btn thm-btn" />
                             </div>
                         </div>

@@ -6,10 +6,13 @@ const router = Router();
 
 router.post('/quote', async (req, res) => {
   try {
-    const { name, email, phone, company, message } = req.body || {};
+    const { name, email, phone, company, services, serviceIds, message } = req.body || {};
     const safeName = String(name || '').trim();
     const safeEmail = String(email || '').trim();
     const safeMessage = String(message || '').trim();
+    const selectedServices = Array.isArray(services)
+      ? services.map((item) => String(item || '').trim()).filter(Boolean)
+      : [];
 
     if (!safeName) {
       return res.status(400).json({ error: 'Name is required' });
@@ -32,6 +35,8 @@ router.post('/quote', async (req, res) => {
       email: safeEmail,
       phone: String(phone || '').trim(),
       company: String(company || '').trim(),
+      services: selectedServices,
+      serviceIds: Array.isArray(serviceIds) ? serviceIds : [],
       message: safeMessage,
     });
 

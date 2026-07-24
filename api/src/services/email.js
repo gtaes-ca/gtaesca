@@ -336,13 +336,19 @@ export async function sendContactQuoteEmail({
   email,
   phone = '',
   company = '',
+  services = [],
+  serviceIds = [],
   message,
 }) {
   const safeName = String(name || '').trim();
   const safeEmail = String(email || '').trim();
   const safePhone = String(phone || '').trim();
   const safeCompany = String(company || '').trim();
+  const selectedServices = Array.isArray(services)
+    ? services.map((item) => String(item || '').trim()).filter(Boolean)
+    : [];
   const safeMessage = String(message || '').trim();
+  const servicesLabel = selectedServices.length ? selectedServices.join(', ') : '';
 
   return sendViaUsePlunk({
     to,
@@ -352,6 +358,7 @@ export async function sendContactQuoteEmail({
       `Name: ${safeName}`,
       `Email: ${safeEmail}`,
       safePhone ? `Phone: ${safePhone}` : '',
+      servicesLabel ? `Services: ${servicesLabel}` : '',
       safeCompany ? `Company: ${safeCompany}` : '',
       '',
       'Message:',
@@ -363,6 +370,7 @@ export async function sendContactQuoteEmail({
         <p><strong>Name:</strong> ${safeName}</p>
         <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
         ${safePhone ? `<p><strong>Phone:</strong> ${safePhone}</p>` : ''}
+        ${servicesLabel ? `<p><strong>Services:</strong> ${servicesLabel}</p>` : ''}
         ${safeCompany ? `<p><strong>Company:</strong> ${safeCompany}</p>` : ''}
         <p><strong>Message:</strong></p>
         <p style="white-space: pre-wrap;">${safeMessage}</p>
@@ -371,6 +379,8 @@ export async function sendContactQuoteEmail({
     data: {
       contactName: { value: safeName, persistent: false },
       contactEmail: { value: safeEmail, persistent: false },
+      contactServices: { value: servicesLabel || 'None', persistent: false },
+      contactServiceIds: { value: Array.isArray(serviceIds) ? serviceIds.join(',') : '', persistent: false },
     },
   });
 }

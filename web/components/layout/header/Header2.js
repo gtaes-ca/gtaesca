@@ -1,7 +1,10 @@
+'use client'
+
 import Link from "next/link"
 import Menu from "../Menu"
 import MobileMenu from "../MobileMenu"
 import BookServiceLink from "@/components/booking/BookServiceLink"
+import { CtaCallNumber } from "@/components/contact/SiteContact"
 import { assetUrl } from "@/lib/assets"
 
 const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
@@ -32,7 +35,7 @@ export default function Header2({ scroll, handleMobileMenu }) {
                                         </div>
                                         <div className="main-menu-two__call-number">
                                             <p>Make a call</p>
-                                            <h5><Link href="tel:00554755242">00 55 475 5242</Link></h5>
+                                            <CtaCallNumber headingTag="h5" />
                                         </div>
                                     </div>
                                     <div className="main-menu-two__btn-box">
@@ -67,7 +70,7 @@ export default function Header2({ scroll, handleMobileMenu }) {
                                         </div>
                                         <div className="main-menu-two__call-number">
                                             <p>Make a call</p>
-                                            <h5><Link href="tel:00554755242">00 55 475 5242</Link></h5>
+                                            <CtaCallNumber headingTag="h5" />
                                         </div>
                                     </div>
                                     <div className="main-menu-two__btn-box">

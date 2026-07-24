@@ -1,4 +1,8 @@
+'use client'
+
 import Link from "next/link"
+import { CtaCallNumber } from '@/components/contact/SiteContact'
+
 export default function Cta() {
     return (
         <>
@@ -23,7 +27,7 @@ export default function Cta() {
                         to avoid worse pains to the selection circumstances</p>
                     <div className="cta-one__btn-and-call-box">
                         <div className="cta-one__btn-box">
-                            <Link href="contact" className="cta-one__btn thm-btn">Get Appointment</Link>
+                            <Link href="/contact" className="cta-one__btn thm-btn">Get Appointment</Link>
                         </div>
                         <div className="cta-one__call-box">
                             <div className="icon">
@@ -31,7 +35,7 @@ export default function Cta() {
                             </div>
                             <div className="content">
                                 <p>Make a call</p>
-                                <h4><Link href="tel:00554755242">00 55 475 5242</Link></h4>
+                                <CtaCallNumber />
                             </div>
                         </div>
                     </div>

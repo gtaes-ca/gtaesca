@@ -39,4 +39,4 @@ FROM (VALUES
   ('Commercial Electrical Services', 'Dedicated Circuits & Equipment Wiring', 'Power installations for commercial equipment, machinery, HVAC, and appliances.', 10)
 ) AS s(category_name, name, description, sort_order)
 JOIN service_categories c ON c.name = s.category_name
-ON CONFLICT (category_id, name) DO NOTHING;
+ON CONFLICT DO NOTHING;

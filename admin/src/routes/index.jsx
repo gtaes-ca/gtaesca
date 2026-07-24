@@ -242,7 +242,7 @@ const managementRoutes = [{
   pageKey: 'management.cms.projects'
 }, {
   path: '/management/cms/services',
-  name: 'Services Page',
+  name: 'Services Pages',
   element: <ServicesCmsPage />,
   pageKey: 'management.cms.services'
 }, {

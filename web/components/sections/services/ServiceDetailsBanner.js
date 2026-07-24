@@ -2,19 +2,23 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { DEFAULT_SERVICE_DETAILS_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
+import { DEFAULT_SERVICES_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
+import { serviceCategoryLabel, serviceCategoryPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-export default function ServiceDetailsBanner({ serviceName = '' }) {
-    const [content, setContent] = useState(DEFAULT_SERVICE_DETAILS_BANNER)
+export default function ServiceDetailsBanner({ serviceName = '', categoryName = '' }) {
+    const [content, setContent] = useState(DEFAULT_SERVICES_BANNER)
+    const categoryHref = serviceCategoryPath(categoryName)
+    const categoryLabel = serviceCategoryLabel(categoryName)
+    const pageKey = categoryHref === '/commercial' ? 'commercial' : 'residential'
 
     useEffect(() => {
         let cancelled = false
 
         async function loadBanner() {
             try {
-                const res = await fetch(`${API_URL}/api/web-content/service-details/banner`)
+                const res = await fetch(`${API_URL}/api/web-content/${pageKey}/banner`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
@@ -30,10 +34,10 @@ export default function ServiceDetailsBanner({ serviceName = '' }) {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [pageKey])
 
     const backgroundImage = resolveCmsAssetUrl(content.backgroundImage)
-    const displayTitle = serviceName || content.title
+    const displayTitle = serviceName || content.title || categoryLabel
 
     return (
         <section className="page-header about-banner">
@@ -51,7 +55,7 @@ export default function ServiceDetailsBanner({ serviceName = '' }) {
                         <ul className="thm-breadcrumb list-unstyled">
                             <li><Link href="/">Home</Link></li>
                             <li><span className="icon-angle-right"></span></li>
-                            <li><Link href="/services">Services</Link></li>
+                            <li><Link href={categoryHref}>{categoryLabel}</Link></li>
                             <li><span className="icon-angle-right"></span></li>
                             <li>{displayTitle}</li>
                         </ul>

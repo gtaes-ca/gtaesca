@@ -39,7 +39,12 @@ function ImagePreview({ label, imageUrl, aspectRatio }) {
   );
 }
 
-const ServicesBannerForm = () => {
+export default function CategoryServicesBannerForm({
+  pageKey,
+  title,
+  description,
+  imageUploadKey,
+}) {
   const { showNotification } = useNotificationContext();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -48,7 +53,7 @@ const ServicesBannerForm = () => {
   const loadBanner = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await httpClient.get('/api/admin/web-content/services/banner');
+      const res = await httpClient.get(`/api/admin/web-content/${pageKey}/banner`);
       setForm(mapServicesBannerFromApi(res.data.content || {}));
     } catch (e) {
       showNotification({
@@ -58,7 +63,7 @@ const ServicesBannerForm = () => {
     } finally {
       setLoading(false);
     }
-  }, [showNotification]);
+  }, [pageKey, showNotification]);
 
   useEffect(() => {
     loadBanner();
@@ -97,10 +102,10 @@ const ServicesBannerForm = () => {
       let backgroundImage = form.backgroundImage;
 
       if (form.backgroundImageData) {
-        backgroundImage = await uploadBannerImage(form.backgroundImageData, 'services-banner-background');
+        backgroundImage = await uploadBannerImage(form.backgroundImageData, imageUploadKey);
       }
 
-      const res = await httpClient.put('/api/admin/web-content/services/banner', {
+      const res = await httpClient.put(`/api/admin/web-content/${pageKey}/banner`, {
         content: mapServicesBannerForSave({
           ...form,
           backgroundImage,
@@ -119,10 +124,7 @@ const ServicesBannerForm = () => {
   };
 
   return (
-    <ComponentContainerCard
-      title="Page Banner"
-      description="Controls the Services listing page header title and background image."
-    >
+    <ComponentContainerCard title={title} description={description}>
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : (
@@ -166,6 +168,4 @@ const ServicesBannerForm = () => {
       )}
     </ComponentContainerCard>
   );
-};
-
-export default ServicesBannerForm;
+}

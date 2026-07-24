@@ -2,9 +2,10 @@
 import Link from "next/link"
 import { Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { resolveCmsAssetUrl } from '@/lib/cms'
 import { buildTelHref, fetchPublicBookingSettings } from '@/lib/booking'
+import { useContactDetails } from '@/hooks/useContactDetails'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -17,6 +18,13 @@ const swiperOptions = {
         clickable: true,
     },
 }
+
+const SOCIAL_ITEMS = [
+    { key: 'facebook', icon: 'icon-facebook' },
+    { key: 'twitter', icon: 'icon-xpa' },
+    { key: 'linkedin', icon: 'icon-link-in' },
+    { key: 'instagram', icon: 'icon-instagram' },
+]
 
 function slideBackgroundStyle(slide) {
     const desktop = resolveCmsAssetUrl(slide.backgroundImage)
@@ -33,6 +41,17 @@ function slideBackgroundStyle(slide) {
 export default function Banner() {
     const [slides, setSlides] = useState([])
     const [callHref, setCallHref] = useState(null)
+    const contactDetails = useContactDetails()
+
+    const socialLinks = useMemo(
+        () => SOCIAL_ITEMS
+            .map((item) => ({
+                ...item,
+                href: contactDetails.social?.[item.key] || '',
+            }))
+            .filter((item) => item.href),
+        [contactDetails.social]
+    )
 
     useEffect(() => {
         let cancelled = false
@@ -68,6 +87,36 @@ export default function Banner() {
         }
     }, [])
 
+    useEffect(() => {
+        const root = document.documentElement
+        const header = document.querySelector('.main-header')
+
+        const syncHeroOffset = () => {
+            const headerHeight = header?.getBoundingClientRect().height || 0
+            if (headerHeight > 0) {
+                root.style.setProperty('--hero-header-offset', `${Math.ceil(headerHeight)}px`)
+            }
+        }
+
+        syncHeroOffset()
+
+        const resizeObserver = typeof ResizeObserver !== 'undefined' && header
+            ? new ResizeObserver(syncHeroOffset)
+            : null
+        if (resizeObserver && header) {
+            resizeObserver.observe(header)
+        }
+
+        window.addEventListener('resize', syncHeroOffset)
+        window.addEventListener('orientationchange', syncHeroOffset)
+
+        return () => {
+            resizeObserver?.disconnect()
+            window.removeEventListener('resize', syncHeroOffset)
+            window.removeEventListener('orientationchange', syncHeroOffset)
+        }
+    }, [])
+
     return (
         <section className="main-slider">
             <Swiper {...swiperOptions} className="main-slider__carousel owl-carousel owl-theme">
@@ -100,10 +149,28 @@ export default function Banner() {
                                                 Call Now
                                             </a>
                                         ) : null}
-                                        <Link href={slide.buttonLink || '/about'} className="main-slider__btn thm-btn">
+                                        <Link
+                                            href={slide.buttonLink || '/about'}
+                                            className="main-slider__btn main-slider__btn--outline"
+                                        >
                                             {slide.buttonText || 'Learn More'}
                                         </Link>
                                     </div>
+                                    {socialLinks.length ? (
+                                        <div className="main-slider__social" aria-label="Social links">
+                                            {socialLinks.map(({ key, icon, href }) => (
+                                                <Link
+                                                    key={key}
+                                                    href={href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    aria-label={key}
+                                                >
+                                                    <i className={icon}></i>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>

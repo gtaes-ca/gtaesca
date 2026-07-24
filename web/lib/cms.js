@@ -17,6 +17,7 @@ export function hasGalleryImage(image) {
 }
 
 export const DEFAULT_TOPBAR = {
+  phone: '',
   email: '',
   address: '',
   social: {
@@ -26,6 +27,11 @@ export const DEFAULT_TOPBAR = {
     instagram: '',
   },
 };
+
+export function toTelHref(phone) {
+  const digits = String(phone || '').replace(/[^\d+]/g, '');
+  return digits ? `tel:${digits}` : '';
+}
 
 export async function fetchTopbarContent() {
   try {
@@ -49,6 +55,9 @@ export async function fetchTopbarContent() {
   }
 }
 
+/** Contact Details (admin CMS) — phone, email, address, social */
+export const fetchContactDetails = fetchTopbarContent;
+
 export const DEFAULT_SLIDER_SLIDES = [];
 
 export const DEFAULT_HOME_SERVICE_FEATURES = [];
@@ -60,6 +69,8 @@ export const DEFAULT_HOME_ABOUT = {
   text2: '',
   buttonText: '',
   buttonLink: '/about',
+  badgeLine1: '',
+  badgeLine2: '',
   image1: '',
   image2: '',
 };
@@ -69,6 +80,7 @@ export const DEFAULT_HOME_FEATURED_SERVICES = {
   titleLine1: '',
   titleLine2: '',
   services: [],
+  categories: [],
 };
 
 export const DEFAULT_HOME_GALLERY = {
@@ -77,6 +89,15 @@ export const DEFAULT_HOME_GALLERY = {
   titleLine2: '',
   buttonText: '',
   buttonLink: '/projects',
+  items: [],
+};
+
+export const DEFAULT_SERVICE_CATEGORY_GALLERY = {
+  tagline: '',
+  titleLine1: '',
+  titleLine2: '',
+  buttonText: '',
+  buttonLink: '',
   items: [],
 };
 
@@ -119,9 +140,10 @@ export const DEFAULT_SERVICES_BANNER = {
   backgroundImage: '',
 };
 
-export const DEFAULT_SERVICE_DETAILS_BANNER = {
+export const DEFAULT_SERVICE_CATEGORY_DETAILS = {
+  tagline: '',
   title: '',
-  backgroundImage: '',
+  text: '',
 };
 
 export const DEFAULT_CONTACT_BANNER = {

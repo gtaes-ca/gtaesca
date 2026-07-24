@@ -5,7 +5,7 @@ import IconifyIcon from '@/components/wrappers/IconifyIcon';
 import { useNotificationContext } from '@/context/useNotificationContext';
 import httpClient from '@/helpers/httpClient';
 
-const MAX_FEATURED_SERVICES = 6;
+const MAX_FEATURED_SERVICES = 12;
 
 const DEFAULT_SETTINGS = {
   tagline: 'Our Services',
@@ -158,7 +158,7 @@ const HomeFeaturedServicesForm = () => {
   return (
     <ComponentContainerCard
       title="Homepage — Featured Services"
-      description="Choose which services from your catalog appear in the homepage services section. All service cards use the same settings icon."
+      description="Choose which services from your catalog appear under Our Services on the homepage. Services are grouped by category—visitors click a category heading to see its featured services. Limit: 12."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>

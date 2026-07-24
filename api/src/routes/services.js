@@ -4,8 +4,11 @@ import { getPublicServiceById, getPublicServiceBySlug, listPublicServices } from
 
 const router = Router();
 
-router.get('/list', async (_req, res) => {
-  const services = await listPublicServices();
+router.get('/list', async (req, res) => {
+  const group = String(req.query.group || '').trim().toLowerCase();
+  const services = await listPublicServices(
+    group === 'residential' || group === 'commercial' ? { group } : {}
+  );
   return res.json({ services });
 });
 

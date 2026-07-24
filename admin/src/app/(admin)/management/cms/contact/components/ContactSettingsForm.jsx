@@ -59,7 +59,7 @@ const ContactSettingsForm = () => {
   return (
     <ComponentContainerCard
       title="Get A Free Quote"
-      description="Configure the contact form, where submissions are emailed, displayed contact details, and map coordinates."
+      description="Configure the contact form, where submissions are emailed, and map coordinates."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
@@ -89,34 +89,6 @@ const ContactSettingsForm = () => {
                 <Form.Text className="text-muted">
                   Form submissions are sent to this address.
                 </Form.Text>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Display Phone</Form.Label>
-                <Form.Control
-                  value={form.phone}
-                  onChange={(e) => updateField('phone', e.target.value)}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Display Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={form.displayEmail}
-                  onChange={(e) => updateField('displayEmail', e.target.value)}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Office Address</Form.Label>
-                <Form.Control
-                  value={form.address}
-                  onChange={(e) => updateField('address', e.target.value)}
-                />
               </Form.Group>
             </Col>
             <Col md={4}>

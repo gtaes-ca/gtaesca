@@ -5,7 +5,9 @@ import TechnicianExpertiseOffcanvas from '@/components/technician/TechnicianExpe
 import UserActionsOffcanvas from '@/components/users/UserActionsOffcanvas';
 import UserAvatar from '@/components/UserAvatar';
 import PageMetaData from '@/components/PageTitle';
+import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
+import { isWhatsAppBookingMode } from '@/helpers/auth';
 import httpClient from '@/helpers/httpClient';
 
 const OPERATION_TAB = 'operation_team';
@@ -13,7 +15,9 @@ const TECHNICIAN_TAB = 'technician';
 const operationRoles = ['admin', 'support', 'viewer'];
 
 const UserManagementPage = () => {
+  const { user: sessionUser } = useAuthContext();
   const { showNotification } = useNotificationContext();
+  const whatsAppMode = isWhatsAppBookingMode(sessionUser);
   const [activeTab, setActiveTab] = useState(OPERATION_TAB);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +25,12 @@ const UserManagementPage = () => {
   const [actionSaving, setActionSaving] = useState(false);
   const [expertiseUser, setExpertiseUser] = useState(null);
   const [expandedExpertiseUsers, setExpandedExpertiseUsers] = useState(() => new Set());
+
+  useEffect(() => {
+    if (whatsAppMode && activeTab === TECHNICIAN_TAB) {
+      setActiveTab(OPERATION_TAB);
+    }
+  }, [whatsAppMode, activeTab]);
 
   const loadUsers = useCallback(async (userType) => {
     setLoading(true);
@@ -38,8 +48,9 @@ const UserManagementPage = () => {
   }, [showNotification]);
 
   useEffect(() => {
+    if (whatsAppMode && activeTab === TECHNICIAN_TAB) return;
     loadUsers(activeTab);
-  }, [activeTab, loadUsers]);
+  }, [activeTab, loadUsers, whatsAppMode]);
 
   const updateStatus = async (user, status) => {
     try {
@@ -224,27 +235,35 @@ const UserManagementPage = () => {
       <PageMetaData title="User Management" />
       <ComponentContainerCard
         title="Team Management"
-        description="Manage operation team and technician members — passwords, roles, blocking, session logout, and service expertise."
+        description={
+          whatsAppMode
+            ? 'Manage operation team members — passwords, roles, blocking, and session logout.'
+            : 'Manage operation team and technician members — passwords, roles, blocking, session logout, and service expertise.'
+        }
       >
         <Tab.Container
           activeKey={activeTab}
           onSelect={(key) => key && setActiveTab(key)}
         >
-          <Nav variant="tabs" className="nav-tabs card-tabs mb-3">
-            <Nav.Item>
-              <Nav.Link eventKey={OPERATION_TAB}>Operation Team</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey={TECHNICIAN_TAB}>Technicians</Nav.Link>
-            </Nav.Item>
-          </Nav>
+          {!whatsAppMode ? (
+            <Nav variant="tabs" className="nav-tabs card-tabs mb-3">
+              <Nav.Item>
+                <Nav.Link eventKey={OPERATION_TAB}>Operation Team</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey={TECHNICIAN_TAB}>Technicians</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          ) : null}
           <Tab.Content>
             <Tab.Pane eventKey={OPERATION_TAB}>
               {activeTab === OPERATION_TAB && renderUsersTable()}
             </Tab.Pane>
-            <Tab.Pane eventKey={TECHNICIAN_TAB}>
-              {activeTab === TECHNICIAN_TAB && renderUsersTable()}
-            </Tab.Pane>
+            {!whatsAppMode ? (
+              <Tab.Pane eventKey={TECHNICIAN_TAB}>
+                {activeTab === TECHNICIAN_TAB && renderUsersTable()}
+              </Tab.Pane>
+            ) : null}
           </Tab.Content>
         </Tab.Container>
       </ComponentContainerCard>

@@ -9,6 +9,8 @@ export const BOOKING_MODES = {
 
 export const BOOK_SERVICE_CTA_LABEL = 'Book a Service';
 export const BOOK_WHATSAPP_CTA_LABEL = 'Request a Quote';
+export const BOOK_SERVICE_CTA_HREF = '/book';
+export const CONTACT_QUOTE_HREF = '/contact#quote';
 
 export function isWhatsAppBookingMode(bookingMode) {
   return bookingMode === BOOKING_MODES.WHATSAPP;
@@ -16,6 +18,10 @@ export function isWhatsAppBookingMode(bookingMode) {
 
 export function getBookingCtaLabel(bookingMode) {
   return isWhatsAppBookingMode(bookingMode) ? BOOK_WHATSAPP_CTA_LABEL : BOOK_SERVICE_CTA_LABEL;
+}
+
+export function getBookingCtaHref(bookingMode) {
+  return isWhatsAppBookingMode(bookingMode) ? CONTACT_QUOTE_HREF : BOOK_SERVICE_CTA_HREF;
 }
 
 export async function fetchPublicBookingSettings() {
@@ -123,6 +129,42 @@ export function buildWhatsAppBookingMessage({
   }
 
   return lines.join('\n');
+}
+
+export function buildWhatsAppContactQuoteMessage({
+  name = '',
+  email = '',
+  phone = '',
+  services = [],
+  message = '',
+}) {
+  const serviceLines = (services || [])
+    .map((service) => {
+      if (typeof service === 'string') return `- ${service}`
+      const label = service?.name || ''
+      const category = service?.categoryName ? ` (${service.categoryName})` : ''
+      return label ? `- ${label}${category}` : null
+    })
+    .filter(Boolean)
+    .join('\n')
+
+  const lines = [
+    'Hello, I would like to request a quote:',
+    '',
+    '*Contact details:*',
+    `Name: ${String(name || '').trim() || '—'}`,
+    `Email: ${String(email || '').trim() || '—'}`,
+    `Phone: ${String(phone || '').trim() || '—'}`,
+    '',
+    '*Services of interest:*',
+    serviceLines || '- (none selected)',
+  ]
+
+  if (String(message || '').trim()) {
+    lines.push('', '*Message:*', String(message).trim())
+  }
+
+  return lines.join('\n')
 }
 
 export function buildWhatsAppBookingUrl(number, message) {

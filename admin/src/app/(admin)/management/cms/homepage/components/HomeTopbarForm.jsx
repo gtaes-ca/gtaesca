@@ -5,6 +5,7 @@ import { useNotificationContext } from '@/context/useNotificationContext';
 import httpClient from '@/helpers/httpClient';
 
 const DEFAULT_FORM = {
+  phone: '',
   email: '',
   address: '',
   social: {
@@ -21,24 +22,29 @@ const HomeTopbarForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(DEFAULT_FORM);
 
-  const loadTopbar = useCallback(async () => {
+  const loadContactDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await httpClient.get('/api/admin/web-content/home/topbar');
-      const content = res.data.content || DEFAULT_FORM;
+      const [topbarRes, settingsRes] = await Promise.all([
+        httpClient.get('/api/admin/web-content/home/topbar'),
+        httpClient.get('/api/admin/web-content/contact/settings'),
+      ]);
+      const topbar = topbarRes.data.content || {};
+      const settings = settingsRes.data.content || {};
       setForm({
-        email: content.email || '',
-        address: content.address || '',
+        phone: topbar.phone || settings.phone || '',
+        email: topbar.email || settings.displayEmail || '',
+        address: topbar.address || settings.address || '',
         social: {
-          facebook: content.social?.facebook || '',
-          twitter: content.social?.twitter || '',
-          linkedin: content.social?.linkedin || '',
-          instagram: content.social?.instagram || '',
+          facebook: topbar.social?.facebook || '',
+          twitter: topbar.social?.twitter || '',
+          linkedin: topbar.social?.linkedin || '',
+          instagram: topbar.social?.instagram || '',
         },
       });
     } catch (e) {
       showNotification({
-        message: e.response?.data?.error || 'Failed to load homepage top bar content',
+        message: e.response?.data?.error || 'Failed to load contact details',
         variant: 'danger',
       });
     } finally {
@@ -47,7 +53,7 @@ const HomeTopbarForm = () => {
   }, [showNotification]);
 
   useEffect(() => {
-    loadTopbar();
+    loadContactDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -65,11 +71,27 @@ const HomeTopbarForm = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await httpClient.put('/api/admin/web-content/home/topbar', {
-        content: form,
-      });
-      const content = res.data.content || form;
+      const [topbarRes] = await Promise.all([
+        httpClient.put('/api/admin/web-content/home/topbar', {
+          content: {
+            phone: form.phone,
+            email: form.email,
+            address: form.address,
+            social: form.social,
+          },
+        }),
+        httpClient.put('/api/admin/web-content/contact/settings', {
+          content: {
+            phone: form.phone,
+            displayEmail: form.email,
+            address: form.address,
+            syncContactDetails: true,
+          },
+        }),
+      ]);
+      const content = topbarRes.data.content || form;
       setForm({
+        phone: content.phone || form.phone || '',
         email: content.email || '',
         address: content.address || '',
         social: {
@@ -79,10 +101,10 @@ const HomeTopbarForm = () => {
           instagram: content.social?.instagram || '',
         },
       });
-      showNotification({ message: 'Homepage top bar saved', variant: 'success' });
+      showNotification({ message: 'Contact details saved', variant: 'success' });
     } catch (err) {
       showNotification({
-        message: err.response?.data?.error || 'Failed to save top bar content',
+        message: err.response?.data?.error || 'Failed to save contact details',
         variant: 'danger',
       });
     } finally {
@@ -92,29 +114,40 @@ const HomeTopbarForm = () => {
 
   return (
     <ComponentContainerCard
-      title="Top Bar"
-      description="Manage the email, address, and social links shown in the website header top bar."
+      title="Contact Details"
+      description="Manage the phone, email, address, and social links shown in the website header and contact page."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : (
         <form onSubmit={handleSubmit}>
           <Row className="g-4">
-            <Col md={6}>
+            <Col md={4}>
               <Form.Group>
-                <Form.Label>Email</Form.Label>
+                <Form.Label>Display Phone</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="+55 827 057 5405"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Display Email</Form.Label>
                 <Form.Control
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="contact@example.com"
+                  placeholder="example@gamil.com"
                   required
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
+            <Col md={4}>
               <Form.Group>
-                <Form.Label>Address</Form.Label>
+                <Form.Label>Office Address</Form.Label>
                 <Form.Control
                   type="text"
                   value={form.address}
@@ -136,7 +169,7 @@ const HomeTopbarForm = () => {
                   type="url"
                   value={form.social.facebook}
                   onChange={(e) => updateSocial('facebook', e.target.value)}
-                  placeholder="https://facebook.com/your-page"
+                  placeholder="https://facebook.com/gtaes"
                 />
               </Form.Group>
             </Col>
@@ -147,7 +180,7 @@ const HomeTopbarForm = () => {
                   type="url"
                   value={form.social.twitter}
                   onChange={(e) => updateSocial('twitter', e.target.value)}
-                  placeholder="https://x.com/your-handle"
+                  placeholder="https://twitter.com/gtaes"
                 />
               </Form.Group>
             </Col>
@@ -158,7 +191,7 @@ const HomeTopbarForm = () => {
                   type="url"
                   value={form.social.linkedin}
                   onChange={(e) => updateSocial('linkedin', e.target.value)}
-                  placeholder="https://linkedin.com/company/your-company"
+                  placeholder="https://linkedin.com/gtaes"
                 />
               </Form.Group>
             </Col>
@@ -169,14 +202,14 @@ const HomeTopbarForm = () => {
                   type="url"
                   value={form.social.instagram}
                   onChange={(e) => updateSocial('instagram', e.target.value)}
-                  placeholder="https://instagram.com/your-handle"
+                  placeholder="https://instagram.com/gtaes"
                 />
               </Form.Group>
             </Col>
 
             <Col xs={12}>
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Saving...' : 'Save Top Bar'}
+                {submitting ? 'Saving...' : 'Save Contact Details'}
               </Button>
             </Col>
           </Row>

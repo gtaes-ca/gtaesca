@@ -129,7 +129,7 @@ export const MENU_ITEMS = [{
     pageKey: 'management.cms.projects'
   }, {
     key: 'cms-services',
-    label: 'Services Page',
+    label: 'Services Pages',
     url: '/management/cms/services',
     parentKey: 'website-cms',
     pageKey: 'management.cms.services'

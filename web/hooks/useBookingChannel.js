@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import {
   BOOKING_MODES,
+  BOOK_SERVICE_CTA_HREF,
   BOOK_SERVICE_CTA_LABEL,
   fetchPublicBookingSettings,
+  getBookingCtaHref,
   getBookingCtaLabel,
   isWhatsAppBookingMode,
 } from '@/lib/booking'
@@ -13,7 +15,7 @@ const DEFAULT_CHANNEL = {
   bookingMode: BOOKING_MODES.FULL,
   isWhatsAppMode: false,
   label: BOOK_SERVICE_CTA_LABEL,
-  href: '/book',
+  href: BOOK_SERVICE_CTA_HREF,
 }
 
 export function useBookingChannel() {
@@ -32,7 +34,7 @@ export function useBookingChannel() {
           bookingMode,
           isWhatsAppMode: isWhatsAppBookingMode(bookingMode),
           label: getBookingCtaLabel(bookingMode),
-          href: '/book',
+          href: getBookingCtaHref(bookingMode),
         })
       } catch {
         if (!cancelled) {

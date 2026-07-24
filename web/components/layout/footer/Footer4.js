@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { SitePhoneLink, SiteEmailLink, SiteAddress } from '@/components/contact/SiteContact'
 
 export default function Footer4() {
     return (
@@ -68,14 +69,14 @@ export default function Footer4() {
                                     <li>
                                         <h3>Address</h3>
                                         <div className="content">
-                                            <p>2972 Westheimer Rd. Santa <br/> Ana, Illinois 8548 </p>
+                                            <SiteAddress />
                                         </div>
                                     </li>
                                     <li>
                                         <h3>Contact</h3>
                                         <div className="content">
-                                            <p><Link href="tel:8528525285505">+85 2852 5285 505</Link></p>
-                                            <p><Link href="mailto:example@gmail.com">example@gmail.com</Link></p>
+                                            <p><SitePhoneLink /></p>
+                                            <p><SiteEmailLink /></p>
                                         </div>
                                     </li>
                                 </ul>

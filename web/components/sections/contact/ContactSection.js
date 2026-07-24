@@ -1,8 +1,13 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { DEFAULT_CONTACT_PAGE_SETTINGS } from '@/lib/cms'
+import Link from "next/link"
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { DEFAULT_CONTACT_PAGE_SETTINGS, toTelHref } from '@/lib/cms'
+import {
+    buildWhatsAppContactQuoteMessage,
+    fetchPublicBookingSettings,
+    openWhatsAppBooking,
+} from '@/lib/booking'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -10,7 +15,7 @@ const EMPTY_FORM = {
     name: '',
     email: '',
     phone: '',
-    company: '',
+    serviceIds: [],
     message: '',
 }
 
@@ -20,22 +25,43 @@ function buildMapEmbedUrl(latitude, longitude, zoom) {
 
 export default function ContactSection() {
     const [settings, setSettings] = useState(DEFAULT_CONTACT_PAGE_SETTINGS)
+    const [whatsappNumber, setWhatsappNumber] = useState('')
     const [form, setForm] = useState(EMPTY_FORM)
+    const [categories, setCategories] = useState([])
+    const [selectedCategoryId, setSelectedCategoryId] = useState('')
+    const [servicesOpen, setServicesOpen] = useState(false)
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [status, setStatus] = useState({ type: '', message: '' })
+    const servicesRef = useRef(null)
 
     useEffect(() => {
         let cancelled = false
 
-        async function loadSettings() {
+        async function loadPageData() {
             try {
-                const res = await fetch(`${API_URL}/api/web-content/contact/settings`)
-                if (!res.ok) return
-                const data = await res.json()
-                if (cancelled) return
-                if (data.content) {
-                    setSettings(data.content)
+                const [settingsRes, servicesRes, bookingRes] = await Promise.all([
+                    fetch(`${API_URL}/api/web-content/contact/settings`),
+                    fetch(`${API_URL}/api/services`),
+                    fetchPublicBookingSettings().catch(() => ({})),
+                ])
+
+                if (settingsRes.ok) {
+                    const data = await settingsRes.json()
+                    if (!cancelled && data.content) {
+                        setSettings(data.content)
+                    }
+                }
+
+                if (servicesRes.ok) {
+                    const data = await servicesRes.json()
+                    if (!cancelled) {
+                        setCategories(Array.isArray(data.categories) ? data.categories : [])
+                    }
+                }
+
+                if (!cancelled) {
+                    setWhatsappNumber(bookingRes?.companyWhatsappNumber || '')
                 }
             } catch {
                 // Keep defaults on failure
@@ -46,14 +72,70 @@ export default function ContactSection() {
             }
         }
 
-        loadSettings()
+        loadPageData()
         return () => {
             cancelled = true
         }
     }, [])
 
+    useEffect(() => {
+        if (!servicesOpen) return undefined
+
+        const onPointerDown = (event) => {
+            if (servicesRef.current && !servicesRef.current.contains(event.target)) {
+                setServicesOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', onPointerDown)
+        return () => document.removeEventListener('mousedown', onPointerDown)
+    }, [servicesOpen])
+
+    const flatServices = useMemo(
+        () => categories.flatMap((category) => (
+            (category.services || []).map((service) => ({
+                ...service,
+                categoryId: category.id,
+                categoryName: category.name,
+            }))
+        )),
+        [categories]
+    )
+
+    const selectedCategory = useMemo(
+        () => categories.find((category) => String(category.id) === String(selectedCategoryId)) || null,
+        [categories, selectedCategoryId]
+    )
+
+    const categoryServices = useMemo(
+        () => (selectedCategory?.services || []),
+        [selectedCategory]
+    )
+
+    const selectedServices = useMemo(
+        () => flatServices.filter((service) => form.serviceIds.includes(service.id)),
+        [flatServices, form.serviceIds]
+    )
+
     const updateField = (field, value) => {
         setForm((prev) => ({ ...prev, [field]: value }))
+    }
+
+    const handleCategoryChange = (categoryId) => {
+        setSelectedCategoryId(categoryId)
+        setServicesOpen(false)
+    }
+
+    const toggleService = (serviceId) => {
+        setForm((prev) => {
+            const exists = prev.serviceIds.includes(serviceId)
+            return {
+                ...prev,
+                serviceIds: exists
+                    ? prev.serviceIds.filter((id) => id !== serviceId)
+                    : [...prev.serviceIds, serviceId],
+            }
+        })
     }
 
     const handleSubmit = async (e) => {
@@ -62,30 +144,35 @@ export default function ContactSection() {
         setStatus({ type: '', message: '' })
 
         try {
-            const res = await fetch(`${API_URL}/api/contact/quote`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            })
-            const data = await res.json()
-
-            if (!res.ok) {
+            if (!whatsappNumber) {
                 setStatus({
                     type: 'error',
-                    message: data.error || 'Failed to send message',
+                    message: 'WhatsApp is not configured yet. Please call or email us directly.',
                 })
                 return
             }
 
+            const message = buildWhatsAppContactQuoteMessage({
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                services: selectedServices,
+                message: form.message,
+            })
+
+            openWhatsAppBooking(whatsappNumber, message)
+
             setForm(EMPTY_FORM)
+            setSelectedCategoryId('')
+            setServicesOpen(false)
             setStatus({
                 type: 'success',
-                message: data.message || 'Your message has been sent.',
+                message: 'WhatsApp opened with your quote request. Send the message to complete.',
             })
-        } catch {
+        } catch (error) {
             setStatus({
                 type: 'error',
-                message: 'Failed to send message. Please try again.',
+                message: error?.message || 'Failed to open WhatsApp. Please try again.',
             })
         } finally {
             setSubmitting(false)
@@ -93,6 +180,12 @@ export default function ContactSection() {
     }
 
     const mapUrl = buildMapEmbedUrl(settings.latitude, settings.longitude, settings.mapZoom)
+    const selectedInCategoryCount = categoryServices.filter((service) => form.serviceIds.includes(service.id)).length
+    const servicesLabel = !selectedCategoryId
+        ? 'Select a category first'
+        : selectedInCategoryCount
+            ? `${selectedInCategoryCount} service${selectedInCategoryCount > 1 ? 's' : ''} selected`
+            : 'Select services'
 
     return (
         <>
@@ -109,7 +202,7 @@ export default function ContactSection() {
                                             <span className="icon-call"></span>
                                         </div>
                                         <p>Contact Us</p>
-                                        <h3><Link href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</Link></h3>
+                                        <h3><Link href={toTelHref(settings.phone)}>{settings.phone}</Link></h3>
                                     </div>
                                 </div>
                             ) : null}
@@ -156,7 +249,7 @@ export default function ContactSection() {
                                 </div>
                             </div>
                             <div className="col-xl-6">
-                                <div className="contact-three__right">
+                                <div className="contact-three__right" id="quote">
                                     <h3 className="contact-three__form-title">{settings.formTitle}</h3>
                                     <form className="contact-three__form" onSubmit={handleSubmit}>
                                         <div className="row">
@@ -197,13 +290,77 @@ export default function ContactSection() {
                                             </div>
                                             <div className="col-xl-6 col-lg-6">
                                                 <div className="contact-three__input-box">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Company"
-                                                        name="company"
-                                                        value={form.company}
-                                                        onChange={(e) => updateField('company', e.target.value)}
-                                                    />
+                                                    <select
+                                                        name="category"
+                                                        value={selectedCategoryId}
+                                                        onChange={(e) => handleCategoryChange(e.target.value)}
+                                                        aria-label="Service category"
+                                                    >
+                                                        <option value="">Select category</option>
+                                                        {categories.map((category) => (
+                                                            <option key={category.id} value={category.id}>
+                                                                {category.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="col-xl-12">
+                                                <div className="contact-three__input-box contact-three__services" ref={servicesRef}>
+                                                    <button
+                                                        type="button"
+                                                        className={`contact-three__services-trigger${selectedInCategoryCount ? '' : ' is-placeholder'}`}
+                                                        onClick={() => {
+                                                            if (!selectedCategoryId) return
+                                                            setServicesOpen((open) => !open)
+                                                        }}
+                                                        aria-expanded={servicesOpen}
+                                                        aria-haspopup="listbox"
+                                                        disabled={!selectedCategoryId}
+                                                    >
+                                                        <span>{servicesLabel}</span>
+                                                        <i className={`fa ${servicesOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} />
+                                                    </button>
+
+                                                    {servicesOpen && selectedCategory ? (
+                                                        <div className="contact-three__services-panel" role="listbox" aria-multiselectable="true">
+                                                            {categoryServices.length === 0 ? (
+                                                                <p className="contact-three__services-empty">No services in this category.</p>
+                                                            ) : (
+                                                                categoryServices.map((service) => {
+                                                                    const checked = form.serviceIds.includes(service.id)
+                                                                    return (
+                                                                        <label key={service.id} className="contact-three__services-option">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={checked}
+                                                                                onChange={() => toggleService(service.id)}
+                                                                            />
+                                                                            <span>{service.name}</span>
+                                                                        </label>
+                                                                    )
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    ) : null}
+
+                                                    {selectedServices.length ? (
+                                                        <div className="contact-three__services-chips">
+                                                            {selectedServices.map((service) => (
+                                                                <span key={service.id} className="contact-three__services-chip">
+                                                                    <small>{service.categoryName}</small>
+                                                                    {service.name}
+                                                                    <button
+                                                                        type="button"
+                                                                        aria-label={`Remove ${service.name}`}
+                                                                        onClick={() => toggleService(service.id)}
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : null}
                                                 </div>
                                             </div>
                                             <div className="col-xl-12">
@@ -222,7 +379,7 @@ export default function ContactSection() {
                                                         className="thm-btn contact-three__btn"
                                                         disabled={submitting}
                                                     >
-                                                        {submitting ? 'Please wait...' : 'send a message'}
+                                                        {submitting ? 'Please wait...' : 'Continue on WhatsApp'}
                                                     </button>
                                                 </div>
                                             </div>

@@ -1,6 +1,7 @@
 'use client'
 import Layout from "@/components/layout/Layout"
 import Link from "next/link"
+import { CtaCallNumber } from '@/components/contact/SiteContact'
 export default function Home() {
 
     return (
@@ -193,7 +194,7 @@ export default function Home() {
                             </div>
                             <div className="content">
                                 <p>Make a call</p>
-                                <h4><Link href="tel:00554755242">00 55 475 5242</Link></h4>
+                                <CtaCallNumber />
                             </div>
                         </div>
                     </div>

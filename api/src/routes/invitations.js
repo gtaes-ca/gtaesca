@@ -9,8 +9,19 @@ import {
 import { generateOtp, generateToken, hashValue } from '../utils/crypto.js';
 import { sendInvitationEmail } from '../services/email.js';
 import { createTeamUser, formatUser } from '../services/users.js';
+import { getBookingSettings, isWhatsAppBookingMode } from '../services/bookingSettings.js';
 
 const router = Router();
+
+async function assertTechnicianInviteAllowed(userType) {
+  if (userType !== USER_TYPES.TECHNICIAN) return;
+  const settings = await getBookingSettings();
+  if (isWhatsAppBookingMode(settings)) {
+    const error = new Error('Technician accounts are not available while WhatsApp booking mode is enabled');
+    error.status = 400;
+    throw error;
+  }
+}
 
 router.post('/', authenticate, requirePageAccess('management.invitations'), async (req, res) => {
   const { email, userType, role } = req.body;
@@ -25,6 +36,12 @@ router.post('/', authenticate, requirePageAccess('management.invitations'), asyn
 
   if (!isValidRoleForUserType(userType, role)) {
     return res.status(400).json({ error: 'Invalid role for the selected user type' });
+  }
+
+  try {
+    await assertTechnicianInviteAllowed(userType);
+  } catch (error) {
+    return res.status(error.status || 400).json({ error: error.message });
   }
 
   const normalizedEmail = email.toLowerCase();
@@ -76,6 +93,12 @@ router.post('/', authenticate, requirePageAccess('management.invitations'), asyn
 router.post('/create-account', authenticate, requirePageAccess('management.invitations'), async (req, res) => {
   const { email, userType, role, firstName, lastName, password, phone } = req.body;
   const normalizedEmail = String(email || '').trim().toLowerCase();
+
+  try {
+    await assertTechnicianInviteAllowed(userType);
+  } catch (error) {
+    return res.status(error.status || 400).json({ error: error.message });
+  }
 
   const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
   if (existingUser.rowCount > 0) {

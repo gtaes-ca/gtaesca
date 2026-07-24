@@ -1,6 +1,7 @@
 'use client'
 import Layout from "@/components/layout/Layout"
 import Link from "next/link"
+import { CtaCallNumber, GetStartedContactPoints } from '@/components/contact/SiteContact'
 export default function Home() {
 
     return (
@@ -139,26 +140,7 @@ export default function Home() {
                                 <p className="project-details__get-started-text">Pianissimos of dulcimers qui therefore
                                     always
                                     holds in these matters to this principle</p>
-                                <ul className="project-details__get-started-points list-unstyled">
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-call"></span>
-                                        </div>
-                                        <p><Link href="tel:585858575084">+58 585 857 5084</Link></p>
-                                    </li>
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-envelope"></span>
-                                        </div>
-                                        <p><Link href="mailto:example@gmail.com">example@gmail.com</Link></p>
-                                    </li>
-                                    <li>
-                                        <div className="icon">
-                                            <span className="icon-location"></span>
-                                        </div>
-                                        <p>4517 Washington Ave. Manchester,<br/> Kentucky 39495</p>
-                                    </li>
-                                </ul>
+                                <GetStartedContactPoints />
                                 <div className="project-details__get-started-btn-box">
                                     <Link href="#" className="project-details__get-started-btn thm-btn">get in touch</Link>
                                 </div>
@@ -198,7 +180,7 @@ export default function Home() {
                             </div>
                             <div className="content">
                                 <p>Make a call</p>
-                                <h4><Link href="tel:00554755242">00 55 475 5242</Link></h4>
+                                <CtaCallNumber />
                             </div>
                         </div>
                     </div>

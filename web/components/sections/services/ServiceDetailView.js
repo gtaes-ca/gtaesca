@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl } from '@/lib/cms'
-import { serviceDetailPath } from '@/lib/paths'
+import { serviceCategoryLabel, serviceCategoryPath, serviceDetailPath } from '@/lib/paths'
 import ServiceDetailsBanner from '@/components/sections/services/ServiceDetailsBanner'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -132,7 +132,7 @@ export default function ServiceDetailView({ serviceSlug }) {
                 <section className="service-details">
                     <div className="container">
                         <p className="mb-3">This service could not be found.</p>
-                        <Link href="/services" className="thm-btn">Back to Services</Link>
+                        <Link href="/residential" className="thm-btn">Back to Residential</Link>
                     </div>
                 </section>
             </>
@@ -142,10 +142,17 @@ export default function ServiceDetailView({ serviceSlug }) {
     const descriptionParagraphs = service.description
         ? service.description.split(/\n\s*\n/).filter(Boolean)
         : []
+    const categoryHref = serviceCategoryPath(service.categoryName)
+    const categoryLabel = serviceCategoryLabel(service.categoryName)
+    const relatedServices = allServices.filter((item) => {
+        const itemIsCommercial = String(item.categoryName || '').toLowerCase().includes('commercial')
+        const currentIsCommercial = String(service.categoryName || '').toLowerCase().includes('commercial')
+        return itemIsCommercial === currentIsCommercial
+    })
 
     return (
         <>
-            <ServiceDetailsBanner serviceName={service.name} />
+            <ServiceDetailsBanner serviceName={service.name} categoryName={service.categoryName} />
             <section className="service-details">
                 <div className="container">
                     <div className="row">
@@ -181,6 +188,11 @@ export default function ServiceDetailView({ serviceSlug }) {
                                         ))}
                                     </ul>
                                 ) : null}
+                                <div className="mt-4">
+                                    <Link href={categoryHref} className="thm-btn">
+                                        Back to {categoryLabel}
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                         <div className="col-xl-4 col-lg-5">
@@ -198,12 +210,12 @@ export default function ServiceDetailView({ serviceSlug }) {
                                         </li>
                                     </ul>
                                 </div>
-                                {allServices.length ? (
+                                {relatedServices.length ? (
                                     <div className="service-details__services-box">
-                                        <h3 className="service-details__services-title">Our Services</h3>
+                                        <h3 className="service-details__services-title">{categoryLabel} Services</h3>
                                         <div className="service-details__services-list-wrap">
                                             <ul className="service-details__services-list list-unstyled">
-                                                {allServices.map((item) => {
+                                                {relatedServices.map((item) => {
                                                     const isActive = item.slug === service.slug
                                                     return (
                                                         <li key={item.id} className={isActive ? 'active' : ''}>
@@ -221,6 +233,14 @@ export default function ServiceDetailView({ serviceSlug }) {
                                 <div className="project-details__get-started">
                                     <h3 className="project-details__get-started-title">Get Started Today</h3>
                                     <ul className="project-details__get-started-points list-unstyled">
+                                        {topbar.phone ? (
+                                            <li>
+                                                <div className="icon">
+                                                    <span className="icon-call"></span>
+                                                </div>
+                                                <p><Link href={`tel:${String(topbar.phone).replace(/[^\d+]/g, '')}`}>{topbar.phone}</Link></p>
+                                            </li>
+                                        ) : null}
                                         {topbar.email ? (
                                             <li>
                                                 <div className="icon">

@@ -63,6 +63,8 @@ export function mapAboutFromApi(content = {}) {
     text2: content.text2 || '',
     buttonText: content.buttonText || 'About Us More',
     buttonLink: content.buttonLink || '/about',
+    badgeLine1: content.badgeLine1 || '',
+    badgeLine2: content.badgeLine2 || '',
     image1,
     image2,
     image1Preview: resolveCmsAssetUrl(image1),
@@ -80,6 +82,8 @@ export function mapAboutForSave(content = {}) {
     text2: content.text2,
     buttonText: content.buttonText,
     buttonLink: content.buttonLink,
+    badgeLine1: content.badgeLine1,
+    badgeLine2: content.badgeLine2,
     image1: content.image1,
     image2: content.image2,
   };
@@ -145,8 +149,62 @@ export const mapProjectDetailsBannerFromApi = mapAboutBannerFromApi;
 export const mapProjectDetailsBannerForSave = mapAboutBannerForSave;
 export const mapServicesBannerFromApi = mapAboutBannerFromApi;
 export const mapServicesBannerForSave = mapAboutBannerForSave;
-export const mapServiceDetailsBannerFromApi = mapAboutBannerFromApi;
-export const mapServiceDetailsBannerForSave = mapAboutBannerForSave;
+
+export function mapServiceCategoryDetailsFromApi(content = {}) {
+  return {
+    tagline: content.tagline || '',
+    title: content.title || '',
+    text: content.text || '',
+  };
+}
+
+export function mapServiceCategoryDetailsForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    title: content.title,
+    text: content.text,
+  };
+}
+
+export function mapServiceCategoryGalleryFromApi(content = {}) {
+  const items = Array.isArray(content.items) ? content.items : [];
+
+  return {
+    tagline: content.tagline || '',
+    titleLine1: content.titleLine1 || '',
+    titleLine2: content.titleLine2 || '',
+    buttonText: content.buttonText || '',
+    buttonLink: content.buttonLink || '',
+    items: items.map((item) => {
+      const image = item.image || '';
+      return {
+        subTitle: item.subTitle || '',
+        title: item.title || '',
+        text: item.text || '',
+        image,
+        imagePreview: resolveCmsAssetUrl(image),
+        imageData: null,
+      };
+    }),
+  };
+}
+
+export function mapServiceCategoryGalleryForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    titleLine1: content.titleLine1,
+    titleLine2: content.titleLine2,
+    buttonText: content.buttonText,
+    buttonLink: content.buttonLink,
+    items: (content.items || []).map((item) => ({
+      subTitle: item.subTitle,
+      title: item.title,
+      text: item.text,
+      image: item.image,
+    })),
+  };
+}
+
 export const mapContactBannerFromApi = mapAboutBannerFromApi;
 export const mapContactBannerForSave = mapAboutBannerForSave;
 export const mapFaqBannerFromApi = mapAboutBannerFromApi;
@@ -205,9 +263,6 @@ export function mapContactSettingsFromApi(content = {}) {
   return {
     formTitle: content.formTitle || 'Get A Free Quote',
     recipientEmail: content.recipientEmail || '',
-    phone: content.phone || '',
-    displayEmail: content.displayEmail || '',
-    address: content.address || '',
     latitude: content.latitude ?? 43.6532,
     longitude: content.longitude ?? -79.3832,
     mapZoom: content.mapZoom ?? 14,
@@ -218,9 +273,6 @@ export function mapContactSettingsForSave(content = {}) {
   return {
     formTitle: content.formTitle,
     recipientEmail: content.recipientEmail,
-    phone: content.phone,
-    displayEmail: content.displayEmail,
-    address: content.address,
     latitude: Number(content.latitude),
     longitude: Number(content.longitude),
     mapZoom: Number.parseInt(content.mapZoom, 10) || 14,

@@ -16,6 +16,9 @@ import {
   getProjectsGalleryContent,
   getProjectDetailsBannerContent,
   getServicesBannerContent,
+  getServiceCategoryBannerContent,
+  getServiceCategoryDetailsContent,
+  getServiceCategoryGalleryContent,
   getServiceDetailsBannerContent,
   getContactBannerContent,
   getContactPageSettingsContent,
@@ -41,6 +44,9 @@ import {
   updateProjectsGalleryContent,
   updateProjectDetailsBannerContent,
   updateServicesBannerContent,
+  updateServiceCategoryBannerContent,
+  updateServiceCategoryDetailsContent,
+  updateServiceCategoryGalleryContent,
   updateServiceDetailsBannerContent,
   updateContactBannerContent,
   updateContactPageSettingsContent,
@@ -249,6 +255,90 @@ router.get('/services/banner', requirePageAccess('management.cms.services'), asy
 router.put('/services/banner', requirePageAccess('management.cms.services'), async (req, res) => {
   try {
     const content = await updateServicesBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/residential/banner', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryBannerContent('residential');
+  return res.json({ content });
+});
+
+router.put('/residential/banner', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryBannerContent('residential', req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/residential/details', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryDetailsContent('residential');
+  return res.json({ content });
+});
+
+router.put('/residential/details', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryDetailsContent('residential', req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/residential/gallery', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryGalleryContent('residential');
+  return res.json({ content });
+});
+
+router.put('/residential/gallery', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryGalleryContent('residential', req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/commercial/banner', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryBannerContent('commercial');
+  return res.json({ content });
+});
+
+router.put('/commercial/banner', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryBannerContent('commercial', req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/commercial/details', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryDetailsContent('commercial');
+  return res.json({ content });
+});
+
+router.put('/commercial/details', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryDetailsContent('commercial', req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/commercial/gallery', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServiceCategoryGalleryContent('commercial');
+  return res.json({ content });
+});
+
+router.put('/commercial/gallery', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServiceCategoryGalleryContent('commercial', req.body.content || {});
     return res.json({ content });
   } catch (error) {
     return res.status(400).json({ error: error.message });

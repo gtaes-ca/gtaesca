@@ -16,7 +16,7 @@ function truncateText(text, maxLength = 140) {
     return `${text.slice(0, maxLength).trim()}...`
 }
 
-export default function ServicesGrid() {
+export default function ServicesGrid({ group = 'residential' }) {
     const [services, setServices] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -25,7 +25,7 @@ export default function ServicesGrid() {
 
         async function loadServices() {
             try {
-                const res = await fetch(`${API_URL}/api/services/list`)
+                const res = await fetch(`${API_URL}/api/services/list?group=${encodeURIComponent(group)}`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return
@@ -43,7 +43,7 @@ export default function ServicesGrid() {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [group])
 
     if (loading) {
         return (

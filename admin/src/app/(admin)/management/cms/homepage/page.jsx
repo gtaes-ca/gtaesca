@@ -6,10 +6,8 @@ import HomeFeaturedServicesForm from './components/HomeFeaturedServicesForm';
 import HomeGalleryForm from './components/HomeGalleryForm';
 import HomeServicesForm from './components/HomeServicesForm';
 import HomeSliderForm from './components/HomeSliderForm';
-import HomeTopbarForm from './components/HomeTopbarForm';
 
 const TABS = {
-  TOPBAR: 'topbar',
   SLIDER: 'slider',
   FEATURES: 'features',
   ABOUT: 'about',
@@ -18,7 +16,7 @@ const TABS = {
 };
 
 const HomepageCmsPage = () => {
-  const [activeTab, setActiveTab] = useState(TABS.TOPBAR);
+  const [activeTab, setActiveTab] = useState(TABS.SLIDER);
 
   return (
     <>
@@ -28,9 +26,6 @@ const HomepageCmsPage = () => {
         onSelect={(key) => key && setActiveTab(key)}
       >
         <Nav variant="tabs" className="nav-tabs card-tabs mb-3 flex-wrap">
-          <Nav.Item>
-            <Nav.Link eventKey={TABS.TOPBAR}>Top Bar</Nav.Link>
-          </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey={TABS.SLIDER}>Hero Slider</Nav.Link>
           </Nav.Item>
@@ -49,9 +44,6 @@ const HomepageCmsPage = () => {
         </Nav>
 
         <Tab.Content>
-          <Tab.Pane eventKey={TABS.TOPBAR}>
-            {activeTab === TABS.TOPBAR && <HomeTopbarForm />}
-          </Tab.Pane>
           <Tab.Pane eventKey={TABS.SLIDER}>
             {activeTab === TABS.SLIDER && <HomeSliderForm />}
           </Tab.Pane>

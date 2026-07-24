@@ -1,25 +1,34 @@
 'use client'
 
 import Link from "next/link"
-import { useEffect, useState } from 'react'
-import { DEFAULT_TOPBAR } from '@/lib/cms'
+import { useEffect, useMemo, useState } from 'react'
+import { DEFAULT_TOPBAR, toTelHref } from '@/lib/cms'
 import { assetUrl } from '@/lib/assets'
+import { useBookingChannel } from '@/hooks/useBookingChannel'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 const FOOTER_LOGO_SRC = assetUrl('assets/images/resources/footer-logo-1.png')
-const HASHMARK_LOGO_SRC = assetUrl('assets/images/brand/hashmark-logo.png')
+const HASHMARK_LOGO_SRC = assetUrl('assets/images/brand/hashmark-light-logo.png')
 
 const FOOTER_PAGES = [
     { label: 'Home', href: '/' },
     { label: 'About Us', href: '/about' },
-    { label: 'Team', href: '/team' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Services', href: '/services' },
+    { label: 'Team', href: '/team', bookingOnly: true },
+    { label: 'Residential', href: '/residential' },
+    { label: 'Commercial', href: '/commercial' },
     { label: 'Contact', href: '/contact' },
 ]
 
 export default function Footer1() {
     const [content, setContent] = useState(DEFAULT_TOPBAR)
+    const { isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
+
+    const footerPages = useMemo(() => {
+        if (!channelLoaded || isWhatsAppMode) {
+            return FOOTER_PAGES.filter((item) => !item.bookingOnly)
+        }
+        return FOOTER_PAGES
+    }, [channelLoaded, isWhatsAppMode])
 
     useEffect(() => {
         let cancelled = false
@@ -31,6 +40,7 @@ export default function Footer1() {
                 const data = await res.json()
                 if (cancelled) return
                 setContent({
+                    phone: data.content?.phone || '',
                     email: data.content?.email || '',
                     address: data.content?.address || '',
                     social: {
@@ -87,7 +97,7 @@ export default function Footer1() {
                                 </div>
                                 <div className="footer-widget__link-box">
                                     <ul className="footer-widget__link footer-widget__link--grid list-unstyled">
-                                        {FOOTER_PAGES.map((page) => (
+                                        {footerPages.map((page) => (
                                             <li key={page.href}>
                                                 <Link href={page.href}>{page.label}</Link>
                                             </li>
@@ -107,6 +117,16 @@ export default function Footer1() {
                                             <h3>Address</h3>
                                             <div className="content">
                                                 <p>{content.address}</p>
+                                            </div>
+                                        </li>
+                                    ) : null}
+                                    {content.phone ? (
+                                        <li>
+                                            <h3>Phone</h3>
+                                            <div className="content">
+                                                <p>
+                                                    <Link href={toTelHref(content.phone)}>{content.phone}</Link>
+                                                </p>
                                             </div>
                                         </li>
                                     ) : null}

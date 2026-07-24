@@ -4,12 +4,13 @@ import { saveCmsImage } from './cmsImage.js';
 import { slugify } from '../utils/slug.js';
 
 const DEFAULT_TOPBAR = {
+  phone: '+55 827 057 5405',
   email: 'example@gamil.com',
   address: '12 Green Road, 05 New York',
   social: {
-    facebook: '',
-    twitter: '',
-    linkedin: '',
+    facebook: 'https://facebook.com/gtaes',
+    twitter: 'https://twitter.com/gtaes',
+    linkedin: 'https://linkedin.com/gtaes',
     instagram: '',
   },
 };
@@ -55,7 +56,7 @@ const DEFAULT_HOME_SERVICES = {
     {
       title: 'Fair & Transparent Pricing',
       text: 'Honest upfront quotes with no hidden fees on residential and commercial electrical work.',
-      link: '/services',
+      link: '/residential',
       icon: HOME_SERVICES_ICON,
     },
     {
@@ -80,6 +81,8 @@ const DEFAULT_HOME_ABOUT = {
   text2: 'Our licensed ESA-certified electricians deliver safe, code-compliant work with honest pricing and dependable service you can count on.',
   buttonText: 'About Us More',
   buttonLink: '/about',
+  badgeLine1: '',
+  badgeLine2: '',
   image1: 'assets/images/resources/about-one-img-1.jpg',
   image2: 'assets/images/resources/about-one-img-2.jpg',
 };
@@ -153,6 +156,8 @@ export function normalizeHomeAboutContent(content = {}) {
     text2: String(content.text2 ?? DEFAULT_HOME_ABOUT.text2).trim(),
     buttonText: String(content.buttonText ?? DEFAULT_HOME_ABOUT.buttonText).trim(),
     buttonLink: String(content.buttonLink ?? DEFAULT_HOME_ABOUT.buttonLink).trim(),
+    badgeLine1: String(content.badgeLine1 ?? DEFAULT_HOME_ABOUT.badgeLine1).trim(),
+    badgeLine2: String(content.badgeLine2 ?? DEFAULT_HOME_ABOUT.badgeLine2).trim(),
     image1: String(content.image1 ?? DEFAULT_HOME_ABOUT.image1).trim(),
     image2: String(content.image2 ?? DEFAULT_HOME_ABOUT.image2).trim(),
   };
@@ -172,15 +177,37 @@ export function normalizeFeaturedServicesWidgetContent(content = {}) {
 }
 
 function formatFeaturedService(row) {
+  const categoryName = row.category_name || '';
+  const isCommercial = String(categoryName).toLowerCase().includes('commercial');
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     description: row.description || '',
-    categoryName: row.category_name,
-    link: row.slug ? `/services/${row.slug}` : '/services',
+    categoryId: row.category_id,
+    categoryName,
+    categorySortOrder: row.category_sort_order ?? 0,
+    link: row.slug ? `/services/${row.slug}` : (isCommercial ? '/commercial' : '/residential'),
     icon: FEATURED_SERVICES_ICON,
   };
+}
+
+function buildFeaturedServiceCategories(services = []) {
+  const categories = new Map();
+
+  for (const service of services) {
+    if (!service?.categoryId || categories.has(service.categoryId)) continue;
+    categories.set(service.categoryId, {
+      id: service.categoryId,
+      name: service.categoryName || '',
+      sortOrder: service.categorySortOrder ?? 0,
+    });
+  }
+
+  return [...categories.values()].sort((a, b) => {
+    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+    return a.id - b.id;
+  });
 }
 
 function normalizeGalleryItem(item = {}) {
@@ -267,7 +294,8 @@ async function persistGalleryImages(items) {
 async function resolveFeaturedServices(serviceIds = []) {
   if (!serviceIds.length) {
     const result = await pool.query(
-      `SELECT s.id, s.slug, s.name, s.description, c.name AS category_name
+      `SELECT s.id, s.slug, s.name, s.description,
+              c.id AS category_id, c.name AS category_name, c.sort_order AS category_sort_order
        FROM services s
        JOIN service_categories c ON c.id = s.category_id
        ORDER BY s.sort_order, s.id
@@ -277,7 +305,8 @@ async function resolveFeaturedServices(serviceIds = []) {
   }
 
   const result = await pool.query(
-    `SELECT s.id, s.slug, s.name, s.description, c.name AS category_name
+    `SELECT s.id, s.slug, s.name, s.description,
+            c.id AS category_id, c.name AS category_name, c.sort_order AS category_sort_order
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
      WHERE s.id = ANY($1::int[])
@@ -381,6 +410,7 @@ export async function upsertWidget(page, section, content) {
 
 export function normalizeTopbarContent(content = {}) {
   return {
+    phone: String(content.phone || DEFAULT_TOPBAR.phone).trim(),
     email: String(content.email || DEFAULT_TOPBAR.email).trim(),
     address: String(content.address || DEFAULT_TOPBAR.address).trim(),
     social: {
@@ -472,6 +502,7 @@ export async function getFeaturedServicesContent() {
   return {
     ...settings,
     services,
+    categories: buildFeaturedServiceCategories(services),
   };
 }
 
@@ -873,6 +904,22 @@ const DEFAULT_SERVICE_DETAILS_BANNER = {
   backgroundImage: '',
 };
 
+const DEFAULT_SERVICE_CATEGORY_DETAILS = {
+  tagline: '',
+  title: '',
+  text: '',
+};
+
+const SERVICE_CATEGORY_PAGES = new Set(['residential', 'commercial']);
+
+function assertServiceCategoryPage(page) {
+  const key = String(page || '').trim().toLowerCase();
+  if (!SERVICE_CATEGORY_PAGES.has(key)) {
+    throw new Error('Invalid service category page');
+  }
+  return key;
+}
+
 export function normalizeServicesBannerContent(content = {}) {
   return {
     title: String(content.title ?? DEFAULT_SERVICES_BANNER.title).trim(),
@@ -894,6 +941,108 @@ export async function updateServicesBannerContent(content) {
 
   const widget = await upsertWidget('services', 'banner', normalized);
   return normalizeServicesBannerContent(widget.content);
+}
+
+export async function getServiceCategoryBannerContent(page) {
+  const pageKey = assertServiceCategoryPage(page);
+  const widget = await getWidget(pageKey, 'banner');
+  const fallbackTitle = pageKey === 'commercial' ? 'Commercial Services' : 'Residential Services';
+  return normalizeServicesBannerContent(widget?.content || { title: fallbackTitle, backgroundImage: '' });
+}
+
+export async function updateServiceCategoryBannerContent(page, content) {
+  const pageKey = assertServiceCategoryPage(page);
+  const normalized = normalizeServicesBannerContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Banner title is required');
+  }
+
+  const widget = await upsertWidget(pageKey, 'banner', normalized);
+  return normalizeServicesBannerContent(widget.content);
+}
+
+export function normalizeServiceCategoryDetailsContent(content = {}) {
+  return {
+    tagline: String(content.tagline ?? DEFAULT_SERVICE_CATEGORY_DETAILS.tagline).trim(),
+    title: String(content.title ?? DEFAULT_SERVICE_CATEGORY_DETAILS.title).trim(),
+    text: String(content.text ?? DEFAULT_SERVICE_CATEGORY_DETAILS.text).trim(),
+  };
+}
+
+export async function getServiceCategoryDetailsContent(page) {
+  const pageKey = assertServiceCategoryPage(page);
+  const widget = await getWidget(pageKey, 'details');
+  return normalizeServiceCategoryDetailsContent(widget?.content || DEFAULT_SERVICE_CATEGORY_DETAILS);
+}
+
+export async function updateServiceCategoryDetailsContent(page, content) {
+  const pageKey = assertServiceCategoryPage(page);
+  const normalized = normalizeServiceCategoryDetailsContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Section title is required');
+  }
+
+  const widget = await upsertWidget(pageKey, 'details', normalized);
+  return normalizeServiceCategoryDetailsContent(widget.content);
+}
+
+const DEFAULT_SERVICE_CATEGORY_GALLERY = {
+  tagline: '',
+  titleLine1: '',
+  titleLine2: '',
+  buttonText: '',
+  buttonLink: '',
+  items: [],
+};
+
+function normalizeServiceCategoryGalleryItem(item = {}) {
+  return {
+    subTitle: String(item?.subTitle ?? '').trim(),
+    title: String(item?.title ?? '').trim(),
+    text: String(item?.text ?? '').trim(),
+    image: String(item?.image ?? '').trim(),
+  };
+}
+
+export function normalizeServiceCategoryGalleryContent(content = {}) {
+  const items = Array.isArray(content.items)
+    ? content.items.map((item) => normalizeServiceCategoryGalleryItem(item)).filter((item) => item.image)
+    : [];
+
+  return {
+    tagline: String(content.tagline ?? DEFAULT_SERVICE_CATEGORY_GALLERY.tagline).trim(),
+    titleLine1: String(content.titleLine1 ?? DEFAULT_SERVICE_CATEGORY_GALLERY.titleLine1).trim(),
+    titleLine2: String(content.titleLine2 ?? DEFAULT_SERVICE_CATEGORY_GALLERY.titleLine2).trim(),
+    buttonText: String(content.buttonText ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonText).trim(),
+    buttonLink: String(content.buttonLink ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonLink).trim(),
+    items: items.slice(0, 12),
+  };
+}
+
+export async function getServiceCategoryGalleryContent(page) {
+  const pageKey = assertServiceCategoryPage(page);
+  const widget = await getWidget(pageKey, 'gallery');
+  return normalizeServiceCategoryGalleryContent(widget?.content || DEFAULT_SERVICE_CATEGORY_GALLERY);
+}
+
+export async function updateServiceCategoryGalleryContent(page, content) {
+  const pageKey = assertServiceCategoryPage(page);
+  const normalized = normalizeServiceCategoryGalleryContent(content);
+
+  if (normalized.items.length && !normalized.titleLine1) {
+    throw new Error('Section title is required when gallery items are present');
+  }
+
+  for (const item of normalized.items) {
+    if (!item.image) {
+      throw new Error('Each gallery item needs an image');
+    }
+  }
+
+  const widget = await upsertWidget(pageKey, 'gallery', normalized);
+  return normalizeServiceCategoryGalleryContent(widget.content);
 }
 
 export function normalizeServiceDetailsBannerContent(content = {}) {
@@ -978,12 +1127,37 @@ export async function getContactPageSettingsContent() {
 }
 
 export async function getPublicContactPageSettingsContent() {
-  const settings = await getContactPageSettingsContent();
-  return toPublicContactPageSettings(settings);
+  const [settings, topbar] = await Promise.all([
+    getContactPageSettingsContent(),
+    getTopbarContent(),
+  ]);
+  return toPublicContactPageSettings({
+    ...settings,
+    phone: topbar.phone,
+    displayEmail: topbar.email,
+    address: topbar.address,
+  });
 }
 
-export async function updateContactPageSettingsContent(content) {
-  const normalized = normalizeContactPageSettingsContent(content);
+export async function updateContactPageSettingsContent(content = {}) {
+  const current = await getContactPageSettingsContent();
+  const syncContactDetails = Boolean(content.syncContactDetails);
+
+  const next = {
+    formTitle: content.formTitle !== undefined ? content.formTitle : current.formTitle,
+    recipientEmail: content.recipientEmail !== undefined ? content.recipientEmail : current.recipientEmail,
+    phone: syncContactDetails && content.phone !== undefined ? content.phone : current.phone,
+    displayEmail:
+      syncContactDetails && content.displayEmail !== undefined
+        ? content.displayEmail
+        : current.displayEmail,
+    address: syncContactDetails && content.address !== undefined ? content.address : current.address,
+    latitude: content.latitude !== undefined ? content.latitude : current.latitude,
+    longitude: content.longitude !== undefined ? content.longitude : current.longitude,
+    mapZoom: content.mapZoom !== undefined ? content.mapZoom : current.mapZoom,
+  };
+
+  const normalized = normalizeContactPageSettingsContent(next);
 
   if (!normalized.formTitle) {
     throw new Error('Form title is required');

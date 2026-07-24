@@ -141,6 +141,199 @@
     z-index: 1;
 }
 
+.services-category-details {
+    position: relative;
+    display: block;
+    padding: 70px 0 20px;
+}
+
+.services-category-details__text {
+    max-width: 720px;
+    margin: 18px auto 0;
+    color: var(--erepair-gray);
+    line-height: 28px;
+}
+
+.services-gallery {
+    position: relative;
+    display: block;
+    padding: 40px 0 100px;
+}
+
+.services-gallery__header {
+    margin-bottom: 36px;
+}
+
+.services-gallery__btn-box {
+    margin-top: 24px;
+}
+
+.services-gallery__thumbs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.services-gallery__thumb {
+    position: relative;
+    flex: 0 0 auto;
+    width: 148px;
+    height: 110px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #eef1f4;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.services-gallery__thumb:hover,
+.services-gallery__thumb:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    outline: none;
+}
+
+.services-gallery__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.services-gallery__lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 64px 48px;
+    background: rgba(10, 16, 24, 0.88);
+    backdrop-filter: blur(4px);
+}
+
+.services-gallery__lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.services-gallery__lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.services-gallery__lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.services-gallery__lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.services-gallery__lightbox-nav--prev {
+    left: 18px;
+}
+
+.services-gallery__lightbox-nav--next {
+    right: 18px;
+}
+
+.services-gallery__lightbox-stage {
+    position: relative;
+    max-width: min(1100px, 100%);
+    max-height: 100%;
+    text-align: center;
+}
+
+.services-gallery__lightbox-stage img {
+    max-width: 100%;
+    max-height: calc(100vh - 180px);
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.services-gallery__lightbox-caption {
+    margin-top: 18px;
+    color: #fff;
+}
+
+.services-gallery__lightbox-caption p {
+    margin: 0 0 4px;
+    opacity: 0.75;
+    font-size: 14px;
+}
+
+.services-gallery__lightbox-caption h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+}
+
+.services-gallery__lightbox-count {
+    margin: 12px 0 0;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+}
+
+@media (max-width: 767px) {
+    .services-gallery {
+        padding-bottom: 70px;
+    }
+
+    .services-gallery__thumb {
+        width: 120px;
+        height: 90px;
+    }
+
+    .services-gallery__lightbox {
+        padding: 64px 16px 32px;
+    }
+
+    .services-gallery__lightbox-nav--prev {
+        left: 8px;
+    }
+
+    .services-gallery__lightbox-nav--next {
+        right: 8px;
+    }
+}
+
+.services-page .services-two {
+    padding-top: 30px;
+}
+
 .services-two__shape-1 {
     position: absolute;
     bottom: 0;
@@ -157,6 +350,93 @@
 .services-two .row {
     align-items: stretch;
     row-gap: 10px;
+}
+
+.services-two__categories {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 18px;
+    margin: 0 0 40px;
+}
+
+.services-two__category {
+    position: relative;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0 0 8px;
+    font-family: var(--erepair-font);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+    color: var(--erepair-gray);
+    cursor: pointer;
+    transition: color 0.25s ease;
+}
+
+.services-two__category::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--erepair-base);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+}
+
+.services-two__category:hover,
+.services-two__category.is-active {
+    color: var(--erepair-black);
+}
+
+.services-two__category.is-active::after {
+    transform: scaleX(1);
+}
+
+.services-two__carousel {
+    position: relative;
+    padding: 8px 8px 56px 28px;
+    overflow: hidden;
+}
+
+.services-two__carousel .swiper-slide {
+    height: auto;
+}
+
+.services-two__carousel .services-two__single {
+    margin-bottom: 0;
+    height: 100%;
+}
+
+.services-two__carousel .swiper-pagination {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+.services-two__carousel .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    margin: 0 !important;
+    background: var(--erepair-gray);
+    opacity: 0.35;
+    transition: opacity 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+}
+
+.services-two__carousel .swiper-pagination-bullet-active {
+    background: var(--erepair-base);
+    opacity: 1;
+    transform: scale(1.15);
 }
 
 .services-two .row > [class*="col-"] {
@@ -188,7 +468,7 @@
 }
 
 .services-two__title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     line-height: 34px;
     letter-spacing: -0.72px;

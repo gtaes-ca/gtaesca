@@ -214,14 +214,14 @@
 
 .shop-page-one-single .img-box .rate-box h4 {
     color: var(--erepair-white);
-    font-size: 18px;
+    font-size: 14px;
     line-height: 28px;
     font-weight: 600;
     text-transform: uppercase;
 }
 
 .shop-page-one-single .img-box .rate-box h4 del {
-    font-size: 16px;
+    font-size: 12px;
     color: rgba(var(--erepair-white-rgb), 0.70);
     font-weight: 500;
     margin-left: 5px;
@@ -243,7 +243,7 @@
 
 .shop-page-one-single .img-box .discount h6 {
     color: var(--erepair-white);
-    font-size: 14px;
+    font-size: 10px;
     line-height: 25px;
     font-weight: 700;
     text-transform: uppercase;
@@ -261,7 +261,7 @@
 
 .shop-page-one-single .img-box .new h6 {
     color: var(--erepair-white);
-    font-size: 16px;
+    font-size: 12px;
     line-height: 25px;
     font-weight: 700;
     text-transform: uppercase;
@@ -288,7 +288,7 @@
 }
 
 .shop-page-one-single .content-box .title h3 {
-    font-size: 24px;
+    font-size: 20px;
     line-height: 34px;
     font-weight: 700;
     margin-bottom: 4px;
@@ -460,7 +460,7 @@
 }
 
 .shop-widget-single .title h3 {
-    font-size: 22px;
+    font-size: 18px;
     line-height: 32px;
     font-weight: 700;
     text-transform: uppercase;
@@ -687,7 +687,7 @@
 }
 
 .popular-products-content h3 {
-    font-size: 18px;
+    font-size: 14px;
     line-height: 25px;
     font-weight: 700;
     margin-bottom: 6px;
@@ -705,7 +705,7 @@
 
 .popular-products-content h6 {
     color: #6a6b74;
-    font-size: 14px;
+    font-size: 10px;
     line-height: 24px;
     font-weight: 700;
 }
@@ -917,7 +917,7 @@
 
 .shop-details-page1__title h6 {
     color: #a0a3b1;
-    font-size: 14px;
+    font-size: 10px;
     line-height: 24px;
     font-weight: 700;
     text-transform: uppercase;
@@ -925,7 +925,7 @@
 
 .shop-details-page1__title h2 {
     color: #0c0c0c;
-    font-size: 36px;
+    font-size: 32px;
     line-height: 46px;
     font-weight: 700;
     text-transform: capitalize;
@@ -940,7 +940,7 @@
 
 .shop-details-page1__value h3 {
     color: var(--erepair-base);
-    font-size: 26px;
+    font-size: 22px;
     line-height: 36px;
     font-weight: 600;
 }
@@ -997,7 +997,7 @@
 
 .shop-details-page1__product ul li .title h5 {
     color: var(--erepair-black);
-    font-size: 16px;
+    font-size: 12px;
     line-height: 26px;
     font-weight: 600;
     text-transform: capitalize;
@@ -1227,7 +1227,7 @@
 }
 
 .shop-details-page1__description .inner-title h3 {
-    font-size: 30px;
+    font-size: 26px;
     line-height: 40px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1268,7 +1268,7 @@
 }
 
 .shop-details-page1__description ul li .title h5 {
-    font-size: 16px;
+    font-size: 12px;
     line-height: 26px;
     font-weight: 600;
     text-transform: capitalize;
@@ -1295,7 +1295,7 @@
 }
 
 .shop-details-page1__reviews .title-box h2 {
-    font-size: 26px;
+    font-size: 22px;
     line-height: 36px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1347,7 +1347,7 @@
 
 .shop-details-page1__reviews ul li .inner .content-box h3 {
     color: var(--erepair-black);
-    font-size: 20px;
+    font-size: 16px;
     line-height: 30px;
     font-weight: 700;
     text-transform: capitalize;
@@ -1360,7 +1360,7 @@
     margin-left: 5px;
     padding: 0px 10px;
     color: var(--erepair-base);
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 700;
     font-family: var(--thm-font);
     text-transform: uppercase;
@@ -1385,7 +1385,7 @@
 }
 
 .shop-details-page1__form .title-box h2 {
-    font-size: 26px;
+    font-size: 22px;
     line-height: 36px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1596,7 +1596,7 @@
 }
 
 .related-products-one .inner-title h3 {
-    font-size: 36px;
+    font-size: 32px;
     line-height: 1.2em;
     font-weight: 700;
     text-transform: uppercase;
@@ -1749,7 +1749,7 @@
 
 .cart-page-one-table .cart-table tbody tr .prod-column .column-box .title h3 {
     color: var(--erepair-black);
-    font-size: 16px;
+    font-size: 12px;
     line-height: 26px;
     font-weight: 700;
     text-transform: capitalize;
@@ -2116,7 +2116,7 @@
 }
 
 .product-name-select-box .product-name h4 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 24px;
     text-transform: uppercase;
@@ -2170,7 +2170,7 @@
 }
 
 .checkout-page-one-title h3 {
-    font-size: 30px;
+    font-size: 26px;
     line-height: 30px;
     font-weight: 600;
     margin-top: 16px;
@@ -2329,7 +2329,7 @@
 }
 
 .your_order .title h3 {
-    font-size: 30px;
+    font-size: 26px;
     line-height: 30px;
     font-weight: 600;
     text-transform: uppercase;
@@ -2436,7 +2436,7 @@
 
 .checkout__payment .accordion-box-style1 .accordion .accord-btn h4 {
     color: var(--erepair-black);
-    font-size: 18px;
+    font-size: 14px;
     line-height: 28px;
     font-weight: 700;
     text-transform: uppercase;

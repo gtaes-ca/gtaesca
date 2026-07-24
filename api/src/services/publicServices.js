@@ -18,12 +18,23 @@ function formatPublicService(row) {
 const SERVICE_SELECT = `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order,
             c.name AS category_name, c.sort_order AS category_sort_order`;
 
-export async function listPublicServices() {
+export async function listPublicServices({ group } = {}) {
+  const params = [];
+  let categoryFilter = '';
+
+  if (group === 'commercial') {
+    categoryFilter = `WHERE lower(c.name) LIKE '%commercial%'`;
+  } else if (group === 'residential') {
+    categoryFilter = `WHERE lower(c.name) NOT LIKE '%commercial%'`;
+  }
+
   const result = await pool.query(
     `${SERVICE_SELECT}
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
-     ORDER BY c.sort_order, s.sort_order, s.id`
+     ${categoryFilter}
+     ORDER BY c.sort_order, s.sort_order, s.id`,
+    params
   );
 
   return result.rows.map(formatPublicService);

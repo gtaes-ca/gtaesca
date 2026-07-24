@@ -31,7 +31,7 @@
 }
 
 .faq-one__right .section-title-two__title {
-    font-size: 41px;
+    font-size: 39px;
 }
 
 .faq-one__right .section-title-two {
@@ -102,7 +102,7 @@
 
 .faq-one__right .faq-one-accrodion .accrodion-title h4 {
     margin: 0;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 26px;
     color: var(--erepair-black);
@@ -124,7 +124,7 @@
     content: "\e927";
     font-family: 'icomoon' !important;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 10px;
     color: var(--erepair-gray);
     position: absolute;
     top: 50%;

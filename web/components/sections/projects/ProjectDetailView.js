@@ -178,6 +178,14 @@ export default function ProjectDetailView({ projectSlug }) {
                                 <div className="project-details__get-started">
                                     <h3 className="project-details__get-started-title">Get Started Today</h3>
                                     <ul className="project-details__get-started-points list-unstyled">
+                                        {topbar.phone ? (
+                                            <li>
+                                                <div className="icon">
+                                                    <span className="icon-call"></span>
+                                                </div>
+                                                <p><Link href={`tel:${String(topbar.phone).replace(/[^\d+]/g, '')}`}>{topbar.phone}</Link></p>
+                                            </li>
+                                        ) : null}
                                         {topbar.email ? (
                                             <li>
                                                 <div className="icon">

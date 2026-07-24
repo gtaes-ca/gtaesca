@@ -1,16 +1,5 @@
-'use client'
-
-import Layout from '@/components/layout/Layout'
-import ServicesBanner from '@/components/sections/services/ServicesBanner'
-import ServicesGrid from '@/components/sections/services/ServicesGrid'
+import { redirect } from 'next/navigation'
 
 export default function ServicesPage() {
-    return (
-        <div className="services-page">
-            <Layout headerStyle={1} footerStyle={1}>
-                <ServicesBanner />
-                <ServicesGrid />
-            </Layout>
-        </div>
-    )
+    redirect('/residential')
 }

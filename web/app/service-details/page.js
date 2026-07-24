@@ -15,7 +15,7 @@ function ServiceDetailsRedirect() {
 
         async function redirect() {
             if (!id) {
-                router.replace('/services')
+                router.replace('/residential')
                 return
             }
 
@@ -35,7 +35,7 @@ function ServiceDetailsRedirect() {
             }
 
             if (!cancelled) {
-                router.replace('/services')
+                router.replace('/residential')
             }
         }
 

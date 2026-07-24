@@ -56,7 +56,11 @@ export default function AboutSection({ variant = '' }) {
                                         <div className="icon">
                                             <span className="icon-check"></span>
                                         </div>
-                                        <h3>We are certified<br/> company since 1997</h3>
+                                        <h3>
+                                            {content.badgeLine1}
+                                            {content.badgeLine1 && content.badgeLine2 ? <br/> : null}
+                                            {content.badgeLine2 ? ` ${content.badgeLine2}` : null}
+                                        </h3>
                                     </div>
                                     <div className="about-one__img-box-2">
                                         <div className="about-one__img-2">

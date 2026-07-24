@@ -11,9 +11,9 @@ const LOGO_SRC = assetUrl('assets/images/resources/logo-1.png')
 const BASE_NAV_ITEMS = [
     { label: 'Home', href: '/' },
     { label: 'About Us', href: '/about' },
-    { label: 'Team', href: '/team' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Services', href: '/services' },
+    { label: 'Team', href: '/team', bookingOnly: true },
+    { label: 'Residential', href: '/residential' },
+    { label: 'Commercial', href: '/commercial' },
     { label: 'FAQ', href: '/faq' },
     { labelKey: 'book', href: '/book' },
     { label: 'Contact', href: '/contact' },
@@ -21,15 +21,20 @@ const BASE_NAV_ITEMS = [
 
 const MobileMenu = ({ handleMobileMenu }) => {
     const { isAuthenticated, sessionChecked } = useAuth()
-    const { label: bookLabel, isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
+    const { label: bookLabel, href: bookHref, isWhatsAppMode, loaded: channelLoaded } = useBookingChannel()
 
     const menuItems = useMemo(() => {
-        const navItems = BASE_NAV_ITEMS.map((item) => {
-            if (item.labelKey === 'book') {
-                return { label: bookLabel, href: item.href }
-            }
-            return item
-        })
+        const navItems = BASE_NAV_ITEMS
+            .filter((item) => {
+                if (!item.bookingOnly) return true
+                return channelLoaded && !isWhatsAppMode
+            })
+            .map((item) => {
+                if (item.labelKey === 'book') {
+                    return { label: bookLabel, href: bookHref }
+                }
+                return item
+            })
 
         if (!sessionChecked || !channelLoaded || isWhatsAppMode) {
             return navItems
@@ -42,7 +47,7 @@ const MobileMenu = ({ handleMobileMenu }) => {
                 href: isAuthenticated ? '/account/bookings' : '/account/login?redirectTo=/account/bookings',
             },
         ]
-    }, [bookLabel, channelLoaded, isAuthenticated, isWhatsAppMode, sessionChecked])
+    }, [bookHref, bookLabel, channelLoaded, isAuthenticated, isWhatsAppMode, sessionChecked])
 
     return (
         <div className="mobile-nav__wrapper">
