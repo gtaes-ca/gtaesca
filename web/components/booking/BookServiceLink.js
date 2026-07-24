@@ -8,7 +8,8 @@ export default function BookServiceLink({ className, onClick, children }) {
 
   return (
     <Link href={href} className={className} onClick={onClick}>
-      {children || label}
+      <span className="thm-btn__label">{children || label}</span>
+      <span className="thm-btn__icon icon-arrow-right" aria-hidden="true" />
     </Link>
   )
 }

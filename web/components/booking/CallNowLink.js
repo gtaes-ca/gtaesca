@@ -11,7 +11,8 @@ export default function CallNowLink({ className, children = 'Call Now' }) {
 
   return (
     <a href={href} className={className}>
-      {children}
+      <span className="thm-btn__icon icon-phone-call" aria-hidden="true" />
+      <span className="thm-btn__label">{children}</span>
     </a>
   )
 }

@@ -438,6 +438,8 @@ ul {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
   vertical-align: middle;
   -webkit-appearance: none;
   appearance: none;
@@ -456,6 +458,20 @@ ul {
   font-family: var(--erepair-font-2);
   text-transform: uppercase;
   z-index: 1;
+}
+
+.thm-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.thm-btn__label {
+  display: inline-block;
+  line-height: 1.2;
 }
 
 .thm-btn:before {

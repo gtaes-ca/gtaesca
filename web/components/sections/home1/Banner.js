@@ -146,7 +146,8 @@ export default function Banner() {
                                     <div className="main-slider__btn-box">
                                         {callHref ? (
                                             <a href={callHref} className="main-slider__btn thm-btn">
-                                                Call Now
+                                                <span className="thm-btn__icon icon-phone-call" aria-hidden="true" />
+                                                <span className="thm-btn__label">Call Now</span>
                                             </a>
                                         ) : null}
                                         <Link
