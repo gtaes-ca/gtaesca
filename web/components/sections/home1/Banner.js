@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link"
-import { Navigation, Pagination } from "swiper/modules"
+import { Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { useEffect, useState } from 'react'
 import { resolveCmsAssetUrl } from '@/lib/cms'
@@ -9,16 +9,11 @@ import { buildTelHref, fetchPublicBookingSettings } from '@/lib/booking'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const swiperOptions = {
-    modules: [Pagination, Navigation],
+    modules: [Pagination],
     slidesPerView: 1,
     spaceBetween: 0,
     loop: true,
-    navigation: {
-        nextEl: '.h1n',
-        prevEl: '.h1p',
-    },
     pagination: {
-        el: '.swiper-pagination',
         clickable: true,
     },
 }
