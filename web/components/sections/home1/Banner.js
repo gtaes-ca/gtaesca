@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { resolveCmsAssetUrl } from '@/lib/cms'
 import { buildTelHref, fetchPublicBookingSettings } from '@/lib/booking'
 import { useContactDetails } from '@/hooks/useContactDetails'
+import BookServiceLink from '@/components/booking/BookServiceLink'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -150,12 +151,7 @@ export default function Banner() {
                                                 <span className="thm-btn__label">Call Now</span>
                                             </a>
                                         ) : null}
-                                        <Link
-                                            href={slide.buttonLink || '/about'}
-                                            className="main-slider__btn main-slider__btn--outline"
-                                        >
-                                            {slide.buttonText || 'Learn More'}
-                                        </Link>
+                                        <BookServiceLink className="main-slider__btn main-slider__btn--outline" />
                                     </div>
                                     {socialLinks.length ? (
                                         <div className="main-slider__social" aria-label="Social links">

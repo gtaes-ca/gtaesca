@@ -1171,6 +1171,12 @@ ul {
 .main-menu__btn {
   background-color: var(--erepair-base);
   color: var(--erepair-white);
+  min-width: 196px;
+  min-height: 50px;
+  justify-content: center;
+  box-sizing: border-box;
+  padding-left: 22px;
+  padding-right: 22px;
 }
 
 .main-menu__btn--call {
