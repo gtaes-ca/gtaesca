@@ -8,7 +8,7 @@ export const BOOKING_MODES = {
 };
 
 export const BOOK_SERVICE_CTA_LABEL = 'Book a Service';
-export const BOOK_WHATSAPP_CTA_LABEL = 'Book via WhatsApp';
+export const BOOK_WHATSAPP_CTA_LABEL = 'Request a Quote';
 
 export function isWhatsAppBookingMode(bookingMode) {
   return bookingMode === BOOKING_MODES.WHATSAPP;
