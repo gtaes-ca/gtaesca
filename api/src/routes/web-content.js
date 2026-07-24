@@ -6,6 +6,7 @@ import {
   getHomeAboutContent,
   getHomeGalleryContent,
   getHomeServicesContent,
+  getHomeTestimonialsContent,
   getPageWidgets,
   getSliderContent,
   getTeamBannerContent,
@@ -59,6 +60,11 @@ router.get('/home/featured-services', async (_req, res) => {
 
 router.get('/home/gallery', async (_req, res) => {
   const content = await getHomeGalleryContent();
+  return res.json({ content });
+});
+
+router.get('/home/testimonials', async (_req, res) => {
+  const content = await getHomeTestimonialsContent();
   return res.json({ content });
 });
 

@@ -103,6 +103,35 @@ const DEFAULT_HOME_GALLERY = {
   items: [],
 };
 
+const DEFAULT_HOME_TESTIMONIALS = {
+  tagline: 'Testimonials',
+  titleLine1: 'What Our Clients Say',
+  titleLine2: '',
+  items: [
+    {
+      message:
+        'GTA Electric Services upgraded our panel quickly and explained every step. Professional, clean work, and fair pricing.',
+      clientName: 'Sarah Mitchell',
+      timestamp: '2026-06-12T14:30:00.000Z',
+      rating: 5,
+    },
+    {
+      message:
+        'They handled our office lighting retrofit after hours so we had zero downtime. Highly recommend for commercial work.',
+      clientName: 'James Chen',
+      timestamp: '2026-05-28T10:00:00.000Z',
+      rating: 5,
+    },
+    {
+      message:
+        'Responsive, licensed, and thorough. Fixed our intermittent breaker issues the same week we called.',
+      clientName: 'Priya Patel',
+      timestamp: '2026-04-18T16:45:00.000Z',
+      rating: 4,
+    },
+  ],
+};
+
 function normalizeSlide(slide = {}, index = 0) {
   const fallback = DEFAULT_SLIDER_SLIDES[index] || DEFAULT_SLIDER_SLIDES[0];
   const backgroundImage = String(slide.backgroundImage ?? fallback.backgroundImage).trim();
@@ -231,6 +260,42 @@ export function normalizeHomeGalleryContent(content = {}) {
     titleLine2: String(content.titleLine2 ?? DEFAULT_HOME_GALLERY.titleLine2).trim(),
     buttonText: String(content.buttonText ?? DEFAULT_HOME_GALLERY.buttonText).trim(),
     buttonLink: String(content.buttonLink ?? DEFAULT_HOME_GALLERY.buttonLink).trim(),
+    items,
+  };
+}
+
+function clampRating(value) {
+  const rating = Number(value);
+  if (!Number.isFinite(rating)) return 5;
+  return Math.min(5, Math.max(1, Math.round(rating)));
+}
+
+function normalizeTimestamp(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return date.toISOString();
+}
+
+function normalizeTestimonialItem(item = {}) {
+  return {
+    message: String(item?.message ?? '').trim(),
+    clientName: String(item?.clientName ?? '').trim(),
+    timestamp: normalizeTimestamp(item?.timestamp),
+    rating: clampRating(item?.rating ?? 5),
+  };
+}
+
+export function normalizeHomeTestimonialsContent(content = {}) {
+  const items = Array.isArray(content.items)
+    ? content.items.map((item) => normalizeTestimonialItem(item)).filter((item) => item.message && item.clientName)
+    : [];
+
+  return {
+    tagline: String(content.tagline ?? DEFAULT_HOME_TESTIMONIALS.tagline).trim(),
+    titleLine1: String(content.titleLine1 ?? DEFAULT_HOME_TESTIMONIALS.titleLine1).trim(),
+    titleLine2: String(content.titleLine2 ?? DEFAULT_HOME_TESTIMONIALS.titleLine2).trim(),
     items,
   };
 }
@@ -534,6 +599,36 @@ export async function updateFeaturedServicesContent(content) {
 export async function getHomeGalleryContent() {
   const projects = await getProjectsGalleryContent();
   return mapProjectsGalleryToHomeContent(projects);
+}
+
+export async function getHomeTestimonialsContent() {
+  const widget = await getWidget('home', 'testimonials');
+  if (!widget?.content) {
+    return normalizeHomeTestimonialsContent(DEFAULT_HOME_TESTIMONIALS);
+  }
+  return normalizeHomeTestimonialsContent(widget.content);
+}
+
+export async function updateHomeTestimonialsContent(content) {
+  const normalized = normalizeHomeTestimonialsContent(content);
+
+  if (!normalized.titleLine1) {
+    throw new Error('Testimonials title is required');
+  }
+
+  for (const item of normalized.items) {
+    if (!item.message) {
+      throw new Error('Each testimonial requires a message');
+    }
+    if (!item.clientName) {
+      throw new Error('Each testimonial requires a client name');
+    }
+    if (!item.timestamp) {
+      throw new Error('Each testimonial requires a timestamp');
+    }
+  }
+
+  return upsertWidget('home', 'testimonials', normalized);
 }
 
 export async function updateHomeGalleryContent(content) {

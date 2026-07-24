@@ -6,12 +6,14 @@ import HomeFeaturedServicesForm from './components/HomeFeaturedServicesForm';
 import HomeGalleryForm from './components/HomeGalleryForm';
 import HomeServicesForm from './components/HomeServicesForm';
 import HomeSliderForm from './components/HomeSliderForm';
+import HomeTestimonialsForm from './components/HomeTestimonialsForm';
 
 const TABS = {
   SLIDER: 'slider',
   FEATURES: 'features',
   ABOUT: 'about',
   FEATURED_SERVICES: 'featured-services',
+  TESTIMONIALS: 'testimonials',
   GALLERY: 'gallery',
 };
 
@@ -39,6 +41,9 @@ const HomepageCmsPage = () => {
             <Nav.Link eventKey={TABS.FEATURED_SERVICES}>Featured Services</Nav.Link>
           </Nav.Item>
           <Nav.Item>
+            <Nav.Link eventKey={TABS.TESTIMONIALS}>Testimonials</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
             <Nav.Link eventKey={TABS.GALLERY}>Our Gallery</Nav.Link>
           </Nav.Item>
         </Nav>
@@ -55,6 +60,9 @@ const HomepageCmsPage = () => {
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.FEATURED_SERVICES}>
             {activeTab === TABS.FEATURED_SERVICES && <HomeFeaturedServicesForm />}
+          </Tab.Pane>
+          <Tab.Pane eventKey={TABS.TESTIMONIALS}>
+            {activeTab === TABS.TESTIMONIALS && <HomeTestimonialsForm />}
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.GALLERY}>
             {activeTab === TABS.GALLERY && <HomeGalleryForm />}

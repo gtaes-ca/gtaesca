@@ -8,6 +8,7 @@ import {
   getHomeAboutContent,
   getHomeGalleryContent,
   getHomeServicesContent,
+  getHomeTestimonialsContent,
   getPageWidgets,
   getSliderContent,
   getTeamBannerContent,
@@ -37,6 +38,7 @@ import {
   updateHomeAboutContent,
   updateHomeGalleryContent,
   updateHomeServicesContent,
+  updateHomeTestimonialsContent,
   updateSliderContent,
   updateTeamBannerContent,
   updateTeamDetailsBannerContent,
@@ -171,6 +173,20 @@ router.get('/home/gallery', requirePageAccess('management.cms'), async (_req, re
 router.put('/home/gallery', requirePageAccess('management.cms'), async (req, res) => {
   try {
     const widget = await updateHomeGalleryContent(req.body?.content || req.body);
+    return res.json({ widget, content: widget.content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/home/testimonials', requirePageAccess('management.cms'), async (_req, res) => {
+  const content = await getHomeTestimonialsContent();
+  return res.json({ content });
+});
+
+router.put('/home/testimonials', requirePageAccess('management.cms'), async (req, res) => {
+  try {
+    const widget = await updateHomeTestimonialsContent(req.body?.content || req.body);
     return res.json({ widget, content: widget.content });
   } catch (error) {
     return res.status(400).json({ error: error.message });

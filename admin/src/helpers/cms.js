@@ -372,3 +372,41 @@ export function mapGalleryForSave(content = {}) {
     })),
   };
 }
+
+function toDatetimeLocalValue(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function mapTestimonialsFromApi(content = {}) {
+  const items = Array.isArray(content.items) ? content.items : [];
+
+  return {
+    tagline: content.tagline || 'Testimonials',
+    titleLine1: content.titleLine1 || 'What Our Clients Say',
+    titleLine2: content.titleLine2 || '',
+    items: items.map((item) => ({
+      message: item.message || '',
+      clientName: item.clientName || '',
+      timestamp: toDatetimeLocalValue(item.timestamp) || '',
+      rating: Number(item.rating) >= 1 && Number(item.rating) <= 5 ? Number(item.rating) : 5,
+    })),
+  };
+}
+
+export function mapTestimonialsForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    titleLine1: content.titleLine1,
+    titleLine2: content.titleLine2,
+    items: (content.items || []).map((item) => ({
+      message: item.message,
+      clientName: item.clientName,
+      timestamp: item.timestamp ? new Date(item.timestamp).toISOString() : '',
+      rating: Number(item.rating) || 5,
+    })),
+  };
+}

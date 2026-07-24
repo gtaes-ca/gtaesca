@@ -128,6 +128,104 @@
 }
 
 /*--------------------------------------------------------------
+# Home Testimonials Cards
+--------------------------------------------------------------*/
+.home-testimonials {
+    padding: 100px 0 90px;
+}
+
+.home-testimonials .section-title {
+    margin-bottom: 50px;
+}
+
+.home-testimonials__grid {
+    row-gap: 30px;
+}
+
+.home-testimonials__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--erepair-white);
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.05);
+    padding: 36px 30px 32px;
+    transition: transform 0.35s ease;
+}
+
+.home-testimonials__card:hover {
+    transform: translateY(-8px);
+}
+
+.home-testimonials__quote {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--erepair-base);
+    color: var(--erepair-white);
+}
+
+.home-testimonials__quote span {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--erepair-white);
+}
+
+.home-testimonials__rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 16px;
+}
+
+.home-testimonials__rating span {
+    font-size: 14px;
+    color: var(--erepair-primary);
+}
+
+.home-testimonials__rating span.is-empty {
+    color: rgba(var(--erepair-gray-rgb), 0.35);
+}
+
+.home-testimonials__message {
+    flex: 1;
+    margin: 0 0 24px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--erepair-gray);
+}
+
+.home-testimonials__meta {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(var(--erepair-black-rgb), 0.08);
+}
+
+.home-testimonials__name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--erepair-black);
+    text-transform: capitalize;
+}
+
+.home-testimonials__date {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--erepair-gray);
+}
+
+/*--------------------------------------------------------------
 # Testimonial Two
 --------------------------------------------------------------*/
 .testimonial-two {
