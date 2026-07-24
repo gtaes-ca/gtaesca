@@ -191,17 +191,16 @@ const BookingSettingsPage = () => {
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Company WhatsApp number</Form.Label>
+                        <Form.Label>Company mobile number</Form.Label>
                         <Form.Control
                           type="tel"
                           placeholder="e.g. 14165551234"
                           value={form.companyWhatsappNumber}
                           onChange={(e) => setForm({ ...form, companyWhatsappNumber: e.target.value })}
-                          disabled={!isWhatsAppMode}
                           required={isWhatsAppMode}
                         />
                         <Form.Text className="text-muted">
-                          Include country code, digits only (10–15 digits).
+                          Include country code, digits only (10–15). Used for Call Now on the website and WhatsApp booking.
                         </Form.Text>
                       </Form.Group>
                     </Col>

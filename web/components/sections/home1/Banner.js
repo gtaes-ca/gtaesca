@@ -1,10 +1,10 @@
-
 'use client'
 import Link from "next/link"
 import { Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { useEffect, useState } from 'react'
 import { resolveCmsAssetUrl } from '@/lib/cms'
+import { buildTelHref, fetchPublicBookingSettings } from '@/lib/booking'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -37,6 +37,7 @@ function slideBackgroundStyle(slide) {
 
 export default function Banner() {
     const [slides, setSlides] = useState([])
+    const [callHref, setCallHref] = useState(null)
 
     useEffect(() => {
         let cancelled = false
@@ -55,7 +56,18 @@ export default function Banner() {
             }
         }
 
+        async function loadCallNumber() {
+            try {
+                const settings = await fetchPublicBookingSettings()
+                if (cancelled) return
+                setCallHref(buildTelHref(settings.companyWhatsappNumber))
+            } catch {
+                // Call Now stays hidden if settings unavailable
+            }
+        }
+
         loadSlider()
+        loadCallNumber()
         return () => {
             cancelled = true
         }
@@ -88,6 +100,11 @@ export default function Banner() {
                                     </h2>
                                     <p className="main-slider__text">{slide.text}</p>
                                     <div className="main-slider__btn-box">
+                                        {callHref ? (
+                                            <a href={callHref} className="main-slider__btn thm-btn">
+                                                Call Now
+                                            </a>
+                                        ) : null}
                                         <Link href={slide.buttonLink || '/about'} className="main-slider__btn thm-btn">
                                             {slide.buttonText || 'Learn More'}
                                         </Link>

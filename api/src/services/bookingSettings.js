@@ -85,7 +85,8 @@ export function getPublicBookingSettings(settings) {
     bookingMode: settings.bookingMode,
   };
 
-  if (isWhatsAppBookingMode(settings) && settings.companyWhatsappNumber) {
+  // Always expose when set — used for Call Now (tel:) and WhatsApp booking.
+  if (settings.companyWhatsappNumber) {
     base.companyWhatsappNumber = settings.companyWhatsappNumber;
   }
 

@@ -84,6 +84,12 @@ export function normalizeWhatsAppNumber(number) {
   return String(number || '').replace(/\D/g, '');
 }
 
+export function buildTelHref(number) {
+  const digits = normalizeWhatsAppNumber(number);
+  if (!digits) return null;
+  return `tel:+${digits}`;
+}
+
 export function buildWhatsAppBookingMessage({
   services = [],
   location,
