@@ -501,12 +501,7 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: linear-gradient(
-        180deg,
-        rgba(var(--erepair-navy-rgb), 0.18) 0%,
-        rgba(var(--erepair-navy-rgb), 0.42) 55%,
-        rgba(var(--erepair-navy-rgb), 0.72) 100%
-    );
+    background: var(--erepair-photo-overlay);
 }
 
 .services-two__media-fallback {
@@ -706,12 +701,7 @@
 .services-two__category-card-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        180deg,
-        rgba(var(--erepair-navy-rgb), 0.2) 0%,
-        rgba(var(--erepair-navy-rgb), 0.55) 45%,
-        rgba(var(--erepair-navy-rgb), 0.88) 100%
-    );
+    background: var(--erepair-category-overlay);
     z-index: 1;
     pointer-events: none;
 }

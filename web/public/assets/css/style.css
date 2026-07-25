@@ -22,6 +22,7 @@
 @import url('module-css/about.css');
 @import url('module-css/blog.css');
 @import url('module-css/brand.css');
+@import url('module-css/bg-overlay.css');
 @import url('module-css/coming-soon.css');
 @import url('module-css/contact.css');
 @import url('module-css/counter.css');
@@ -72,6 +73,25 @@
   --erepair-extra-rgb: 255, 246, 232;
   --erepair-bdr-color: #DDDDDD;
   --erepair-bdr-color-rgb: 221, 221, 221;
+  /* Shared photo / banner overlays */
+  --erepair-photo-overlay: linear-gradient(
+    180deg,
+    rgba(var(--erepair-navy-rgb), 0.18) 0%,
+    rgba(var(--erepair-navy-rgb), 0.42) 55%,
+    rgba(var(--erepair-navy-rgb), 0.72) 100%
+  );
+  --erepair-banner-overlay: linear-gradient(
+    90deg,
+    rgba(var(--erepair-navy-rgb), 0.94) 0%,
+    rgba(var(--erepair-navy-rgb), 0.78) 50%,
+    rgba(var(--erepair-navy-rgb), 0.42) 100%
+  );
+  --erepair-category-overlay: linear-gradient(
+    180deg,
+    rgba(var(--erepair-navy-rgb), 0.2) 0%,
+    rgba(var(--erepair-navy-rgb), 0.55) 45%,
+    rgba(var(--erepair-navy-rgb), 0.88) 100%
+  );
   /* Site-wide typeface (homepage standard) */
   --erepair-font-2: var(--erepair-font);
   --erepair-font-3: var(--erepair-font);

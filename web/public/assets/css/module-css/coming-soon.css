@@ -34,7 +34,7 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(0deg, #000000 5%, rgba(0, 0, 0, 0.5) 100%);
+    background: var(--erepair-banner-overlay);
 }
 
 .coming-soon-page__content {

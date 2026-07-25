@@ -1,0 +1,94 @@
+/*--------------------------------------------------------------
+# Sitewide navy overlays on photo backgrounds & media
+--------------------------------------------------------------*/
+
+/* Absolute section backgrounds already have positioning — do not override */
+.services-page__card-media,
+.about-page-intro__media,
+.about-contact__image-wrap,
+.about-one__img-1,
+.about-one__img-2,
+.about-two__img,
+.about-three__img,
+.about-three__img-two,
+.project-one__img,
+.project-details__img,
+.team-one__img,
+.team-details__img,
+.blog-one__img,
+.blog-two__img,
+.blog-three__img,
+.service-three__img,
+.services-four__img,
+.services-gallery__thumb,
+.service-details__img,
+.service-details__img-box-img,
+.contact-one__img,
+.main-slider-two__img {
+    position: relative;
+}
+
+.has-bg-overlay::after,
+.video-one__bg::after,
+.faq-one__bg::after,
+.process-one__bg::after,
+.services-page__card-media::after,
+.about-page-intro__media::after,
+.about-contact__image-wrap::after,
+.about-one__img-1::after,
+.about-one__img-2::after,
+.about-two__img::after,
+.about-three__img::after,
+.about-three__img-two::after,
+.project-one__img::after,
+.project-details__img::after,
+.team-one__img::after,
+.team-details__img::after,
+.blog-one__img::after,
+.blog-two__img::after,
+.blog-three__img::after,
+.service-three__img::after,
+.services-four__img::after,
+.services-gallery__thumb::after,
+.service-details__img::after,
+.service-details__img-box-img::after,
+.contact-one__img::after,
+.main-slider-two__img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: var(--erepair-photo-overlay);
+    border-radius: inherit;
+}
+
+/* Keep interactive controls above the overlay */
+.video-one__video-link,
+.project-one__arrow {
+    position: relative;
+    z-index: 2;
+}
+
+/* Intro media accent is redundant once the full overlay is applied */
+.about-page-intro__media-accent {
+    display: none;
+}
+
+/* Clip overlays to rounded image frames */
+.service-details__img,
+.project-details__img,
+.team-details__img,
+.contact-one__img {
+    overflow: hidden;
+}
+
+.service-details__img {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.project-details__img,
+.team-details__img {
+    border-radius: 20px;
+}

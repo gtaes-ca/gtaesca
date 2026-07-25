@@ -58,12 +58,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        90deg,
-        rgba(var(--erepair-navy-rgb), 0.94) 0%,
-        rgba(var(--erepair-navy-rgb), 0.78) 42%,
-        rgba(var(--erepair-navy-rgb), 0.42) 100%
-    );
+    background: var(--erepair-banner-overlay);
     z-index: 1;
     pointer-events: none;
 }
@@ -933,8 +928,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(var(--erepair-black-rgb), .90);
-    z-index: -1;
+    background: var(--erepair-banner-overlay);
+    z-index: 1;
+    pointer-events: none;
 }
 
 .swiper-slide-active .main-slider-three__bg {
