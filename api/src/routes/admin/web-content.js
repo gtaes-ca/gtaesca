@@ -3,12 +3,14 @@ import { authenticate, requirePageAccess } from '../../middleware/auth.js';
 import { getAllowedPagesForUser } from '../../services/pageAccess.js';
 import {
   getAboutBannerContent,
+  getAboutIntroContent,
   getAboutContactContent,
   getFeaturedServicesContent,
   getHomeAboutContent,
   getHomeGalleryContent,
   getHomeServicesContent,
   getHomeTestimonialsContent,
+  getHomeCoverageContent,
   getPageWidgets,
   getSliderContent,
   getTeamBannerContent,
@@ -17,6 +19,7 @@ import {
   getProjectsGalleryContent,
   getProjectDetailsBannerContent,
   getServicesBannerContent,
+  getServicesHomepageSectionContent,
   getServiceCategoryBannerContent,
   getServiceCategoryDetailsContent,
   getServiceCategoryGalleryContent,
@@ -33,12 +36,14 @@ import {
   getWidget,
   saveWidgetImage,
   updateAboutBannerContent,
+  updateAboutIntroContent,
   updateAboutContactContent,
   updateFeaturedServicesContent,
   updateHomeAboutContent,
   updateHomeGalleryContent,
   updateHomeServicesContent,
   updateHomeTestimonialsContent,
+  updateHomeCoverageContent,
   updateSliderContent,
   updateTeamBannerContent,
   updateTeamDetailsBannerContent,
@@ -46,6 +51,7 @@ import {
   updateProjectsGalleryContent,
   updateProjectDetailsBannerContent,
   updateServicesBannerContent,
+  updateServicesHomepageSectionContent,
   updateServiceCategoryBannerContent,
   updateServiceCategoryDetailsContent,
   updateServiceCategoryGalleryContent,
@@ -193,6 +199,20 @@ router.put('/home/testimonials', requirePageAccess('management.cms'), async (req
   }
 });
 
+router.get('/home/coverage', requirePageAccess('management.cms'), async (_req, res) => {
+  const content = await getHomeCoverageContent();
+  return res.json({ content });
+});
+
+router.put('/home/coverage', requirePageAccess('management.cms'), async (req, res) => {
+  try {
+    const saved = await updateHomeCoverageContent(req.body?.content || req.body);
+    return res.json({ content: saved });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/team-details/banner', requirePageAccess('management.cms.team'), async (_req, res) => {
   const content = await getTeamDetailsBannerContent();
   return res.json({ content });
@@ -271,6 +291,20 @@ router.get('/services/banner', requirePageAccess('management.cms.services'), asy
 router.put('/services/banner', requirePageAccess('management.cms.services'), async (req, res) => {
   try {
     const content = await updateServicesBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/services/homepage-section', requirePageAccess('management.cms.services'), async (_req, res) => {
+  const content = await getServicesHomepageSectionContent();
+  return res.json({ content });
+});
+
+router.put('/services/homepage-section', requirePageAccess('management.cms.services'), async (req, res) => {
+  try {
+    const content = await updateServicesHomepageSectionContent(req.body.content || {});
     return res.json({ content });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -495,6 +529,20 @@ router.get('/about/banner', requirePageAccess('management.cms.about'), async (_r
 router.put('/about/banner', requirePageAccess('management.cms.about'), async (req, res) => {
   try {
     const content = await updateAboutBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/about/intro', requirePageAccess('management.cms.about'), async (_req, res) => {
+  const content = await getAboutIntroContent();
+  return res.json({ content });
+});
+
+router.put('/about/intro', requirePageAccess('management.cms.about'), async (req, res) => {
+  try {
+    const content = await updateAboutIntroContent(req.body.content || {});
     return res.json({ content });
   } catch (error) {
     return res.status(400).json({ error: error.message });

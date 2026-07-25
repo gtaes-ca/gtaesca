@@ -1,0 +1,98 @@
+/*--------------------------------------------------------------
+# Global section reveal (hero-style entrance)
+--------------------------------------------------------------*/
+.section-reveal .section-reveal__tagline,
+.section-reveal .section-reveal__title,
+.section-reveal .section-reveal__text,
+.section-reveal .section-reveal__item {
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+.section-reveal .section-reveal__tagline {
+    transform: translateX(-140px);
+    transition: transform 1100ms ease, opacity 1100ms ease;
+}
+
+.section-reveal .section-reveal__title {
+    transform: translateX(140px);
+    transition: transform 1000ms ease, opacity 1000ms ease;
+}
+
+.section-reveal .section-reveal__text {
+    transform: translateX(-120px);
+    transition: transform 1100ms ease, opacity 1100ms ease;
+}
+
+.section-reveal .section-reveal__item {
+    transform: translateY(56px);
+}
+
+.section-reveal.is-inview .section-reveal__tagline {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 80ms;
+}
+
+.section-reveal.is-inview .section-reveal__title {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 260ms;
+}
+
+.section-reveal.is-inview .section-reveal__text {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 420ms;
+}
+
+/* Animation (not transition) so cards that mount after the section is
+   already in view still play their entrance */
+.section-reveal.is-inview .section-reveal__item {
+    animation: section-reveal-item 900ms ease both;
+    animation-delay: calc(520ms + (var(--reveal-index, 0) * 70ms));
+}
+
+@keyframes section-reveal-item {
+    from {
+        opacity: 0;
+        transform: translateY(56px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fallback: sections with no annotated children still get a soft rise */
+.section-reveal:not(:has(.section-reveal__tagline, .section-reveal__title, .section-reveal__text, .section-reveal__item)) > .container {
+    opacity: 0;
+    transform: translateY(48px);
+    transition: transform 1000ms ease, opacity 1000ms ease;
+}
+
+.section-reveal.is-inview:not(:has(.section-reveal__tagline, .section-reveal__title, .section-reveal__text, .section-reveal__item)) > .container {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 767px) {
+    .section-reveal .section-reveal__tagline,
+    .section-reveal .section-reveal__title,
+    .section-reveal .section-reveal__text {
+        transform: translateY(36px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .section-reveal .section-reveal__tagline,
+    .section-reveal .section-reveal__title,
+    .section-reveal .section-reveal__text,
+    .section-reveal .section-reveal__item,
+    .section-reveal > .container {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}

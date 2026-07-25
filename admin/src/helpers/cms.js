@@ -89,6 +89,39 @@ export function mapAboutForSave(content = {}) {
   };
 }
 
+export function mapAboutIntroFromApi(content = {}) {
+  const image = content.image || '';
+  const points = Array.isArray(content.points) && content.points.length
+    ? content.points
+    : ['', '', ''];
+
+  return {
+    tagline: content.tagline || 'Who We Are',
+    title: content.title || '',
+    text1: content.text1 || '',
+    text2: content.text2 || '',
+    points: [...points, '', '', ''].slice(0, 6),
+    image,
+    imagePreview: resolveCmsAssetUrl(image),
+    imageData: null,
+    buttonText: content.buttonText || 'Request a Quote',
+    buttonLink: content.buttonLink || '/contact',
+  };
+}
+
+export function mapAboutIntroForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    title: content.title,
+    text1: content.text1,
+    text2: content.text2,
+    points: (content.points || []).map((point) => String(point || '').trim()).filter(Boolean),
+    image: content.image,
+    buttonText: content.buttonText,
+    buttonLink: content.buttonLink,
+  };
+}
+
 export function mapAboutContactFromApi(content = {}) {
   const backgroundImage = content.backgroundImage || '';
 
@@ -408,5 +441,43 @@ export function mapTestimonialsForSave(content = {}) {
       timestamp: item.timestamp ? new Date(item.timestamp).toISOString() : '',
       rating: Number(item.rating) || 5,
     })),
+  };
+}
+
+export function mapServicesHomepageSectionFromApi(content = {}) {
+  return {
+    tagline: content.tagline || 'What We Do',
+    titleLine1: content.titleLine1 || 'Featured Electrical Services',
+    titleLine2: content.titleLine2 || 'for Your Home & Business',
+  };
+}
+
+export function mapServicesHomepageSectionForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    titleLine1: content.titleLine1,
+    titleLine2: content.titleLine2,
+  };
+}
+
+export function mapHomeCoverageFromApi(content = {}) {
+  return {
+    tagline: content.tagline || 'Service Coverage',
+    titleLine1: content.titleLine1 || 'Areas We Serve Across the GTA',
+    titleLine2: content.titleLine2 || '',
+    text: content.text || '',
+    gtaLabel: content.gtaLabel || 'Greater Toronto Area',
+    nearbyLabel: content.nearbyLabel || 'Nearby Areas',
+  };
+}
+
+export function mapHomeCoverageForSave(content = {}) {
+  return {
+    tagline: content.tagline,
+    titleLine1: content.titleLine1,
+    titleLine2: content.titleLine2,
+    text: content.text,
+    gtaLabel: content.gtaLabel,
+    nearbyLabel: content.nearbyLabel,
   };
 }

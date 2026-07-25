@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import {
   getAboutBannerContent,
+  getAboutIntroContent,
   getAboutContactContent,
   getFeaturedServicesContent,
   getHomeAboutContent,
   getHomeGalleryContent,
   getHomeServicesContent,
   getHomeTestimonialsContent,
+  getHomeCoverageContent,
   getPageWidgets,
   getSliderContent,
   getTeamBannerContent,
@@ -15,6 +17,7 @@ import {
   getProjectsGalleryContent,
   getProjectDetailsBannerContent,
   getServicesBannerContent,
+  getServicesHomepageSectionContent,
   getServiceCategoryBannerContent,
   getServiceCategoryDetailsContent,
   getServiceCategoryGalleryContent,
@@ -68,6 +71,11 @@ router.get('/home/testimonials', async (_req, res) => {
   return res.json({ content });
 });
 
+router.get('/home/coverage', async (_req, res) => {
+  const content = await getHomeCoverageContent();
+  return res.json({ content });
+});
+
 router.get('/contact/settings', async (_req, res) => {
   const content = await getPublicContactPageSettingsContent();
   return res.json({ content });
@@ -110,6 +118,11 @@ router.get('/privacy/content', async (_req, res) => {
 
 router.get('/services/banner', async (_req, res) => {
   const content = await getServicesBannerContent();
+  return res.json({ content });
+});
+
+router.get('/services/homepage-section', async (_req, res) => {
+  const content = await getServicesHomepageSectionContent();
   return res.json({ content });
 });
 
@@ -175,6 +188,11 @@ router.get('/team/banner', async (_req, res) => {
 
 router.get('/about/banner', async (_req, res) => {
   const content = await getAboutBannerContent();
+  return res.json({ content });
+});
+
+router.get('/about/intro', async (_req, res) => {
+  const content = await getAboutIntroContent();
   return res.json({ content });
 });
 

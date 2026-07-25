@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import PageMetaData from '@/components/PageTitle';
 import HomeAboutForm from './components/HomeAboutForm';
+import HomeCoverageForm from './components/HomeCoverageForm';
 import HomeFeaturedServicesForm from './components/HomeFeaturedServicesForm';
 import HomeGalleryForm from './components/HomeGalleryForm';
 import HomeServicesForm from './components/HomeServicesForm';
@@ -13,6 +14,7 @@ const TABS = {
   FEATURES: 'features',
   ABOUT: 'about',
   FEATURED_SERVICES: 'featured-services',
+  COVERAGE: 'coverage',
   TESTIMONIALS: 'testimonials',
   GALLERY: 'gallery',
 };
@@ -35,10 +37,13 @@ const HomepageCmsPage = () => {
             <Nav.Link eventKey={TABS.FEATURES}>Service Features</Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey={TABS.ABOUT}>Get To Know Us</Nav.Link>
+            <Nav.Link eventKey={TABS.ABOUT}>About Section</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey={TABS.FEATURED_SERVICES}>Featured Services</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey={TABS.COVERAGE}>Coverage</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey={TABS.TESTIMONIALS}>Testimonials</Nav.Link>
@@ -60,6 +65,9 @@ const HomepageCmsPage = () => {
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.FEATURED_SERVICES}>
             {activeTab === TABS.FEATURED_SERVICES && <HomeFeaturedServicesForm />}
+          </Tab.Pane>
+          <Tab.Pane eventKey={TABS.COVERAGE}>
+            {activeTab === TABS.COVERAGE && <HomeCoverageForm />}
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.TESTIMONIALS}>
             {activeTab === TABS.TESTIMONIALS && <HomeTestimonialsForm />}

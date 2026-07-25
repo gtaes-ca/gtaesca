@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import PageTitle from '@/components/PageTitle';
 import AboutBannerForm from './components/AboutBannerForm';
-import AboutSectionForm from './components/AboutSectionForm';
+import AboutIntroForm from './components/AboutIntroForm';
 import AboutContactForm from './components/AboutContactForm';
 
 const TABS = {
   BANNER: 'banner',
-  ABOUT: 'about',
+  INTRO: 'intro',
   CONTACT: 'contact',
 };
 
@@ -23,7 +23,7 @@ const AboutCmsPage = () => {
             <Nav.Link eventKey={TABS.BANNER}>Page Banner</Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey={TABS.ABOUT}>Get To Know Us</Nav.Link>
+            <Nav.Link eventKey={TABS.INTRO}>Page Intro</Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey={TABS.CONTACT}>Contact With Us</Nav.Link>
@@ -31,13 +31,13 @@ const AboutCmsPage = () => {
         </Nav>
         <Tab.Content>
           <Tab.Pane eventKey={TABS.BANNER}>
-            <AboutBannerForm />
+            {activeTab === TABS.BANNER && <AboutBannerForm />}
           </Tab.Pane>
-          <Tab.Pane eventKey={TABS.ABOUT}>
-            <AboutSectionForm />
+          <Tab.Pane eventKey={TABS.INTRO}>
+            {activeTab === TABS.INTRO && <AboutIntroForm />}
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.CONTACT}>
-            <AboutContactForm />
+            {activeTab === TABS.CONTACT && <AboutContactForm />}
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

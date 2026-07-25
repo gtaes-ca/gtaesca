@@ -25,6 +25,7 @@
 @import url('module-css/coming-soon.css');
 @import url('module-css/contact.css');
 @import url('module-css/counter.css');
+@import url('module-css/coverage.css');
 @import url('module-css/cta.css');
 @import url('module-css/error-page.css');
 @import url('module-css/faq.css');
@@ -34,6 +35,7 @@
 @import url('module-css/process.css');
 @import url('module-css/project.css');
 @import url('module-css/service.css');
+@import url('module-css/section-reveal.css');
 @import url('module-css/shop.css');
 @import url('module-css/skill.css');
 @import url('module-css/slider.css');
@@ -2666,6 +2668,11 @@ ul {
       margin-left: 24px;
   }
 
+  .services-two__single--photo {
+      margin-left: 0;
+      padding: 0;
+  }
+
   .project-one__title {
       font-size: 23px;
   }
@@ -3527,6 +3534,11 @@ ul {
   .services-two__single {
       margin-left: 20px;
       padding: 34px 28px 30px 96px;
+  }
+
+  .services-two__single--photo {
+      margin-left: 0;
+      padding: 0;
   }
 
   .services-two__title {

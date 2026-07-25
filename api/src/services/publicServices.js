@@ -9,13 +9,14 @@ function formatPublicService(row) {
     categoryName: row.category_name,
     name: row.name,
     description: row.description || '',
+    image: row.image_url || '',
     durationMinutes: row.duration_minutes,
     price: row.price != null ? Number(row.price) : 0,
     sortOrder: row.sort_order,
   };
 }
 
-const SERVICE_SELECT = `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order,
+const SERVICE_SELECT = `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.image_url, s.duration_minutes, s.price, s.sort_order,
             c.name AS category_name, c.sort_order AS category_sort_order`;
 
 export async function listPublicServices({ group } = {}) {

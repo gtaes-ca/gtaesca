@@ -81,10 +81,10 @@ INSERT INTO web_content_widgets (page, section, content) VALUES
     'home',
     'featured-services',
     '{
-      "tagline": "Our Services",
-      "titleLine1": "Featured Electrical Services",
-      "titleLine2": "for Your Home & Business",
-      "serviceIds": []
+          "tagline": "What We Do",
+          "titleLine1": "Featured Electrical Services",
+          "titleLine2": "for Your Home & Business",
+          "serviceIds": []
     }'::jsonb
   ),
   (

@@ -2,16 +2,14 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { resolveCmsAssetUrl } from '@/lib/cms'
 import { serviceDetailPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const FEATURED_SERVICES_ICON = 'icon-setting'
 
-const ANIMATION_CLASSES = ['fadeInLeft', 'fadeInUp', 'fadeInRight']
-const ANIMATION_DELAYS = ['100ms', '300ms', '500ms', '700ms', '900ms', '1100ms']
-
-function truncateText(text, maxLength = 140) {
+function truncateText(text, maxLength = 90) {
     if (!text || text.length <= maxLength) return text
     return `${text.slice(0, maxLength).trim()}...`
 }
@@ -47,7 +45,7 @@ export default function ServicesGrid({ group = 'residential' }) {
 
     if (loading) {
         return (
-            <section className="services-two services-page">
+            <section className="services-two services-page services-page--compact">
                 <div className="container">
                     <p className="mb-0">Loading services...</p>
                 </div>
@@ -56,36 +54,44 @@ export default function ServicesGrid({ group = 'residential' }) {
     }
 
     return (
-        <section className="services-two services-page">
-            <div className="services-two__shape-1 img-bounce">
-                <img src="assets/images/shapes/services-two-shape-1.png" alt=""/>
-            </div>
+        <section className="services-two services-page services-page--compact">
             <div className="container">
                 {services.length === 0 ? (
                     <p className="mb-0">No services are available right now.</p>
                 ) : (
-                    <div className="row">
-                        {services.map((service, index) => {
+                    <div className="row services-page__grid">
+                        {services.map((service) => {
                             const detailLink = serviceDetailPath(service)
+                            const imageUrl = resolveCmsAssetUrl(service.image)
                             return (
                                 <div
                                     key={service.id}
-                                    className={`col-xl-4 col-lg-6 wow ${ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]}`}
-                                    data-wow-delay={ANIMATION_DELAYS[index % ANIMATION_DELAYS.length]}
+                                    className="col-xl-4 col-lg-6 col-md-6"
                                 >
-                                    <div className="services-two__single">
-                                        <div className="services-two__icon">
-                                            <span className={FEATURED_SERVICES_ICON}></span>
+                                    <article className="services-page__card">
+                                        <div className="services-page__card-media">
+                                            {imageUrl ? (
+                                                <img src={imageUrl} alt={service.name} />
+                                            ) : (
+                                                <div className="services-page__card-fallback" aria-hidden="true">
+                                                    <span className={FEATURED_SERVICES_ICON} />
+                                                </div>
+                                            )}
                                         </div>
-                                        <p className="services-two__sub-title">{service.categoryName}</p>
-                                        <h3 className="services-two__title">
-                                            <Link href={detailLink}>{service.name}</Link>
-                                        </h3>
-                                        <p className="services-two__text">{truncateText(service.description)}</p>
-                                        <Link href={detailLink} className="services-two__learn-more">
-                                            Learn More<span className="icon-arrow-right"></span>
-                                        </Link>
-                                    </div>
+                                        <div className="services-page__card-body">
+                                            <h3 className="services-page__card-title">
+                                                <Link href={detailLink}>{service.name}</Link>
+                                            </h3>
+                                            {service.description ? (
+                                                <p className="services-page__card-text">
+                                                    {truncateText(service.description)}
+                                                </p>
+                                            ) : null}
+                                            <Link href={detailLink} className="services-page__card-more">
+                                                Learn More<span className="icon-arrow-right" aria-hidden="true" />
+                                            </Link>
+                                        </div>
+                                    </article>
                                 </div>
                             )
                         })}

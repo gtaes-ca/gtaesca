@@ -8,7 +8,7 @@ import httpClient from '@/helpers/httpClient';
 const MAX_FEATURED_SERVICES = 12;
 
 const DEFAULT_SETTINGS = {
-  tagline: 'Our Services',
+  tagline: 'What We Do',
   titleLine1: 'Featured Electrical Services',
   titleLine2: 'for Your Home & Business',
   serviceIds: [],
@@ -158,46 +158,13 @@ const HomeFeaturedServicesForm = () => {
   return (
     <ComponentContainerCard
       title="Homepage — Featured Services"
-      description="Choose which services from your catalog appear under Our Services on the homepage. Services are grouped by category—visitors click a category heading to see its featured services. Limit: 12."
+      description="Choose which catalog services appear as cards below the Residential & Commercial cards on the homepage. Limit: 12. Edit “What We Do” headings under Website CMS → Services Pages → Homepage Section."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : (
         <form onSubmit={handleSubmit}>
           <Row className="g-4">
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Tagline</Form.Label>
-                <Form.Control
-                  value={settings.tagline}
-                  onChange={(e) => updateSetting('tagline', e.target.value)}
-                  placeholder="Our Services"
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Title — Line 1</Form.Label>
-                <Form.Control
-                  value={settings.titleLine1}
-                  onChange={(e) => updateSetting('titleLine1', e.target.value)}
-                  placeholder="Featured Electrical Services"
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Title — Line 2</Form.Label>
-                <Form.Control
-                  value={settings.titleLine2}
-                  onChange={(e) => updateSetting('titleLine2', e.target.value)}
-                  placeholder="for Your Home & Business"
-                />
-              </Form.Group>
-            </Col>
-
             <Col xs={12}>
               <h6 className="mb-2">Featured services ({selectedServices.length}/{MAX_FEATURED_SERVICES})</h6>
               {selectedServices.length ? (

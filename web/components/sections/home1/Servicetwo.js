@@ -4,87 +4,153 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from 'react'
 import { Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
+import { resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const FEATURED_SERVICES_ICON = 'icon-setting'
 
-const DEFAULT_CONTENT = {
-    tagline: '',
-    titleLine1: '',
-    titleLine2: '',
-    services: [],
-    categories: [],
+const DEFAULT_HEADING = {
+    tagline: 'What We Do',
+    titleLine1: 'Featured Electrical Services',
+    titleLine2: 'for Your Home & Business',
 }
 
+const FALLBACK_CARDS = [
+    {
+        key: 'residential',
+        name: 'Residential',
+        title: 'Residential Services',
+        text: 'Licensed electrical work for homes across the Greater Toronto Area — repairs, upgrades, lighting, EV chargers, and more.',
+        backgroundImage: '',
+        link: '/residential',
+    },
+    {
+        key: 'commercial',
+        name: 'Commercial',
+        title: 'Commercial Services',
+        text: 'Reliable electrical solutions for offices, retail, warehouses, and commercial properties across the GTA.',
+        backgroundImage: '',
+        link: '/commercial',
+    },
+]
+
 export default function Servicetwo() {
-    const [content, setContent] = useState(DEFAULT_CONTENT)
+    const [heading, setHeading] = useState(DEFAULT_HEADING)
+    const [categoryCards, setCategoryCards] = useState(FALLBACK_CARDS)
+    const [services, setServices] = useState([])
+    const [categories, setCategories] = useState([])
     const [activeCategoryId, setActiveCategoryId] = useState(null)
 
     useEffect(() => {
         let cancelled = false
 
-        async function loadFeaturedServices() {
+        async function loadSection() {
             try {
-                const res = await fetch(`${API_URL}/api/web-content/home/featured-services`)
-                if (!res.ok) return
-                const data = await res.json()
-                if (cancelled) return
-                if (data.content) {
-                    const services = Array.isArray(data.content.services) ? data.content.services : []
-                    const categories = Array.isArray(data.content.categories) ? data.content.categories : []
-                    setContent({
-                        ...data.content,
-                        services,
-                        categories,
-                    })
-                    setActiveCategoryId(categories[0]?.id ?? null)
+                const [headingRes, featuredRes] = await Promise.all([
+                    fetch(`${API_URL}/api/web-content/services/homepage-section`),
+                    fetch(`${API_URL}/api/web-content/home/featured-services`),
+                ])
+
+                if (!cancelled && headingRes.ok) {
+                    const headingData = await headingRes.json()
+                    if (headingData.content) {
+                        setHeading({
+                            tagline: headingData.content.tagline || DEFAULT_HEADING.tagline,
+                            titleLine1: headingData.content.titleLine1 || DEFAULT_HEADING.titleLine1,
+                            titleLine2: headingData.content.titleLine2 || DEFAULT_HEADING.titleLine2,
+                        })
+                    }
+                }
+
+                if (!cancelled && featuredRes.ok) {
+                    const featuredData = await featuredRes.json()
+                    const content = featuredData.content || {}
+                    if (Array.isArray(content.categoryCards) && content.categoryCards.length) {
+                        setCategoryCards(content.categoryCards)
+                    }
+                    const nextServices = Array.isArray(content.services) ? content.services : []
+                    const nextCategories = Array.isArray(content.categories) ? content.categories : []
+                    setServices(nextServices)
+                    setCategories(nextCategories)
+                    setActiveCategoryId(nextCategories[0]?.id ?? null)
                 }
             } catch {
                 // Keep defaults on failure
             }
         }
 
-        loadFeaturedServices()
+        loadSection()
         return () => {
             cancelled = true
         }
     }, [])
 
     const visibleServices = useMemo(() => {
-        if (!activeCategoryId) return content.services
-        return content.services.filter((service) => service.categoryId === activeCategoryId)
-    }, [activeCategoryId, content.services])
+        if (!activeCategoryId) return services
+        return services.filter((service) => service.categoryId === activeCategoryId)
+    }, [activeCategoryId, services])
 
     const enableLoop = visibleServices.length > 3
 
     return (
-        <>
-        {/*Services Two Start */}
-        <section className="services-two">
+        <section className="services-two services-two--categories">
             <div className="services-two__shape-1 img-bounce">
-                <img src="assets/images/shapes/services-two-shape-1.png" alt=""/>
+                <img src="assets/images/shapes/services-two-shape-1.png" alt="" />
             </div>
             <div className="container">
                 <div className="section-title text-center">
-                    <div className="section-title__tagline-box">
-                        <span className="section-title__tagline">{content.tagline}</span>
-                    </div>
+                    {heading.tagline ? (
+                        <div className="section-title__tagline-box">
+                            <span className="section-title__tagline">{heading.tagline}</span>
+                        </div>
+                    ) : null}
                     <div className="section-title__title-box sec-title-animation animation-style1">
                         <h2 className="section-title__title title-animation">
-                            {content.titleLine1}
-                            {content.titleLine2 ? (
+                            {heading.titleLine1}
+                            {heading.titleLine2 ? (
                                 <>
-                                    <br/> {content.titleLine2}
+                                    <br /> {heading.titleLine2}
                                 </>
                             ) : null}
                         </h2>
                     </div>
                 </div>
 
-                {content.categories.length > 0 ? (
-                    <div className="services-two__categories" role="tablist" aria-label="Service categories">
-                        {content.categories.map((category) => {
+                <div className="row services-two__category-grid">
+                    {categoryCards.map((card) => {
+                        const backgroundImage = resolveCmsAssetUrl(card.backgroundImage)
+                        return (
+                            <div className="col-lg-6" key={card.key}>
+                                <article
+                                    className="services-two__category-card"
+                                    style={
+                                        backgroundImage
+                                            ? { backgroundImage: `url("${backgroundImage}")` }
+                                            : undefined
+                                    }
+                                >
+                                    <div className="services-two__category-card-overlay" />
+                                    <div className="services-two__category-card-content">
+                                        <h3 className="services-two__category-card-title">
+                                            <Link href={card.link}>{card.name || card.title}</Link>
+                                        </h3>
+                                        {card.text ? (
+                                            <p className="services-two__category-card-text">{card.text}</p>
+                                        ) : null}
+                                        <Link href={card.link} className="services-two__category-card-more">
+                                            More<span className="icon-arrow-right" aria-hidden="true" />
+                                        </Link>
+                                    </div>
+                                </article>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                {categories.length > 0 ? (
+                    <div className="services-two__categories" role="tablist" aria-label="Featured service categories">
+                        {categories.map((category) => {
                             const isActive = category.id === activeCategoryId
                             return (
                                 <button
@@ -128,28 +194,36 @@ export default function Servicetwo() {
                             },
                         }}
                     >
-                        {visibleServices.map((service) => (
-                            <SwiperSlide key={service.id}>
-                                <div className="services-two__single">
-                                    <div className="services-two__icon">
-                                        <span className={FEATURED_SERVICES_ICON}></span>
+                        {visibleServices.map((service) => {
+                            const imageUrl = resolveCmsAssetUrl(service.image)
+                            return (
+                                <SwiperSlide key={service.id}>
+                                    <div className="services-two__single services-two__single--photo">
+                                        <div className="services-two__media">
+                                            {imageUrl ? (
+                                                <img src={imageUrl} alt={service.name} />
+                                            ) : (
+                                                <div className="services-two__media-fallback" aria-hidden="true">
+                                                    <span className={FEATURED_SERVICES_ICON}></span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="services-two__body">
+                                            <h3 className="services-two__title">
+                                                <Link href={service.link}>{service.name}</Link>
+                                            </h3>
+                                            <p className="services-two__text">{service.description}</p>
+                                            <Link href={service.link} className="services-two__learn-more">
+                                                Learn More<span className="icon-arrow-right"></span>
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <h3 className="services-two__title">
-                                        <Link href={service.link}>{service.name}</Link>
-                                    </h3>
-                                    <p className="services-two__text">{service.description}</p>
-                                    <Link href={service.link} className="services-two__learn-more">
-                                        Learn More<span className="icon-arrow-right"></span>
-                                    </Link>
-                                </div>
-                            </SwiperSlide>
-                        ))}
+                                </SwiperSlide>
+                            )
+                        })}
                     </Swiper>
                 ) : null}
             </div>
         </section>
-        {/*Services Two End */}
-    
-        </>
     )
 }

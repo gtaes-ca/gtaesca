@@ -2,6 +2,7 @@ import { Router } from 'express';
 import pool from '../../db.js';
 import { authenticate, requirePageAccess } from '../../middleware/auth.js';
 import { parsePrice } from '../../utils/currency.js';
+import { saveCmsImage } from '../../services/cmsImage.js';
 import {
   generateUniqueServiceSlug,
   resolveServiceSlug,
@@ -21,12 +22,16 @@ function formatService(row) {
     categoryName: row.category_name,
     name: row.name,
     description: row.description,
+    image: row.image_url || '',
     durationMinutes: row.duration_minutes,
     price: row.price != null ? Number(row.price) : 0,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
   };
 }
+
+const SERVICE_SELECT = `s.id, s.slug, s.category_id, s.name, s.description, s.image_url, s.duration_minutes, s.price, s.sort_order, s.created_at,
+            c.name AS category_name`;
 
 const SORT_COLUMNS = {
   name: 's.name',
@@ -36,6 +41,16 @@ const SORT_COLUMNS = {
   durationMinutes: 's.duration_minutes',
   price: 's.price',
 };
+
+function resolveServiceImage({ serviceId, image, imageData }) {
+  if (imageData) {
+    return saveCmsImage(`service-${serviceId}`, imageData);
+  }
+  if (image !== undefined) {
+    return String(image || '').trim();
+  }
+  return undefined;
+}
 
 router.get('/', authenticate, requirePageAccess('management.services'), async (req, res) => {
   const {
@@ -84,8 +99,7 @@ router.get('/', authenticate, requirePageAccess('management.services'), async (r
 
   const listParams = [...params, pageSize, offset];
   const result = await pool.query(
-    `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
-            c.name AS category_name
+    `SELECT ${SERVICE_SELECT}
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
      ${where}
@@ -107,8 +121,7 @@ router.get('/', authenticate, requirePageAccess('management.services'), async (r
 
 router.get('/:id', authenticate, requirePageAccess('management.services'), async (req, res) => {
   const result = await pool.query(
-    `SELECT s.id, s.slug, s.category_id, s.name, s.description, s.duration_minutes, s.price, s.sort_order, s.created_at,
-            c.name AS category_name
+    `SELECT ${SERVICE_SELECT}
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
      WHERE s.id = $1`,
@@ -147,7 +160,7 @@ router.put('/:id/material-defaults', authenticate, requirePageAccess('management
 });
 
 router.post('/', authenticate, requirePageAccess('management.services'), async (req, res) => {
-  const { categoryId, name, description, sortOrder, durationMinutes, price, slug } = req.body;
+  const { categoryId, name, description, sortOrder, durationMinutes, price, slug, image, imageData } = req.body;
 
   if (!categoryId || !name?.trim()) {
     return res.status(400).json({ error: 'Category and service name are required' });
@@ -183,9 +196,28 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
     const result = await pool.query(
       `INSERT INTO services (category_id, name, slug, description, duration_minutes, price, sort_order)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, slug, category_id, name, description, duration_minutes, price, sort_order, created_at`,
+       RETURNING id, slug, category_id, name, description, image_url, duration_minutes, price, sort_order, created_at`,
       [categoryId, name.trim(), serviceSlug, description?.trim() || null, duration, servicePrice, Number(sortOrder) || 0]
     );
+
+    let row = result.rows[0];
+    try {
+      const imageUrl = resolveServiceImage({
+        serviceId: row.id,
+        image,
+        imageData,
+      });
+      if (imageUrl !== undefined) {
+        const updated = await pool.query(
+          `UPDATE services SET image_url = $1 WHERE id = $2
+           RETURNING id, slug, category_id, name, description, image_url, duration_minutes, price, sort_order, created_at`,
+          [imageUrl || null, row.id]
+        );
+        row = updated.rows[0];
+      }
+    } catch (imageError) {
+      return res.status(400).json({ error: imageError.message });
+    }
 
     const categoryName = await pool.query(
       'SELECT name FROM service_categories WHERE id = $1',
@@ -194,7 +226,7 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
 
     return res.status(201).json({
       service: formatService({
-        ...result.rows[0],
+        ...row,
         category_name: categoryName.rows[0].name,
       }),
     });
@@ -207,7 +239,7 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
 });
 
 router.patch('/:id', authenticate, requirePageAccess('management.services'), async (req, res) => {
-  const { categoryId, name, description, sortOrder, durationMinutes, price, slug } = req.body;
+  const { categoryId, name, description, sortOrder, durationMinutes, price, slug, image, imageData } = req.body;
 
   const existing = await pool.query('SELECT id, name, slug FROM services WHERE id = $1', [req.params.id]);
   if (existing.rowCount === 0) {
@@ -254,6 +286,17 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
     }
   }
 
+  let imageUrl;
+  try {
+    imageUrl = resolveServiceImage({
+      serviceId: req.params.id,
+      image,
+      imageData,
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
   try {
     const result = await pool.query(
       `UPDATE services
@@ -263,9 +306,10 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
            description = COALESCE($4, description),
            duration_minutes = COALESCE($5, duration_minutes),
            price = COALESCE($6, price),
-           sort_order = COALESCE($7, sort_order)
-       WHERE id = $8
-       RETURNING id, slug, category_id, name, description, duration_minutes, price, sort_order, created_at`,
+           sort_order = COALESCE($7, sort_order),
+           image_url = CASE WHEN $8::boolean THEN $9 ELSE image_url END
+       WHERE id = $10
+       RETURNING id, slug, category_id, name, description, image_url, duration_minutes, price, sort_order, created_at`,
       [
         categoryId || null,
         name?.trim() || null,
@@ -274,6 +318,8 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
         durationMinutes !== undefined ? Number(durationMinutes) : null,
         price !== undefined ? servicePrice : null,
         sortOrder !== undefined ? Number(sortOrder) : null,
+        imageUrl !== undefined,
+        imageUrl !== undefined ? (imageUrl || null) : null,
         req.params.id,
       ]
     );

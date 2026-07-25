@@ -4,8 +4,10 @@ import PageTitle from '@/components/PageTitle';
 import CategoryServicesBannerForm from './components/CategoryServicesBannerForm';
 import CategoryServicesDetailsForm from './components/CategoryServicesDetailsForm';
 import CategoryServicesGalleryForm from './components/CategoryServicesGalleryForm';
+import ServicesHomepageSectionForm from './components/ServicesHomepageSectionForm';
 
 const TABS = {
+  HOMEPAGE_SECTION: 'homepage-section',
   RESIDENTIAL_BANNER: 'residential-banner',
   RESIDENTIAL_DETAILS: 'residential-details',
   RESIDENTIAL_GALLERY: 'residential-gallery',
@@ -15,13 +17,16 @@ const TABS = {
 };
 
 const ServicesCmsPage = () => {
-  const [activeTab, setActiveTab] = useState(TABS.RESIDENTIAL_BANNER);
+  const [activeTab, setActiveTab] = useState(TABS.HOMEPAGE_SECTION);
 
   return (
     <>
       <PageTitle title="Services Pages" subTitle="Website CMS" />
-      <Tab.Container activeKey={activeTab} onSelect={(key) => setActiveTab(key || TABS.RESIDENTIAL_BANNER)}>
+      <Tab.Container activeKey={activeTab} onSelect={(key) => setActiveTab(key || TABS.HOMEPAGE_SECTION)}>
         <Nav variant="tabs" className="mb-4 flex-wrap">
+          <Nav.Item>
+            <Nav.Link eventKey={TABS.HOMEPAGE_SECTION}>Homepage Section</Nav.Link>
+          </Nav.Item>
           <Nav.Item>
             <Nav.Link eventKey={TABS.RESIDENTIAL_BANNER}>Residential Banner</Nav.Link>
           </Nav.Item>
@@ -42,6 +47,9 @@ const ServicesCmsPage = () => {
           </Nav.Item>
         </Nav>
         <Tab.Content>
+          <Tab.Pane eventKey={TABS.HOMEPAGE_SECTION}>
+            {activeTab === TABS.HOMEPAGE_SECTION && <ServicesHomepageSectionForm />}
+          </Tab.Pane>
           <Tab.Pane eventKey={TABS.RESIDENTIAL_BANNER}>
             <CategoryServicesBannerForm
               pageKey="residential"

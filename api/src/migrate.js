@@ -77,6 +77,10 @@ export async function migrate() {
   await runSqlFile('38_cms_service_category_pages.sql');
   await runSqlFile('39_cms_service_category_galleries.sql');
   await runSqlFile('40_cms_home_testimonials.sql');
+  await runSqlFile('41_cms_services_homepage_section.sql');
+  await runSqlFile('42_service_images.sql');
+  await runSqlFile('43_cms_about_intro.sql');
+  await runSqlFile('44_cms_home_coverage.sql');
 
   await backfillProjectSlugs();
 

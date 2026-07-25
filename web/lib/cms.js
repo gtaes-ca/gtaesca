@@ -76,9 +76,9 @@ export const DEFAULT_HOME_ABOUT = {
 };
 
 export const DEFAULT_HOME_FEATURED_SERVICES = {
-  tagline: '',
-  titleLine1: '',
-  titleLine2: '',
+  tagline: 'What We Do',
+  titleLine1: 'Featured Electrical Services',
+  titleLine2: 'for Your Home & Business',
   services: [],
   categories: [],
 };

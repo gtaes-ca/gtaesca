@@ -129,8 +129,8 @@ const HomeAboutForm = () => {
 
   return (
     <ComponentContainerCard
-      title="Homepage — Get To Know Us"
-      description="Manage the about section content and the two side images shown on the homepage."
+      title="Homepage — About Section"
+      description="Controls the dual-image Get To Know Us block on the homepage only. The About page intro is edited under Website CMS → About Us → Page Intro."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>

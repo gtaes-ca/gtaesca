@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import BackToTop from '../elements/BackToTop'
 import DataBg from "../elements/DataBg"
+import SectionReveal from "../elements/SectionReveal"
 import Breadcrumb from './Breadcrumb'
 import Sidebar from "./Sidebar"
 import Header1 from "./header/Header1"
@@ -43,6 +44,7 @@ export default function Layout({ headerStyle, footerStyle, headTitle, breadcrumb
     return (
         <>
             <DataBg />
+            <SectionReveal />
             <div className={`page-wrapper ${wrapperCls ? wrapperCls : ""}`} id="#top">
                 {!headerStyle && <Header1 scroll={scroll} isMobileMenu={isMobileMenu} handleMobileMenu={handleMobileMenu} isSidebar={isSidebar} handleSidebar={handleSidebar} />}
                 {headerStyle == 1 ? <Header1 scroll={scroll} isMobileMenu={isMobileMenu} handleMobileMenu={handleMobileMenu} isSidebar={isSidebar} handleSidebar={handleSidebar} /> : null}

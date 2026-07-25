@@ -88,10 +88,16 @@ const DEFAULT_HOME_ABOUT = {
 };
 
 const DEFAULT_HOME_FEATURED_SERVICES = {
-  tagline: 'Our Services',
+  tagline: 'What We Do',
   titleLine1: 'Featured Electrical Services',
   titleLine2: 'for Your Home & Business',
   serviceIds: [],
+};
+
+const DEFAULT_SERVICES_HOMEPAGE_SECTION = {
+  tagline: 'What We Do',
+  titleLine1: 'Featured Electrical Services',
+  titleLine2: 'for Your Home & Business',
 };
 
 const DEFAULT_HOME_GALLERY = {
@@ -130,6 +136,15 @@ const DEFAULT_HOME_TESTIMONIALS = {
       rating: 4,
     },
   ],
+};
+
+const DEFAULT_HOME_COVERAGE = {
+  tagline: 'Service Coverage',
+  titleLine1: 'Areas We Serve Across the GTA',
+  titleLine2: '',
+  text: 'Licensed electrical service throughout the Greater Toronto Area and nearby communities.',
+  gtaLabel: 'Greater Toronto Area',
+  nearbyLabel: 'Nearby Areas',
 };
 
 function normalizeSlide(slide = {}, index = 0) {
@@ -213,6 +228,7 @@ function formatFeaturedService(row) {
     slug: row.slug,
     name: row.name,
     description: row.description || '',
+    image: row.image_url || '',
     categoryId: row.category_id,
     categoryName,
     categorySortOrder: row.category_sort_order ?? 0,
@@ -300,6 +316,67 @@ export function normalizeHomeTestimonialsContent(content = {}) {
   };
 }
 
+export function normalizeHomeCoverageContent(content = {}) {
+  return {
+    tagline: String(content.tagline ?? DEFAULT_HOME_COVERAGE.tagline).trim(),
+    titleLine1: String(content.titleLine1 ?? DEFAULT_HOME_COVERAGE.titleLine1).trim(),
+    titleLine2: String(content.titleLine2 ?? DEFAULT_HOME_COVERAGE.titleLine2).trim(),
+    text: String(content.text ?? DEFAULT_HOME_COVERAGE.text).trim(),
+    gtaLabel: String(content.gtaLabel ?? DEFAULT_HOME_COVERAGE.gtaLabel).trim(),
+    nearbyLabel: String(content.nearbyLabel ?? DEFAULT_HOME_COVERAGE.nearbyLabel).trim(),
+  };
+}
+
+async function getPublicCoverageLocations() {
+  const result = await pool.query(
+    `SELECT l.id, l.region, l.name, l.parent_id, l.sort_order,
+            p.name AS parent_name
+     FROM service_locations l
+     LEFT JOIN service_locations p ON p.id = l.parent_id
+     ORDER BY l.region, COALESCE(p.sort_order, l.sort_order), l.sort_order, l.name`
+  );
+
+  const locations = { gta: [], nearby: [] };
+  for (const row of result.rows) {
+    const item = {
+      id: row.id,
+      name: row.name,
+      parentId: row.parent_id,
+      parentName: row.parent_name || '',
+      sortOrder: row.sort_order,
+      label: row.parent_name ? `${row.name} (${row.parent_name})` : row.name,
+    };
+    if (row.region === 'gta') locations.gta.push(item);
+    if (row.region === 'nearby') locations.nearby.push(item);
+  }
+  return locations;
+}
+
+export async function getHomeCoverageContent() {
+  const widget = await getWidget('home', 'coverage');
+  const content = normalizeHomeCoverageContent(widget?.content || DEFAULT_HOME_COVERAGE);
+
+  let locations = { gta: [], nearby: [] };
+  try {
+    locations = await getPublicCoverageLocations();
+  } catch (error) {
+    console.warn(`Coverage locations unavailable: ${error.message}`);
+  }
+
+  return { ...content, locations };
+}
+
+export async function updateHomeCoverageContent(content) {
+  const normalized = normalizeHomeCoverageContent(content);
+
+  if (!normalized.titleLine1) {
+    throw new Error('Coverage section title is required');
+  }
+
+  const widget = await upsertWidget('home', 'coverage', normalized);
+  return normalizeHomeCoverageContent(widget.content);
+}
+
 function convertHomeGalleryToProjectsContent(homeContent) {
   const home = normalizeHomeGalleryContent(homeContent);
 
@@ -359,7 +436,7 @@ async function persistGalleryImages(items) {
 async function resolveFeaturedServices(serviceIds = []) {
   if (!serviceIds.length) {
     const result = await pool.query(
-      `SELECT s.id, s.slug, s.name, s.description,
+      `SELECT s.id, s.slug, s.name, s.description, s.image_url,
               c.id AS category_id, c.name AS category_name, c.sort_order AS category_sort_order
        FROM services s
        JOIN service_categories c ON c.id = s.category_id
@@ -370,7 +447,7 @@ async function resolveFeaturedServices(serviceIds = []) {
   }
 
   const result = await pool.query(
-    `SELECT s.id, s.slug, s.name, s.description,
+    `SELECT s.id, s.slug, s.name, s.description, s.image_url,
             c.id AS category_id, c.name AS category_name, c.sort_order AS category_sort_order
      FROM services s
      JOIN service_categories c ON c.id = s.category_id
@@ -564,10 +641,42 @@ export async function getFeaturedServicesContent() {
   const settings = normalizeFeaturedServicesWidgetContent(widget?.content || DEFAULT_HOME_FEATURED_SERVICES);
   const services = await resolveFeaturedServices(settings.serviceIds);
 
+  const [
+    residentialBanner,
+    residentialDetails,
+    commercialBanner,
+    commercialDetails,
+  ] = await Promise.all([
+    getServiceCategoryBannerContent('residential'),
+    getServiceCategoryDetailsContent('residential'),
+    getServiceCategoryBannerContent('commercial'),
+    getServiceCategoryDetailsContent('commercial'),
+  ]);
+
+  const categoryCards = [
+    {
+      key: 'residential',
+      name: residentialDetails.tagline || 'Residential',
+      title: residentialBanner.title || residentialDetails.title || 'Residential Services',
+      text: residentialDetails.text || '',
+      backgroundImage: residentialBanner.backgroundImage || '',
+      link: '/residential',
+    },
+    {
+      key: 'commercial',
+      name: commercialDetails.tagline || 'Commercial',
+      title: commercialBanner.title || commercialDetails.title || 'Commercial Services',
+      text: commercialDetails.text || '',
+      backgroundImage: commercialBanner.backgroundImage || '',
+      link: '/commercial',
+    },
+  ];
+
   return {
     ...settings,
     services,
     categories: buildFeaturedServiceCategories(services),
+    categoryCards,
   };
 }
 
@@ -735,6 +844,23 @@ const DEFAULT_ABOUT_CONTACT = {
   backgroundImage: '',
 };
 
+const DEFAULT_ABOUT_INTRO = {
+  tagline: 'Who We Are',
+  title: 'Built on Safety, Skill, and Service Across the GTA',
+  text1:
+    'GTA Electric Services is a licensed electrical contractor serving homes and businesses throughout the Greater Toronto Area with clear communication and dependable workmanship.',
+  text2:
+    'From panel upgrades and lighting to EV chargers and emergency repairs, our ESA-certified team focuses on code-compliant installs and honest recommendations.',
+  points: [
+    'Licensed & insured electricians',
+    'Residential and commercial expertise',
+    'Transparent quotes with no hidden fees',
+  ],
+  image: 'assets/images/resources/about-one-img-1.jpg',
+  buttonText: 'Request a Quote',
+  buttonLink: '/contact',
+};
+
 export function normalizeAboutBannerContent(content = {}) {
   return {
     title: String(content.title ?? DEFAULT_ABOUT_BANNER.title).trim(),
@@ -756,6 +882,50 @@ export async function updateAboutBannerContent(content) {
 
   const widget = await upsertWidget('about', 'banner', normalized);
   return normalizeAboutBannerContent(widget.content);
+}
+
+export function normalizeAboutIntroContent(content = {}) {
+  const rawPoints = Array.isArray(content.points) ? content.points : DEFAULT_ABOUT_INTRO.points;
+  const points = rawPoints
+    .map((point) => String(point ?? '').trim())
+    .filter(Boolean)
+    .slice(0, 6);
+
+  return {
+    tagline: String(content.tagline ?? DEFAULT_ABOUT_INTRO.tagline).trim(),
+    title: String(content.title ?? DEFAULT_ABOUT_INTRO.title).trim(),
+    text1: String(content.text1 ?? DEFAULT_ABOUT_INTRO.text1).trim(),
+    text2: String(content.text2 ?? DEFAULT_ABOUT_INTRO.text2).trim(),
+    points: points.length ? points : [...DEFAULT_ABOUT_INTRO.points],
+    image: String(content.image ?? DEFAULT_ABOUT_INTRO.image).trim(),
+    buttonText: String(content.buttonText ?? DEFAULT_ABOUT_INTRO.buttonText).trim(),
+    buttonLink: String(content.buttonLink ?? DEFAULT_ABOUT_INTRO.buttonLink).trim(),
+  };
+}
+
+export async function getAboutIntroContent() {
+  const widget = await getWidget('about', 'intro');
+  return normalizeAboutIntroContent(widget?.content || DEFAULT_ABOUT_INTRO);
+}
+
+export async function updateAboutIntroContent(content) {
+  const incoming = { ...(content || {}) };
+  if (incoming.imageData) {
+    incoming.image = saveCmsImage('about-intro-image', incoming.imageData);
+  }
+  delete incoming.imageData;
+
+  const normalized = normalizeAboutIntroContent(incoming);
+
+  if (!normalized.title) {
+    throw new Error('Section title is required');
+  }
+  if (!normalized.image) {
+    throw new Error('Section image is required');
+  }
+
+  const widget = await upsertWidget('about', 'intro', normalized);
+  return normalizeAboutIntroContent(widget.content);
 }
 
 export function normalizeTeamBannerContent(content = {}) {
@@ -1081,6 +1251,45 @@ export async function updateServiceCategoryDetailsContent(page, content) {
 
   const widget = await upsertWidget(pageKey, 'details', normalized);
   return normalizeServiceCategoryDetailsContent(widget.content);
+}
+
+export function normalizeServicesHomepageSectionContent(content = {}) {
+  return {
+    tagline: String(content.tagline ?? DEFAULT_SERVICES_HOMEPAGE_SECTION.tagline).trim(),
+    titleLine1: String(content.titleLine1 ?? DEFAULT_SERVICES_HOMEPAGE_SECTION.titleLine1).trim(),
+    titleLine2: String(content.titleLine2 ?? DEFAULT_SERVICES_HOMEPAGE_SECTION.titleLine2).trim(),
+  };
+}
+
+export async function getServicesHomepageSectionContent() {
+  const widget = await getWidget('services', 'homepage-section');
+  if (widget?.content) {
+    return normalizeServicesHomepageSectionContent(widget.content);
+  }
+
+  // One-time fallback from legacy homepage featured-services titles
+  const featured = await getWidget('home', 'featured-services');
+  if (featured?.content) {
+    const legacy = normalizeServicesHomepageSectionContent({
+      tagline: featured.content.tagline === 'Our Services' ? 'What We Do' : featured.content.tagline,
+      titleLine1: featured.content.titleLine1,
+      titleLine2: featured.content.titleLine2,
+    });
+    return legacy;
+  }
+
+  return normalizeServicesHomepageSectionContent(DEFAULT_SERVICES_HOMEPAGE_SECTION);
+}
+
+export async function updateServicesHomepageSectionContent(content) {
+  const normalized = normalizeServicesHomepageSectionContent(content);
+
+  if (!normalized.titleLine1) {
+    throw new Error('Section title is required');
+  }
+
+  const widget = await upsertWidget('services', 'homepage-section', normalized);
+  return normalizeServicesHomepageSectionContent(widget.content);
 }
 
 const DEFAULT_SERVICE_CATEGORY_GALLERY = {

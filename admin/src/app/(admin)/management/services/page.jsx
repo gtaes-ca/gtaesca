@@ -6,6 +6,7 @@ import IconifyIcon from '@/components/wrappers/IconifyIcon';
 import ServiceMaterialDefaultsOffcanvas from '@/components/services/ServiceMaterialDefaultsOffcanvas';
 import PageMetaData from '@/components/PageTitle';
 import { useNotificationContext } from '@/context/useNotificationContext';
+import { MAX_CMS_IMAGE_BYTES, resolveCmsAssetUrl } from '@/helpers/cms';
 import httpClient from '@/helpers/httpClient';
 import { formatCurrency } from '@/utils/currency';
 
@@ -17,6 +18,9 @@ const defaultForm = {
   durationMinutes: 120,
   price: '0',
   sortOrder: 0,
+  image: '',
+  imagePreview: '',
+  imageData: null,
 };
 
 const DURATION_PRESETS = [
@@ -171,6 +175,7 @@ const ServicesPage = () => {
 
   const openEdit = (service) => {
     setEditingId(service.id);
+    const image = service.image || '';
     setForm({
       categoryId: String(service.categoryId),
       name: service.name,
@@ -179,8 +184,42 @@ const ServicesPage = () => {
       durationMinutes: service.durationMinutes ?? 120,
       price: String(service.price ?? 0),
       sortOrder: service.sortOrder,
+      image,
+      imagePreview: resolveCmsAssetUrl(image),
+      imageData: null,
     });
     setShowSheet(true);
+  };
+
+  const handleImageSelect = (file) => {
+    if (!file) return;
+    if (file.size > MAX_CMS_IMAGE_BYTES) {
+      showNotification({ message: 'Image must be 5MB or smaller', variant: 'danger' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      setForm((prev) => ({
+        ...prev,
+        imagePreview: dataUrl,
+        imageData: dataUrl,
+      }));
+    };
+    reader.onerror = () => {
+      showNotification({ message: 'Failed to read image file', variant: 'danger' });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearImage = () => {
+    setForm((prev) => ({
+      ...prev,
+      image: '',
+      imagePreview: '',
+      imageData: null,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -188,12 +227,15 @@ const ServicesPage = () => {
     setSubmitting(true);
     try {
       const payload = {
-        ...form,
         categoryId: Number(form.categoryId),
+        name: form.name,
+        description: form.description,
         durationMinutes: Number(form.durationMinutes),
         price: Number(form.price),
         sortOrder: Number(form.sortOrder),
         slug: form.slug.trim() || undefined,
+        image: form.imageData ? undefined : form.image,
+        imageData: form.imageData || undefined,
       };
       if (editingId) {
         await httpClient.patch(`/api/admin/services/${editingId}`, payload);
@@ -299,7 +341,26 @@ const ServicesPage = () => {
               <tbody>
                 {services.map((service) => (
                   <tr key={service.id}>
-                    <td>{service.name}</td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        {service.image ? (
+                          <img
+                            src={resolveCmsAssetUrl(service.image)}
+                            alt=""
+                            className="rounded"
+                            style={{ width: 40, height: 40, objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div
+                            className="rounded bg-light d-flex align-items-center justify-content-center text-muted"
+                            style={{ width: 40, height: 40, fontSize: 12 }}
+                          >
+                            —
+                          </div>
+                        )}
+                        <span>{service.name}</span>
+                      </div>
+                    </td>
                     <td>{service.categoryName}</td>
                     <td className="text-muted" style={{ maxWidth: 320 }}>
                       {service.description || '-'}
@@ -449,6 +510,38 @@ const ServicesPage = () => {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Short description of the service"
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Service image</Form.Label>
+              <div
+                className="position-relative border rounded overflow-hidden bg-light mb-2"
+                style={{ aspectRatio: '16 / 10', maxWidth: 280 }}
+              >
+                {form.imagePreview ? (
+                  <img
+                    src={form.imagePreview}
+                    alt="Service preview"
+                    className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
+                  />
+                ) : (
+                  <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-muted small px-2 text-center">
+                    No image selected
+                  </div>
+                )}
+              </div>
+              <Form.Control
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => handleImageSelect(e.target.files?.[0])}
+              />
+              <Form.Text className="text-muted d-block">
+                Used on homepage featured service cards. JPEG, PNG, WebP, or GIF up to 5MB.
+              </Form.Text>
+              {form.imagePreview ? (
+                <Button type="button" variant="outline-secondary" size="sm" className="mt-2" onClick={clearImage}>
+                  Remove image
+                </Button>
+              ) : null}
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Duration</Form.Label>
