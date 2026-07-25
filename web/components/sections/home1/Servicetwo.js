@@ -207,6 +207,7 @@ export default function Servicetwo() {
                                                     <span className={FEATURED_SERVICES_ICON}></span>
                                                 </div>
                                             )}
+                                            <div className="services-two__media-overlay" aria-hidden="true" />
                                         </div>
                                         <div className="services-two__body">
                                             <h3 className="services-two__title">
