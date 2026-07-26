@@ -198,7 +198,7 @@ export async function getServicesSnapshot(serviceIds) {
 
 export async function getTotalDurationMinutes(serviceIds) {
   const snapshot = await getServicesSnapshot(serviceIds);
-  return snapshot.reduce((sum, service) => sum + service.durationMinutes, 0);
+  return snapshot.reduce((sum, service) => sum + (Number(service.durationMinutes) || 0), 0);
 }
 
 export async function getTotalServicePrice(serviceIds) {
@@ -216,6 +216,9 @@ export async function getServicePrice(serviceId) {
 
 function buildSlotTimes(dateStr, settings, durationMinutes) {
   const slots = [];
+  if (!durationMinutes || durationMinutes < 1) {
+    return slots;
+  }
   const startMinutes = settings.startHour * 60;
   const endMinutes = settings.endHour * 60;
 
@@ -420,6 +423,9 @@ export async function assertSlotAvailable(technicianUserId, scheduledAt, service
   }
 
   const durationMinutes = await getTotalDurationMinutes(normalizedServiceIds);
+  if (!durationMinutes) {
+    throw new Error('Selected services have no duration and cannot be scheduled');
+  }
   await assertNoSchedulingConflict(technicianUserId, slotStart, durationMinutes, client);
 
   const settings = await getBookingSettings();
@@ -433,10 +439,14 @@ export async function assertSlotAvailable(technicianUserId, scheduledAt, service
 
 export async function insertBookingServices(bookingId, services, client = pool) {
   for (const [index, service] of services.entries()) {
+    const duration = Number(service.durationMinutes) || 0;
+    if (!duration) {
+      throw new Error(`Service "${service.serviceName || service.serviceId}" has no duration and cannot be booked online`);
+    }
     await client.query(
       `INSERT INTO booking_services (booking_id, service_id, duration_minutes, price, sort_order)
        VALUES ($1, $2, $3, $4, $5)`,
-      [bookingId, service.serviceId, service.durationMinutes, service.price, index]
+      [bookingId, service.serviceId, duration, service.price, index]
     );
   }
 }

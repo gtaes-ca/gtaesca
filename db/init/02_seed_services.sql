@@ -1,7 +1,6 @@
 INSERT INTO service_categories (name, sort_order) VALUES
-  ('Home Electrical Services', 1),
-  ('Smart Home Installations', 2),
-  ('Commercial Electrical Services', 3)
+  ('Residential Electrical Services', 1),
+  ('Commercial Electrical Services', 2)
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO services (category_id, name, slug, description, sort_order)
@@ -12,21 +11,21 @@ SELECT
   s.description,
   s.sort_order
 FROM (VALUES
-  ('Home Electrical Services', 'Smoke & Carbon Monoxide Alarms', 'Installation, replacement, and upgrades for smoke detectors and carbon monoxide alarms.', 1),
-  ('Home Electrical Services', 'EV Charger Installation', 'Professional installation of Level 2 electric vehicle chargers for convenient at-home charging.', 2),
-  ('Home Electrical Services', 'Electrical Troubleshooting & Repairs', 'Diagnosing and fixing flickering lights, tripping breakers, faulty outlets, and wiring problems.', 3),
-  ('Home Electrical Services', 'Panel Upgrades & Installation', 'Electrical panel upgrades, replacements, and new installations.', 4),
-  ('Home Electrical Services', 'Indoor & Outdoor Lighting', 'Pot lights, chandeliers, security lighting, landscape lighting, and exterior fixtures.', 5),
-  ('Home Electrical Services', 'Sockets, Outlets & Switches', 'Installation and repair of outlets, switches, dimmers, smart switches, and GFCI outlets.', 6),
-  ('Home Electrical Services', 'Basement Wiring', 'Complete electrical wiring for finished basements with code-compliant installations.', 7),
-  ('Home Electrical Services', 'Home Rewiring', 'Partial and full-home rewiring to replace outdated or damaged electrical systems.', 8),
-  ('Home Electrical Services', 'Custom Home Wiring', 'Complete wiring solutions for custom homes, new builds, renovations, and additions.', 9),
-  ('Home Electrical Services', 'Enhanced Home Safety Installations', 'Surge protection, GFCI/AFCI protection, grounding improvements, and code compliance updates.', 10),
-  ('Home Electrical Services', 'Generator Installation', 'Installation of backup generators and transfer switches for outage protection.', 11),
-  ('Home Electrical Services', 'Renovation & Addition Wiring', 'Electrical wiring for kitchens, bathrooms, additions, garages, and renovations.', 12),
-  ('Smart Home Installations', 'Smart Home Installations', 'Smart lighting, thermostats, home automation devices, and electric baseboard heaters.', 1),
-  ('Smart Home Installations', 'Ceiling Fan & Fixture Installation', 'Installation and replacement of ceiling fans, bathroom fans, and light fixtures.', 2),
-  ('Smart Home Installations', 'Dedicated Circuits', 'Dedicated circuits for appliances, EV chargers, hot tubs, HVAC units, and high-power equipment.', 3),
+  ('Residential Electrical Services', 'Smoke & Carbon Monoxide Alarms', 'Installation, replacement, and upgrades for smoke detectors and carbon monoxide alarms.', 1),
+  ('Residential Electrical Services', 'EV Charger Installation', 'Professional installation of Level 2 electric vehicle chargers for convenient at-home charging.', 2),
+  ('Residential Electrical Services', 'Electrical Troubleshooting & Repairs', 'Diagnosing and fixing flickering lights, tripping breakers, faulty outlets, and wiring problems.', 3),
+  ('Residential Electrical Services', 'Panel Upgrades & Installation', 'Electrical panel upgrades, replacements, and new installations.', 4),
+  ('Residential Electrical Services', 'Indoor & Outdoor Lighting', 'Pot lights, chandeliers, security lighting, landscape lighting, and exterior fixtures.', 5),
+  ('Residential Electrical Services', 'Sockets, Outlets & Switches', 'Installation and repair of outlets, switches, dimmers, smart switches, and GFCI outlets.', 6),
+  ('Residential Electrical Services', 'Basement Wiring', 'Complete electrical wiring for finished basements with code-compliant installations.', 7),
+  ('Residential Electrical Services', 'Home Rewiring', 'Partial and full-home rewiring to replace outdated or damaged electrical systems.', 8),
+  ('Residential Electrical Services', 'Custom Home Wiring', 'Complete wiring solutions for custom homes, new builds, renovations, and additions.', 9),
+  ('Residential Electrical Services', 'Enhanced Home Safety Installations', 'Surge protection, GFCI/AFCI protection, grounding improvements, and code compliance updates.', 10),
+  ('Residential Electrical Services', 'Generator Installation', 'Installation of backup generators and transfer switches for outage protection.', 11),
+  ('Residential Electrical Services', 'Renovation & Addition Wiring', 'Electrical wiring for kitchens, bathrooms, additions, garages, and renovations.', 12),
+  ('Residential Electrical Services', 'Smart Home Installations', 'Smart lighting, thermostats, home automation devices, and electric baseboard heaters.', 13),
+  ('Residential Electrical Services', 'Ceiling Fan & Fixture Installation', 'Installation and replacement of ceiling fans, bathroom fans, and light fixtures.', 14),
+  ('Residential Electrical Services', 'Dedicated Circuits', 'Dedicated circuits for appliances, EV chargers, hot tubs, HVAC units, and high-power equipment.', 15),
   ('Commercial Electrical Services', 'New Commercial Rough-Ins', 'Complete electrical rough-ins for new commercial builds and tenant improvements.', 1),
   ('Commercial Electrical Services', 'Transformer Installation & Service', 'Installation, replacement, and servicing of commercial transformers.', 2),
   ('Commercial Electrical Services', 'Commercial Lighting', 'Office, retail, warehouse, LED, and interior/exterior commercial lighting.', 3),

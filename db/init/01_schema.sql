@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS services (
   category_id INT NOT NULL REFERENCES service_categories(id) ON DELETE CASCADE,
   name VARCHAR(200) NOT NULL,
   description TEXT,
-  duration_minutes INT NOT NULL DEFAULT 120,
+  duration_minutes INT,
   price NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (price >= 0),
   sort_order INT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

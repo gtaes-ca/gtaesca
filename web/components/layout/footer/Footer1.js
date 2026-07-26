@@ -25,6 +25,13 @@ const QUICK_LINKS = [
 const ABOUT_TEXT =
     'Licensed and insured electrical contractors serving homeowners and businesses throughout the Greater Toronto Area and Ontario.'
 
+const SOCIAL_ITEMS = [
+    { key: 'facebook', icon: 'icon-facebook', label: 'Facebook' },
+    { key: 'twitter', icon: 'icon-xpa', label: 'X' },
+    { key: 'linkedin', icon: 'icon-link-in', label: 'LinkedIn' },
+    { key: 'instagram', icon: 'icon-instagram', label: 'Instagram' },
+]
+
 export default function Footer1() {
     const [content, setContent] = useState(DEFAULT_TOPBAR)
     const [residential, setResidential] = useState([])
@@ -86,6 +93,13 @@ export default function Footer1() {
         }
     }, [])
 
+    const socialLinks = SOCIAL_ITEMS
+        .map((item) => ({
+            ...item,
+            href: content.social?.[item.key] || '',
+        }))
+        .filter((item) => item.href)
+
     return (
         <footer className="site-footer site-footer--brand">
             <div className="site-footer__cta">
@@ -139,6 +153,21 @@ export default function Footer1() {
                                         </li>
                                     ) : null}
                                 </ul>
+                                {socialLinks.length ? (
+                                    <div className="site-footer__social" aria-label="Social media">
+                                        {socialLinks.map(({ key, icon, href, label }) => (
+                                            <Link
+                                                key={key}
+                                                href={href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label={label}
+                                            >
+                                                <i className={icon} aria-hidden="true" />
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
 
@@ -208,27 +237,29 @@ export default function Footer1() {
                         <p className="site-footer__bottom-text">
                             Copyright {new Date().getFullYear()}. All rights reserved
                         </p>
-                        <div className="site-footer__legal-links">
-                            <Link href="/terms">Terms and Conditions</Link>
-                            <Link href="/privacy">Privacy Policy</Link>
-                        </div>
-                        <div className="site-footer__hashmark">
-                            <Link
-                                href="https://hashmark.tech"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="site-footer__hashmark-link"
-                                aria-label="Visit Hashmark"
-                            >
-                                <span className="site-footer__hashmark-text">Hashmark</span>
-                                <img
-                                    src={HASHMARK_LOGO_SRC}
-                                    alt="Hashmark logo"
-                                    className="site-footer__hashmark-logo"
-                                    width={28}
-                                    height={28}
-                                />
-                            </Link>
+                        <div className="site-footer__bottom-end">
+                            <div className="site-footer__legal-links">
+                                <Link href="/terms">Terms and Conditions</Link>
+                                <Link href="/privacy">Privacy Policy</Link>
+                            </div>
+                            <div className="site-footer__hashmark">
+                                <Link
+                                    href="https://hashmark.tech"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="site-footer__hashmark-link"
+                                    aria-label="Visit Hashmark"
+                                >
+                                    <span className="site-footer__hashmark-text">Hashmark</span>
+                                    <img
+                                        src={HASHMARK_LOGO_SRC}
+                                        alt="Hashmark logo"
+                                        className="site-footer__hashmark-logo"
+                                        width={28}
+                                        height={28}
+                                    />
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,8 +1,45 @@
 import { Router } from 'express';
 import { sendContactQuoteEmail } from '../services/email.js';
-import { getContactPageSettingsContent } from '../services/webContent.js';
+import {
+  getContactPageSettingsContent,
+  getTopbarContent,
+} from '../services/webContent.js';
 
 const router = Router();
+
+function isPlaceholderEmail(email) {
+  const value = String(email || '').trim().toLowerCase();
+  if (!value) return true;
+  return (
+    value === 'example@gamil.com'
+    || value === 'example@gmail.com'
+    || value.endsWith('@example.com')
+    || value.endsWith('@example.org')
+    || value.endsWith('@gamil.com') // common typo for gmail.com
+  );
+}
+
+async function resolveQuoteRecipientEmail() {
+  const [settings, topbar] = await Promise.all([
+    getContactPageSettingsContent(),
+    getTopbarContent(),
+  ]);
+
+  const candidates = [
+    settings.recipientEmail,
+    settings.displayEmail,
+    topbar.email,
+  ];
+
+  for (const candidate of candidates) {
+    const email = String(candidate || '').trim();
+    if (email && !isPlaceholderEmail(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return email;
+    }
+  }
+
+  return null;
+}
 
 router.post('/quote', async (req, res) => {
   try {
@@ -24,13 +61,15 @@ router.post('/quote', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const settings = await getContactPageSettingsContent();
-    if (!settings.recipientEmail) {
-      return res.status(503).json({ error: 'Contact form is not configured yet' });
+    const recipientEmail = await resolveQuoteRecipientEmail();
+    if (!recipientEmail) {
+      return res.status(503).json({
+        error: 'Contact form recipient email is not configured. Set it in Admin → CMS → Contact → Recipient Email.',
+      });
     }
 
     await sendContactQuoteEmail({
-      to: settings.recipientEmail,
+      to: recipientEmail,
       name: safeName,
       email: safeEmail,
       phone: String(phone || '').trim(),
@@ -40,7 +79,10 @@ router.post('/quote', async (req, res) => {
       message: safeMessage,
     });
 
-    return res.json({ success: true, message: 'Your message has been sent.' });
+    return res.json({
+      success: true,
+      message: 'Your quote request has been emailed. Check your inbox for a confirmation.',
+    });
   } catch (error) {
     console.error('[contact] quote submit failed:', error);
     return res.status(500).json({ error: error.message || 'Failed to send message' });

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl } from '@/lib/cms'
 import { serviceCategoryLabel, serviceCategoryPath, serviceDetailPath } from '@/lib/paths'
 import ServiceDetailsBanner from '@/components/sections/services/ServiceDetailsBanner'
+import ServicesGallery from '@/components/sections/services/ServicesGallery'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -193,6 +194,12 @@ export default function ServiceDetailView({ serviceSlug }) {
                                         Back to {categoryLabel}
                                     </Link>
                                 </div>
+                                <ServicesGallery
+                                    pageKey={categoryHref === '/commercial' ? 'commercial' : 'residential'}
+                                    serviceId={service.id}
+                                    embedded
+                                    sectionClassName="services-gallery--service-detail"
+                                />
                             </div>
                         </div>
                         <div className="col-xl-4 col-lg-5">
@@ -204,10 +211,12 @@ export default function ServiceDetailView({ serviceSlug }) {
                                             <h4>Category :</h4>
                                             <p>{service.categoryName}</p>
                                         </li>
-                                        <li>
-                                            <h4>Duration :</h4>
-                                            <p>{formatDuration(service.durationMinutes)}</p>
-                                        </li>
+                                        {Number(service.durationMinutes) > 0 ? (
+                                            <li>
+                                                <h4>Duration :</h4>
+                                                <p>{formatDuration(service.durationMinutes)}</p>
+                                            </li>
+                                        ) : null}
                                     </ul>
                                 </div>
                                 {relatedServices.length ? (

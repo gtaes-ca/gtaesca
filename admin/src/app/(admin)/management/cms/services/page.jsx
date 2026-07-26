@@ -69,7 +69,7 @@ const ServicesCmsPage = () => {
             <CategoryServicesGalleryForm
               pageKey="residential"
               title="Residential Services Gallery"
-              description="Photo gallery shown below the residential services list on /residential."
+              description="Photo gallery for /residential. Each item must be linked to a residential service; those photos also appear on that service’s detail page."
             />
           </Tab.Pane>
           <Tab.Pane eventKey={TABS.COMMERCIAL_BANNER}>
@@ -91,7 +91,7 @@ const ServicesCmsPage = () => {
             <CategoryServicesGalleryForm
               pageKey="commercial"
               title="Commercial Services Gallery"
-              description="Photo gallery shown below the commercial services list on /commercial."
+              description="Photo gallery for /commercial. Each item must be linked to a commercial service; those photos also appear on that service’s detail page."
             />
           </Tab.Pane>
         </Tab.Content>

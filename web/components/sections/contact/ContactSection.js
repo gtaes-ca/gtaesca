@@ -6,6 +6,7 @@ import { DEFAULT_CONTACT_PAGE_SETTINGS, toTelHref } from '@/lib/cms'
 import {
     buildWhatsAppContactQuoteMessage,
     fetchPublicBookingSettings,
+    openSmsMessage,
     openWhatsAppBooking,
 } from '@/lib/booking'
 
@@ -31,9 +32,11 @@ export default function ContactSection() {
     const [selectedCategoryId, setSelectedCategoryId] = useState('')
     const [servicesOpen, setServicesOpen] = useState(false)
     const [loading, setLoading] = useState(true)
-    const [submitting, setSubmitting] = useState(false)
+    const [submittingMode, setSubmittingMode] = useState('')
     const [status, setStatus] = useState({ type: '', message: '' })
     const servicesRef = useRef(null)
+    const formRef = useRef(null)
+    const submitting = Boolean(submittingMode)
 
     useEffect(() => {
         let cancelled = false
@@ -138,9 +141,16 @@ export default function ContactSection() {
         })
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setSubmitting(true)
+    const resetForm = () => {
+        setForm(EMPTY_FORM)
+        setSelectedCategoryId('')
+        setServicesOpen(false)
+    }
+
+    const handleWhatsApp = async () => {
+        if (!formRef.current?.reportValidity()) return
+
+        setSubmittingMode('whatsapp')
         setStatus({ type: '', message: '' })
 
         try {
@@ -161,10 +171,7 @@ export default function ContactSection() {
             })
 
             openWhatsAppBooking(whatsappNumber, message)
-
-            setForm(EMPTY_FORM)
-            setSelectedCategoryId('')
-            setServicesOpen(false)
+            resetForm()
             setStatus({
                 type: 'success',
                 message: 'WhatsApp opened with your quote request. Send the message to complete.',
@@ -175,7 +182,85 @@ export default function ContactSection() {
                 message: error?.message || 'Failed to open WhatsApp. Please try again.',
             })
         } finally {
-            setSubmitting(false)
+            setSubmittingMode('')
+        }
+    }
+
+    const handleMessageClick = async () => {
+        if (!formRef.current?.reportValidity()) return
+
+        setSubmittingMode('message')
+        setStatus({ type: '', message: '' })
+
+        try {
+            const smsNumber = whatsappNumber || settings.phone
+            if (!smsNumber) {
+                setStatus({
+                    type: 'error',
+                    message: 'Mobile number is not configured yet. Please call or email us directly.',
+                })
+                return
+            }
+
+            const message = buildWhatsAppContactQuoteMessage({
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                services: selectedServices,
+                message: form.message,
+            })
+
+            openSmsMessage(smsNumber, message)
+            resetForm()
+            setStatus({
+                type: 'success',
+                message: 'Messages opened with your quote request. Send the text to complete.',
+            })
+        } catch (error) {
+            setStatus({
+                type: 'error',
+                message: error?.message || 'Failed to open Messages. Please try again.',
+            })
+        } finally {
+            setSubmittingMode('')
+        }
+    }
+
+    const handleEmailSubmit = async (e) => {
+        e.preventDefault()
+        setSubmittingMode('email')
+        setStatus({ type: '', message: '' })
+
+        try {
+            const response = await fetch(`${API_URL}/api/contact/quote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: form.name,
+                    email: form.email,
+                    phone: form.phone,
+                    serviceIds: form.serviceIds,
+                    services: selectedServices.map((service) => service.name),
+                    message: form.message,
+                }),
+            })
+            const data = await response.json().catch(() => ({}))
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to send email')
+            }
+
+            resetForm()
+            setStatus({
+                type: 'success',
+                message: data.message || 'Your quote request has been emailed. We will get back to you soon.',
+            })
+        } catch (error) {
+            setStatus({
+                type: 'error',
+                message: error?.message || 'Failed to send email. Please try again.',
+            })
+        } finally {
+            setSubmittingMode('')
         }
     }
 
@@ -251,7 +336,11 @@ export default function ContactSection() {
                             <div className="col-xl-6">
                                 <div className="contact-three__right" id="quote">
                                     <h3 className="contact-three__form-title">{settings.formTitle}</h3>
-                                    <form className="contact-three__form" onSubmit={handleSubmit}>
+                                    <form
+                                        ref={formRef}
+                                        className="contact-three__form"
+                                        onSubmit={handleEmailSubmit}
+                                    >
                                         <div className="row">
                                             <div className="col-xl-6 col-lg-6">
                                                 <div className="contact-three__input-box">
@@ -375,11 +464,38 @@ export default function ContactSection() {
                                                 </div>
                                                 <div className="contact-three__btn-box">
                                                     <button
+                                                        type="button"
+                                                        className="thm-btn contact-three__btn contact-three__btn--whatsapp"
+                                                        disabled={submitting}
+                                                        onClick={handleWhatsApp}
+                                                    >
+                                                        <i className="fab fa-whatsapp" aria-hidden="true" />
+                                                        <span>
+                                                            {submittingMode === 'whatsapp'
+                                                                ? 'Opening...'
+                                                                : 'WhatsApp'}
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="thm-btn contact-three__btn contact-three__btn--message"
+                                                        disabled={submitting}
+                                                        onClick={handleMessageClick}
+                                                    >
+                                                        <i className="fas fa-comment-dots" aria-hidden="true" />
+                                                        <span>
+                                                            {submittingMode === 'message' ? 'Opening...' : 'Message'}
+                                                        </span>
+                                                    </button>
+                                                    <button
                                                         type="submit"
-                                                        className="thm-btn contact-three__btn"
+                                                        className="thm-btn contact-three__btn contact-three__btn--email"
                                                         disabled={submitting}
                                                     >
-                                                        {submitting ? 'Please wait...' : 'Continue on WhatsApp'}
+                                                        <span className="icon-envelope" aria-hidden="true" />
+                                                        <span>
+                                                            {submittingMode === 'email' ? 'Sending...' : 'Email'}
+                                                        </span>
                                                     </button>
                                                 </div>
                                             </div>

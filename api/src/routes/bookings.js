@@ -198,6 +198,9 @@ router.post('/', optionalAuthenticate, async (req, res) => {
   }
 
   const durationMinutes = await getTotalDurationMinutes(serviceIds);
+  if (!durationMinutes) {
+    return res.status(400).json({ error: 'Selected services have no duration and cannot be booked online' });
+  }
   const servicePrice = await getTotalServicePrice(serviceIds);
   const primaryServiceId = serviceIds[0];
   const bookingSource = req.user && canAccessAdminPanel(req.user)

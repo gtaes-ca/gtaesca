@@ -72,7 +72,7 @@ export default function Testimonial() {
 
   if (!content.items.length) return null
 
-  const enableLoop = content.items.length > 3
+  const enableLoop = content.items.length >= 6
 
   return (
     <section className="testimonial-one home-testimonials">
@@ -118,6 +118,7 @@ export default function Testimonial() {
             modules={[Autoplay, Navigation, Pagination]}
             className="home-testimonials__carousel"
             slidesPerView={1}
+            slidesPerGroup={1}
             spaceBetween={24}
             loop={enableLoop}
             speed={700}
@@ -138,10 +139,12 @@ export default function Testimonial() {
             breakpoints={{
               768: {
                 slidesPerView: 2,
+                slidesPerGroup: 2,
                 spaceBetween: 24,
               },
               1200: {
                 slidesPerView: 3,
+                slidesPerGroup: 3,
                 spaceBetween: 28,
               },
             }}

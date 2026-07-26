@@ -15,7 +15,7 @@ const defaultForm = {
   name: '',
   slug: '',
   description: '',
-  durationMinutes: 120,
+  durationMinutes: '',
   price: '0',
   sortOrder: 0,
   image: '',
@@ -24,6 +24,7 @@ const defaultForm = {
 };
 
 const DURATION_PRESETS = [
+  { value: '', label: 'No duration' },
   { value: 60, label: '1 hour' },
   { value: 90, label: '1.5 hours' },
   { value: 120, label: '2 hours' },
@@ -34,7 +35,7 @@ const DURATION_PRESETS = [
 ];
 
 function formatDuration(minutes) {
-  if (!minutes) return '-';
+  if (!minutes) return '—';
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
@@ -181,7 +182,7 @@ const ServicesPage = () => {
       name: service.name,
       slug: service.slug || '',
       description: service.description || '',
-      durationMinutes: service.durationMinutes ?? 120,
+      durationMinutes: service.durationMinutes ?? '',
       price: String(service.price ?? 0),
       sortOrder: service.sortOrder,
       image,
@@ -226,11 +227,16 @@ const ServicesPage = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const durationRaw = form.durationMinutes;
+      const durationMinutes =
+        durationRaw === '' || durationRaw === null || durationRaw === undefined
+          ? null
+          : Number(durationRaw);
       const payload = {
         categoryId: Number(form.categoryId),
         name: form.name,
         description: form.description,
-        durationMinutes: Number(form.durationMinutes),
+        durationMinutes,
         price: Number(form.price),
         sortOrder: Number(form.sortOrder),
         slug: form.slug.trim() || undefined,
@@ -546,15 +552,18 @@ const ServicesPage = () => {
             <Form.Group className="mb-3">
               <Form.Label>Duration</Form.Label>
               <Form.Select
-                value={form.durationMinutes}
+                value={form.durationMinutes === '' || form.durationMinutes == null ? '' : form.durationMinutes}
                 onChange={(e) => setForm({ ...form, durationMinutes: e.target.value })}
               >
                 {DURATION_PRESETS.map((preset) => (
-                  <option key={preset.value} value={preset.value}>{preset.label}</option>
+                  <option key={String(preset.value)} value={preset.value}>{preset.label}</option>
                 ))}
-                <option value={form.durationMinutes}>
-                  Custom: {formatDuration(Number(form.durationMinutes))}
-                </option>
+                {form.durationMinutes !== '' && form.durationMinutes != null
+                  && !DURATION_PRESETS.some((preset) => String(preset.value) === String(form.durationMinutes)) ? (
+                  <option value={form.durationMinutes}>
+                    Custom: {formatDuration(Number(form.durationMinutes))}
+                  </option>
+                ) : null}
               </Form.Select>
               <Form.Control
                 className="mt-2"
@@ -562,11 +571,12 @@ const ServicesPage = () => {
                 min={15}
                 max={960}
                 step={15}
+                placeholder="Optional"
                 value={form.durationMinutes}
                 onChange={(e) => setForm({ ...form, durationMinutes: e.target.value })}
               />
               <Form.Text className="text-muted">
-                How long this service blocks the technician&apos;s calendar.
+                Optional. Leave empty for quote-only services (hidden on the public page). When set, blocks the technician&apos;s calendar when booking.
               </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">

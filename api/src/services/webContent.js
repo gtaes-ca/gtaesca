@@ -1449,7 +1449,15 @@ const DEFAULT_SERVICE_CATEGORY_GALLERY = {
 };
 
 function normalizeServiceCategoryGalleryItem(item = {}) {
+  const rawServiceId = item?.serviceId ?? item?.service_id ?? '';
+  const serviceId =
+    rawServiceId === '' || rawServiceId === null || rawServiceId === undefined
+      ? ''
+      : String(rawServiceId).trim();
+
   return {
+    serviceId,
+    serviceName: String(item?.serviceName ?? '').trim(),
     subTitle: String(item?.subTitle ?? '').trim(),
     title: String(item?.title ?? '').trim(),
     text: String(item?.text ?? '').trim(),
@@ -1468,7 +1476,7 @@ export function normalizeServiceCategoryGalleryContent(content = {}) {
     titleLine2: String(content.titleLine2 ?? DEFAULT_SERVICE_CATEGORY_GALLERY.titleLine2).trim(),
     buttonText: String(content.buttonText ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonText).trim(),
     buttonLink: String(content.buttonLink ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonLink).trim(),
-    items: items.slice(0, 12),
+    items: items.slice(0, 24),
   };
 }
 
@@ -1489,6 +1497,9 @@ export async function updateServiceCategoryGalleryContent(page, content) {
   for (const item of normalized.items) {
     if (!item.image) {
       throw new Error('Each gallery item needs an image');
+    }
+    if (!item.serviceId) {
+      throw new Error('Each gallery item needs a linked service');
     }
   }
 
@@ -1526,10 +1537,10 @@ const DEFAULT_CONTACT_BANNER = {
 
 const DEFAULT_CONTACT_PAGE_SETTINGS = {
   formTitle: 'Get A Free Quote',
-  recipientEmail: 'example@gamil.com',
-  phone: '+55 827 057 5405',
-  displayEmail: 'example@gamil.com',
-  address: '12 Green Road, 05 New York',
+  recipientEmail: '',
+  phone: '',
+  displayEmail: '',
+  address: '',
   latitude: 43.6532,
   longitude: -79.3832,
   mapZoom: 14,

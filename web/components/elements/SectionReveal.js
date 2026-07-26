@@ -16,6 +16,7 @@ const CARD_SELECTORS = [
   '.services-two__category-card',
   '.services-two__single',
   '.services-page__card',
+  '.services-gallery .services-page__card',
   '.about-page-intro__content',
   '.about-page-intro__media',
   '.about-page-values__card',

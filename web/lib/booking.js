@@ -181,6 +181,57 @@ export function openWhatsAppBooking(number, message) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+/**
+ * Apple Messages (macOS + iOS/iPadOS) treats `sms:number?body=` as one To recipient.
+ * Android and most other phones need `sms:+number?body=`.
+ */
+function usesAppleMessagesApp() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(ua)) return true;
+  // iPadOS 13+ can report as Macintosh
+  if (navigator.platform === 'MacIntel' && Number(navigator.maxTouchPoints) > 1) return true;
+  // MacBook / iMac — opens macOS Messages / iMessage
+  if (/Macintosh|Mac OS X/i.test(ua)) return true;
+  return false;
+}
+
+/** Native SMS / iMessage compose link (same digits as WhatsApp / contact mobile). */
+export function buildSmsUrl(number, message) {
+  const digits = normalizeWhatsAppNumber(number);
+  if (!digits) return null;
+  const body = encodeURIComponent(String(message || ''));
+
+  if (usesAppleMessagesApp()) {
+    // macOS Messages + iPhone/iPad iMessage require `&body=` (not `?body=`).
+    // `?body=` puts the full quote into the To field on Apple devices.
+    return `sms:${digits}&body=${body}`;
+  }
+
+  // Android and other SMS apps
+  return `sms:+${digits}?body=${body}`;
+}
+
+export function openSmsMessage(number, message) {
+  const url = buildSmsUrl(number, message);
+  if (!url) {
+    throw new Error('Mobile number is not configured');
+  }
+
+  // location.assign is the most reliable way to hand off to Messages on macOS/iOS.
+  // Fall back to an anchor if navigation is blocked.
+  try {
+    window.location.assign(url);
+  } catch {
+    const anchor = document.createElement('a');
+    anchor.setAttribute('href', url);
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+}
+
 export function getDateStrInTimezone(timeZone) {
   return new Date().toLocaleDateString('en-CA', { timeZone });
 }

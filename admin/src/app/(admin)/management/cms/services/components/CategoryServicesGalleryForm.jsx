@@ -11,7 +11,8 @@ import {
 } from '@/helpers/cms';
 import httpClient from '@/helpers/httpClient';
 
-const MAX_GALLERY_ITEMS = 12;
+const MAX_GALLERY_ITEMS = 24;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 async function uploadGalleryImage(dataUrl, key) {
   const res = await httpClient.post('/api/admin/web-content/upload-image', { dataUrl, key });
@@ -43,6 +44,8 @@ function ImagePreview({ label, imageUrl }) {
 }
 
 const emptyItem = () => ({
+  serviceId: '',
+  serviceName: '',
   subTitle: '',
   title: '',
   text: '',
@@ -59,13 +62,20 @@ export default function CategoryServicesGalleryForm({
   const { showNotification } = useNotificationContext();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [services, setServices] = useState([]);
   const [form, setForm] = useState(mapServiceCategoryGalleryFromApi());
 
   const loadGallery = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await httpClient.get(`/api/admin/web-content/${pageKey}/gallery`);
-      setForm(mapServiceCategoryGalleryFromApi(res.data.content || {}));
+      const [galleryRes, servicesRes] = await Promise.all([
+        httpClient.get(`/api/admin/web-content/${pageKey}/gallery`),
+        fetch(`${API_URL}/api/services/list?group=${encodeURIComponent(pageKey)}`).then((res) =>
+          res.ok ? res.json() : { services: [] }
+        ),
+      ]);
+      setForm(mapServiceCategoryGalleryFromApi(galleryRes.data.content || {}));
+      setServices(Array.isArray(servicesRes.services) ? servicesRes.services : []);
     } catch (e) {
       showNotification({
         message: e.response?.data?.error || 'Failed to load gallery content',
@@ -88,6 +98,22 @@ export default function CategoryServicesGalleryForm({
     setForm((prev) => ({
       ...prev,
       items: prev.items.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    }));
+  };
+
+  const handleServiceSelect = (index, serviceId) => {
+    const selected = services.find((service) => String(service.id) === String(serviceId));
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.map((item, i) => {
+        if (i !== index) return item;
+        return {
+          ...item,
+          serviceId: serviceId || '',
+          serviceName: selected?.name || '',
+          subTitle: item.subTitle || selected?.name || '',
+        };
+      }),
     }));
   };
 
@@ -152,6 +178,13 @@ export default function CategoryServicesGalleryForm({
 
     for (let index = 0; index < form.items.length; index += 1) {
       const item = form.items[index];
+      if (!item.serviceId) {
+        showNotification({
+          message: `Gallery item ${index + 1} needs a service selected`,
+          variant: 'danger',
+        });
+        return;
+      }
       if (!item.image && !item.imageData) {
         showNotification({
           message: `Gallery item ${index + 1} needs an image`,
@@ -173,12 +206,15 @@ export default function CategoryServicesGalleryForm({
       for (let index = 0; index < form.items.length; index += 1) {
         const item = form.items[index];
         let image = item.image;
+        const selected = services.find((service) => String(service.id) === String(item.serviceId));
 
         if (item.imageData) {
           image = await uploadGalleryImage(item.imageData, `${pageKey}-gallery-${index}`);
         }
 
         preparedItems.push({
+          serviceId: String(item.serviceId),
+          serviceName: selected?.name || item.serviceName || '',
           subTitle: item.subTitle,
           title: item.title,
           text: item.text,
@@ -266,11 +302,35 @@ export default function CategoryServicesGalleryForm({
             <Accordion defaultActiveKey="0" className="mb-4">
               {form.items.map((item, index) => (
                 <Accordion.Item eventKey={String(index)} key={`gallery-item-${index}`}>
-                  <Accordion.Header>Item {index + 1}: {item.title || 'Untitled'}</Accordion.Header>
+                  <Accordion.Header>
+                    Item {index + 1}: {item.serviceName || item.title || 'Untitled'}
+                  </Accordion.Header>
                   <Accordion.Body>
                     <Row className="g-4">
                       <Col xs={12}>
                         <ImagePreview label="Gallery image" imageUrl={item.imagePreview} />
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Service</Form.Label>
+                          <Form.Select
+                            value={item.serviceId || ''}
+                            onChange={(e) => handleServiceSelect(index, e.target.value)}
+                            required
+                          >
+                            <option value="">Select a service…</option>
+                            {services.map((service) => (
+                              <option key={service.id} value={String(service.id)}>
+                                {service.name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          {!services.length ? (
+                            <Form.Text className="text-muted">
+                              No {pageKey} services found. Add services first under Management → Services.
+                            </Form.Text>
+                          ) : null}
+                        </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group>
@@ -352,7 +412,7 @@ export default function CategoryServicesGalleryForm({
               ))}
             </Accordion>
           ) : (
-            <p className="text-muted mb-4">No gallery items yet. Add photos to show a gallery on this page.</p>
+            <p className="text-muted mb-4">No gallery items yet. Add photos linked to a service.</p>
           )}
 
           <div className="d-flex flex-wrap gap-2">

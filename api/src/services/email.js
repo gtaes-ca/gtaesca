@@ -41,10 +41,11 @@ function plunkErrorMessage(data) {
   return 'UsePlunk send failed';
 }
 
-async function sendViaUsePlunk({ to, subject, html, text, data }) {
+async function sendViaUsePlunk({ to, subject, html, text, data, replyTo }) {
   if (!USEPLUNK_API_KEY) {
     console.log('\n--- EMAIL (dev mode, UsePlunk not configured) ---');
     console.log(`To: ${to}`);
+    if (replyTo) console.log(`Reply-To: ${replyTo}`);
     console.log(`Subject: ${subject}`);
     console.log(text || html);
     console.log('Set USEPLUNK_API_KEY and USEPLUNK_FROM_EMAIL in .env');
@@ -61,6 +62,7 @@ async function sendViaUsePlunk({ to, subject, html, text, data }) {
   }
 
   const body = html || `<pre>${text || ''}</pre>`;
+  const safeReplyTo = String(replyTo || '').trim();
 
   const payload = {
     to,
@@ -69,6 +71,7 @@ async function sendViaUsePlunk({ to, subject, html, text, data }) {
     from: USEPLUNK_FROM_EMAIL,
     name: USEPLUNK_FROM_NAME,
     subscribed: false,
+    ...(safeReplyTo ? { reply: safeReplyTo, replyTo: safeReplyTo } : {}),
     ...(data ? { data } : {}),
   };
 
@@ -89,7 +92,7 @@ async function sendViaUsePlunk({ to, subject, html, text, data }) {
     throw new Error(message);
   }
 
-  console.log('[email] Sent via UsePlunk:', { to, subject, id: result?.data?.emails?.[0]?.email });
+  console.log('[email] Sent via UsePlunk:', { to, subject, replyTo: safeReplyTo || null, id: result?.data?.emails?.[0]?.email });
   return { devMode: false, provider: 'useplunk', result };
 }
 
@@ -350,21 +353,19 @@ export async function sendContactQuoteEmail({
   const safeMessage = String(message || '').trim();
   const servicesLabel = selectedServices.length ? selectedServices.join(', ') : '';
 
-  return sendViaUsePlunk({
-    to,
-    subject: `${BRAND_NAME} Contact Form — ${safeName}`,
-    text: [
-      'New contact form submission:',
-      `Name: ${safeName}`,
-      `Email: ${safeEmail}`,
-      safePhone ? `Phone: ${safePhone}` : '',
-      servicesLabel ? `Services: ${servicesLabel}` : '',
-      safeCompany ? `Company: ${safeCompany}` : '',
-      '',
-      'Message:',
-      safeMessage,
-    ].filter(Boolean).join('\n'),
-    html: `
+  const textBody = [
+    'New contact form submission:',
+    `Name: ${safeName}`,
+    `Email: ${safeEmail}`,
+    safePhone ? `Phone: ${safePhone}` : '',
+    servicesLabel ? `Services: ${servicesLabel}` : '',
+    safeCompany ? `Company: ${safeCompany}` : '',
+    '',
+    'Message:',
+    safeMessage,
+  ].filter(Boolean).join('\n');
+
+  const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${safeName}</p>
@@ -375,7 +376,14 @@ export async function sendContactQuoteEmail({
         <p><strong>Message:</strong></p>
         <p style="white-space: pre-wrap;">${safeMessage}</p>
       </div>
-    `,
+    `;
+
+  const teamResult = await sendViaUsePlunk({
+    to,
+    replyTo: safeEmail,
+    subject: `${BRAND_NAME} Contact Form — ${safeName}`,
+    text: textBody,
+    html: htmlBody,
     data: {
       contactName: { value: safeName, persistent: false },
       contactEmail: { value: safeEmail, persistent: false },
@@ -383,4 +391,38 @@ export async function sendContactQuoteEmail({
       contactServiceIds: { value: Array.isArray(serviceIds) ? serviceIds.join(',') : '', persistent: false },
     },
   });
+
+  // Confirmation to the person who submitted the form
+  if (safeEmail && safeEmail.toLowerCase() !== String(to).toLowerCase()) {
+    try {
+      await sendViaUsePlunk({
+        to: safeEmail,
+        subject: `We received your quote request — ${BRAND_NAME}`,
+        text: [
+          `Hi ${safeName},`,
+          '',
+          'Thanks for contacting GTA Electric Services. We received your quote request and will get back to you soon.',
+          '',
+          servicesLabel ? `Services: ${servicesLabel}` : '',
+          '',
+          'Your message:',
+          safeMessage,
+        ].filter(Boolean).join('\n'),
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>We received your quote request</h2>
+            <p>Hi ${safeName},</p>
+            <p>Thanks for contacting <strong>${BRAND_NAME}</strong>. We received your quote request and will get back to you soon.</p>
+            ${servicesLabel ? `<p><strong>Services:</strong> ${servicesLabel}</p>` : ''}
+            <p><strong>Your message:</strong></p>
+            <p style="white-space: pre-wrap;">${safeMessage}</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      console.warn('[email] Customer confirmation failed:', error.message);
+    }
+  }
+
+  return teamResult;
 }

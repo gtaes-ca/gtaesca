@@ -287,6 +287,8 @@ export function mapServiceCategoryGalleryFromApi(content = {}) {
     items: items.map((item) => {
       const image = item.image || '';
       return {
+        serviceId: item.serviceId ? String(item.serviceId) : '',
+        serviceName: item.serviceName || '',
         subTitle: item.subTitle || '',
         title: item.title || '',
         text: item.text || '',
@@ -306,6 +308,8 @@ export function mapServiceCategoryGalleryForSave(content = {}) {
     buttonText: content.buttonText,
     buttonLink: content.buttonLink,
     items: (content.items || []).map((item) => ({
+      serviceId: item.serviceId ? String(item.serviceId) : '',
+      serviceName: item.serviceName || '',
       subTitle: item.subTitle,
       title: item.title,
       text: item.text,

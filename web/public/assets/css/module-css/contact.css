@@ -398,7 +398,32 @@
 
 .contact-three__btn-box {
     position: relative;
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.contact-three__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.contact-three__btn i,
+.contact-three__btn [class^="icon-"] {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.contact-three__btn--whatsapp i {
+    font-size: 20px;
+    color: #25d366;
+}
+
+.contact-three__btn--whatsapp:hover i {
+    color: inherit;
 }
 
 .contact-three__services {

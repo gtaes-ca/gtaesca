@@ -177,6 +177,43 @@
     color: var(--erepair-base);
 }
 
+.site-footer--brand .site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.site-footer--brand .site-footer__social a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(var(--erepair-white-rgb), 0.2);
+    background: rgba(var(--erepair-white-rgb), 0.08);
+    color: var(--erepair-white);
+    font-size: 14px;
+    text-decoration: none;
+    overflow: hidden;
+    transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    z-index: 1;
+}
+
+.site-footer--brand .site-footer__social a::after {
+    display: none;
+}
+
+.site-footer--brand .site-footer__social a:hover {
+    color: var(--erepair-navy);
+    background: var(--erepair-base);
+    border-color: var(--erepair-base);
+}
+
 .site-footer--brand .footer-widget__title {
     margin: 0;
     font-size: 14px;
@@ -211,6 +248,23 @@
     border-top: 1px solid rgba(var(--erepair-white-rgb), 0.12);
 }
 
+.site-footer--brand .site-footer__bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 28px;
+    flex-wrap: wrap;
+    padding: 18px 0;
+}
+
+.site-footer--brand .site-footer__bottom-end {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+    margin-left: auto;
+}
+
 .site-footer--brand .site-footer__legal-links {
     display: flex;
     flex-wrap: wrap;
@@ -221,6 +275,7 @@
 .site-footer--brand .site-footer__legal-links a {
     color: rgba(var(--erepair-white-rgb), 0.78);
     font-size: 14px;
+    text-decoration: none;
     transition: color 0.25s ease;
 }
 
@@ -266,6 +321,11 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+    }
+
+    .site-footer--brand .site-footer__bottom-end {
+        margin-left: 0;
+        width: 100%;
     }
 }
 

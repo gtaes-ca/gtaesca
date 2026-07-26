@@ -52,6 +52,22 @@ function resolveServiceImage({ serviceId, image, imageData }) {
   return undefined;
 }
 
+/** Empty / null / 0 means no duration (catalog-only). Otherwise 15–960 minutes. */
+function parseOptionalDuration(durationMinutes) {
+  if (durationMinutes === undefined) return undefined;
+  if (durationMinutes === null || durationMinutes === '' || durationMinutes === false) {
+    return null;
+  }
+  const duration = Number(durationMinutes);
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return null;
+  }
+  if (duration < 15 || duration > 960) {
+    throw new Error('Duration must be between 15 and 960 minutes, or left empty');
+  }
+  return duration;
+}
+
 router.get('/', authenticate, requirePageAccess('management.services'), async (req, res) => {
   const {
     categoryId,
@@ -166,9 +182,11 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
     return res.status(400).json({ error: 'Category and service name are required' });
   }
 
-  const duration = Number(durationMinutes) || 120;
-  if (duration < 15 || duration > 960) {
-    return res.status(400).json({ error: 'Duration must be between 15 and 960 minutes' });
+  let duration;
+  try {
+    duration = parseOptionalDuration(durationMinutes === undefined ? null : durationMinutes);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
 
   let servicePrice;
@@ -234,6 +252,9 @@ router.post('/', authenticate, requirePageAccess('management.services'), async (
     if (error.code === '23505') {
       return res.status(409).json({ error: error.message.includes('slug') ? 'A service with this slug already exists' : 'A service with this name already exists in the category' });
     }
+    if (error.code === '23502') {
+      return res.status(400).json({ error: 'Invalid service data' });
+    }
     throw error;
   }
 });
@@ -263,10 +284,12 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
     }
   }
 
+  let duration;
   if (durationMinutes !== undefined) {
-    const duration = Number(durationMinutes);
-    if (!Number.isFinite(duration) || duration < 15 || duration > 960) {
-      return res.status(400).json({ error: 'Duration must be between 15 and 960 minutes' });
+    try {
+      duration = parseOptionalDuration(durationMinutes);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
     }
   }
 
@@ -304,18 +327,19 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
            name = COALESCE($2, name),
            slug = COALESCE($3, slug),
            description = COALESCE($4, description),
-           duration_minutes = COALESCE($5, duration_minutes),
-           price = COALESCE($6, price),
-           sort_order = COALESCE($7, sort_order),
-           image_url = CASE WHEN $8::boolean THEN $9 ELSE image_url END
-       WHERE id = $10
+           duration_minutes = CASE WHEN $5::boolean THEN $6 ELSE duration_minutes END,
+           price = COALESCE($7, price),
+           sort_order = COALESCE($8, sort_order),
+           image_url = CASE WHEN $9::boolean THEN $10 ELSE image_url END
+       WHERE id = $11
        RETURNING id, slug, category_id, name, description, image_url, duration_minutes, price, sort_order, created_at`,
       [
         categoryId || null,
         name?.trim() || null,
         serviceSlug || null,
         description !== undefined ? (description?.trim() || null) : null,
-        durationMinutes !== undefined ? Number(durationMinutes) : null,
+        durationMinutes !== undefined,
+        durationMinutes !== undefined ? duration : null,
         price !== undefined ? servicePrice : null,
         sortOrder !== undefined ? Number(sortOrder) : null,
         imageUrl !== undefined,
@@ -338,6 +362,9 @@ router.patch('/:id', authenticate, requirePageAccess('management.services'), asy
   } catch (error) {
     if (error.code === '23505') {
       return res.status(409).json({ error: error.message.includes('slug') ? 'A service with this slug already exists' : 'A service with this name already exists in the category' });
+    }
+    if (error.code === '23502') {
+      return res.status(400).json({ error: 'Invalid service data' });
     }
     throw error;
   }
