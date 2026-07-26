@@ -3,12 +3,14 @@ import { Nav, Tab } from 'react-bootstrap';
 import PageTitle from '@/components/PageTitle';
 import AboutBannerForm from './components/AboutBannerForm';
 import AboutIntroForm from './components/AboutIntroForm';
-import AboutContactForm from './components/AboutContactForm';
+import AboutValuesForm from './components/AboutValuesForm';
+import AboutCredentialsForm from './components/AboutCredentialsForm';
 
 const TABS = {
   BANNER: 'banner',
   INTRO: 'intro',
-  CONTACT: 'contact',
+  VALUES: 'values',
+  CREDENTIALS: 'credentials',
 };
 
 const AboutCmsPage = () => {
@@ -26,7 +28,10 @@ const AboutCmsPage = () => {
             <Nav.Link eventKey={TABS.INTRO}>Page Intro</Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey={TABS.CONTACT}>Contact With Us</Nav.Link>
+            <Nav.Link eventKey={TABS.VALUES}>Our Values</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey={TABS.CREDENTIALS}>Licensed & Certified</Nav.Link>
           </Nav.Item>
         </Nav>
         <Tab.Content>
@@ -36,8 +41,11 @@ const AboutCmsPage = () => {
           <Tab.Pane eventKey={TABS.INTRO}>
             {activeTab === TABS.INTRO && <AboutIntroForm />}
           </Tab.Pane>
-          <Tab.Pane eventKey={TABS.CONTACT}>
-            {activeTab === TABS.CONTACT && <AboutContactForm />}
+          <Tab.Pane eventKey={TABS.VALUES}>
+            {activeTab === TABS.VALUES && <AboutValuesForm />}
+          </Tab.Pane>
+          <Tab.Pane eventKey={TABS.CREDENTIALS}>
+            {activeTab === TABS.CREDENTIALS && <AboutCredentialsForm />}
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

@@ -18,6 +18,8 @@ const CARD_SELECTORS = [
   '.services-page__card',
   '.about-page-intro__content',
   '.about-page-intro__media',
+  '.about-page-values__card',
+  '.about-page-credentials__item',
   '.about-one__left',
   '.about-one__right',
   '.home-testimonials__card',

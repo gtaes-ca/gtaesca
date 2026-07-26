@@ -122,35 +122,111 @@ export function mapAboutIntroForSave(content = {}) {
   };
 }
 
-export function mapAboutContactFromApi(content = {}) {
-  const backgroundImage = content.backgroundImage || '';
+const DEFAULT_VALUE_ITEMS = [
+  {
+    icon: 'icon-certified',
+    title: 'Safety Above All',
+    text: 'Every decision we make on the job starts with safety — for your family, your property, and our team. We follow ESA standards on every project, no exceptions.',
+  },
+  {
+    icon: 'icon-speech-bubbles',
+    title: 'Honest Communication',
+    text: 'We tell you what the job involves, what it will cost, and how long it will take — before we start. No surprises, no upselling, no runaround.',
+  },
+  {
+    icon: 'icon-medal',
+    title: 'Quality Workmanship',
+    text: 'We take pride in clean, careful work. From the wiring inside your walls to the finish on your pot lights, the details matter to us.',
+  },
+  {
+    icon: 'icon-clock',
+    title: 'Reliable Service',
+    text: 'We show up when we say we will, complete the work on schedule, and follow up to make sure you are satisfied. That is how we have earned long-term client relationships.',
+  },
+];
+
+export function mapAboutValuesFromApi(content = {}) {
+  const items = Array.isArray(content.items) && content.items.length
+    ? content.items
+    : DEFAULT_VALUE_ITEMS;
 
   return {
-    tagline: content.tagline || '',
-    title: content.title || '',
-    text1: content.text1 || '',
-    text2: content.text2 || '',
-    primaryButtonText: content.primaryButtonText || '',
-    primaryButtonLink: content.primaryButtonLink || '',
-    secondaryButtonText: content.secondaryButtonText || '',
-    secondaryButtonLink: content.secondaryButtonLink || '',
-    backgroundImage,
-    backgroundImagePreview: resolveCmsAssetUrl(backgroundImage),
-    backgroundImageData: null,
+    tagline: content.tagline || 'Our Values',
+    title: content.title || 'What We Stand For',
+    items: items.map((item) => ({
+      icon: item.icon || 'icon-check',
+      title: item.title || '',
+      text: item.text || '',
+    })),
   };
 }
 
-export function mapAboutContactForSave(content = {}) {
+export function mapAboutValuesForSave(content = {}) {
   return {
     tagline: content.tagline,
     title: content.title,
-    text1: content.text1,
-    text2: content.text2,
-    primaryButtonText: content.primaryButtonText,
-    primaryButtonLink: content.primaryButtonLink,
-    secondaryButtonText: content.secondaryButtonText,
-    secondaryButtonLink: content.secondaryButtonLink,
-    backgroundImage: content.backgroundImage,
+    items: (content.items || [])
+      .map((item) => ({
+        icon: String(item.icon || '').trim() || 'icon-check',
+        title: String(item.title || '').trim(),
+        text: String(item.text || '').trim(),
+      }))
+      .filter((item) => item.title || item.text),
+  };
+}
+
+const DEFAULT_CREDENTIAL_ITEMS = [
+  {
+    image: 'assets/images/brand/esa-logo.svg',
+    label: 'ESA Licensed',
+  },
+  {
+    image: 'assets/images/brand/wsib-logo.svg',
+    label: 'WSIB Certified',
+  },
+];
+
+export function mapAboutCredentialsFromApi(content = {}) {
+  const items = Array.isArray(content.items) && content.items.length
+    ? content.items
+    : DEFAULT_CREDENTIAL_ITEMS;
+
+  const esaLicenseNumber = String(content.esaLicenseNumber || '#7014495')
+    .trim()
+    .replace(/^esa\s*licen[sc]e[d]?\s*/i, '')
+    .trim()
+    .split(/\r?\n/)[0]
+    .trim();
+
+  return {
+    title: content.title || 'Licensed & Certified',
+    esaLicenseNumber,
+    items: items.map((item) => {
+      const image = item.image || '';
+      return {
+        image,
+        imagePreview: resolveCmsAssetUrl(image),
+        imageData: null,
+        label: item.label || '',
+      };
+    }),
+  };
+}
+
+export function mapAboutCredentialsForSave(content = {}) {
+  return {
+    title: content.title,
+    esaLicenseNumber: String(content.esaLicenseNumber || '')
+      .trim()
+      .replace(/^esa\s*licen[sc]e[d]?\s*/i, '')
+      .trim()
+      .split(/\r?\n/)[0]
+      .trim(),
+    items: (content.items || []).map((item) => ({
+      image: item.image,
+      imageData: item.imageData || undefined,
+      label: String(item.label || '').trim(),
+    })),
   };
 }
 

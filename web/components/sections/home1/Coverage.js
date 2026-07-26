@@ -142,6 +142,7 @@ export default function Coverage() {
 
   return (
     <section
+      id="service-coverage"
       ref={sectionRef}
       className={`home-coverage${isVisible ? ' is-visible' : ''}`}
     >

@@ -4,7 +4,8 @@ import { getAllowedPagesForUser } from '../../services/pageAccess.js';
 import {
   getAboutBannerContent,
   getAboutIntroContent,
-  getAboutContactContent,
+  getAboutValuesContent,
+  getAboutCredentialsContent,
   getFeaturedServicesContent,
   getHomeAboutContent,
   getHomeGalleryContent,
@@ -37,7 +38,8 @@ import {
   saveWidgetImage,
   updateAboutBannerContent,
   updateAboutIntroContent,
-  updateAboutContactContent,
+  updateAboutValuesContent,
+  updateAboutCredentialsContent,
   updateFeaturedServicesContent,
   updateHomeAboutContent,
   updateHomeGalleryContent,
@@ -549,14 +551,28 @@ router.put('/about/intro', requirePageAccess('management.cms.about'), async (req
   }
 });
 
-router.get('/about/contact', requirePageAccess('management.cms.about'), async (_req, res) => {
-  const content = await getAboutContactContent();
+router.get('/about/values', requirePageAccess('management.cms.about'), async (_req, res) => {
+  const content = await getAboutValuesContent();
   return res.json({ content });
 });
 
-router.put('/about/contact', requirePageAccess('management.cms.about'), async (req, res) => {
+router.put('/about/values', requirePageAccess('management.cms.about'), async (req, res) => {
   try {
-    const content = await updateAboutContactContent(req.body.content || {});
+    const content = await updateAboutValuesContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/about/credentials', requirePageAccess('management.cms.about'), async (_req, res) => {
+  const content = await getAboutCredentialsContent();
+  return res.json({ content });
+});
+
+router.put('/about/credentials', requirePageAccess('management.cms.about'), async (req, res) => {
+  try {
+    const content = await updateAboutCredentialsContent(req.body.content || {});
     return res.json({ content });
   } catch (error) {
     return res.status(400).json({ error: error.message });

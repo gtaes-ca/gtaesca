@@ -832,18 +832,6 @@ const DEFAULT_TEAM_DETAILS_BANNER = {
   backgroundImage: '',
 };
 
-const DEFAULT_ABOUT_CONTACT = {
-  tagline: 'contact with us',
-  title: 'Choose Our Electric Repair Service because its 24/7',
-  text1: 'The wise man therefore always holds in these matters to this principle of selection. He rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains to the selection point.',
-  text2: 'But in certain circumstances and owing to the claims of duty or the obligations of business we often need reliable electrical support around the clock.',
-  primaryButtonText: 'Discover More',
-  primaryButtonLink: '/about',
-  secondaryButtonText: 'Free estimate',
-  secondaryButtonLink: '/contact',
-  backgroundImage: '',
-};
-
 const DEFAULT_ABOUT_INTRO = {
   tagline: 'Who We Are',
   title: 'Built on Safety, Skill, and Service Across the GTA',
@@ -860,6 +848,58 @@ const DEFAULT_ABOUT_INTRO = {
   buttonText: 'Request a Quote',
   buttonLink: '/contact',
 };
+
+const DEFAULT_ABOUT_VALUES = {
+  tagline: 'Our Values',
+  title: 'What We Stand For',
+  items: [
+    {
+      icon: 'icon-certified',
+      title: 'Safety Above All',
+      text: 'Every decision we make on the job starts with safety — for your family, your property, and our team. We follow ESA standards on every project, no exceptions.',
+    },
+    {
+      icon: 'icon-speech-bubbles',
+      title: 'Honest Communication',
+      text: 'We tell you what the job involves, what it will cost, and how long it will take — before we start. No surprises, no upselling, no runaround.',
+    },
+    {
+      icon: 'icon-medal',
+      title: 'Quality Workmanship',
+      text: 'We take pride in clean, careful work. From the wiring inside your walls to the finish on your pot lights, the details matter to us.',
+    },
+    {
+      icon: 'icon-clock',
+      title: 'Reliable Service',
+      text: 'We show up when we say we will, complete the work on schedule, and follow up to make sure you are satisfied. That is how we have earned long-term client relationships.',
+    },
+  ],
+};
+
+const DEFAULT_ABOUT_CREDENTIALS = {
+  title: 'Licensed & Certified',
+  esaLicenseNumber: '#7014495',
+  items: [
+    {
+      image: 'assets/images/brand/esa-logo.svg',
+      label: 'ESA Licensed',
+    },
+    {
+      image: 'assets/images/brand/wsib-logo.svg',
+      label: 'WSIB Certified',
+    },
+  ],
+};
+
+function normalizeEsaLicenseNumber(value) {
+  let next = String(value ?? '').trim();
+  // Strip label-like prefixes so CMS can store either "#7014495" or "ESA Licensed #7014495"
+  next = next.replace(/^esa\s*licen[sc]e[d]?\s*/i, '').trim();
+  next = next.replace(/^license\s*(no\.?|number|#)?\s*/i, '').trim();
+  // Keep only the first line if pasted as multi-line text
+  next = next.split(/\r?\n/)[0].trim();
+  return next;
+}
 
 export function normalizeAboutBannerContent(content = {}) {
   return {
@@ -918,7 +958,7 @@ export async function updateAboutIntroContent(content) {
   const normalized = normalizeAboutIntroContent(incoming);
 
   if (!normalized.title) {
-    throw new Error('Section title is required');
+    throw new Error('Title is required');
   }
   if (!normalized.image) {
     throw new Error('Section image is required');
@@ -926,6 +966,113 @@ export async function updateAboutIntroContent(content) {
 
   const widget = await upsertWidget('about', 'intro', normalized);
   return normalizeAboutIntroContent(widget.content);
+}
+
+export function normalizeAboutValuesContent(content = {}) {
+  const defaults = DEFAULT_ABOUT_VALUES.items;
+  const rawItems = Array.isArray(content.items) ? content.items : defaults;
+
+  const items = rawItems
+    .map((item, index) => ({
+      icon: String(item?.icon ?? defaults[index]?.icon ?? 'icon-check').trim() || 'icon-check',
+      title: String(item?.title ?? '').trim(),
+      text: String(item?.text ?? '').trim(),
+    }))
+    .filter((item) => item.title || item.text)
+    .slice(0, 8);
+
+  return {
+    tagline: String(content.tagline ?? DEFAULT_ABOUT_VALUES.tagline).trim(),
+    title: String(content.title ?? DEFAULT_ABOUT_VALUES.title).trim(),
+    items: items.length ? items : defaults.map((item) => ({ ...item })),
+  };
+}
+
+export async function getAboutValuesContent() {
+  const widget = await getWidget('about', 'values');
+  return normalizeAboutValuesContent(widget?.content || DEFAULT_ABOUT_VALUES);
+}
+
+export async function updateAboutValuesContent(content) {
+  const normalized = normalizeAboutValuesContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Title is required');
+  }
+  if (!normalized.items.length) {
+    throw new Error('At least one value card is required');
+  }
+  for (const [index, item] of normalized.items.entries()) {
+    if (!item.title) {
+      throw new Error(`Value card ${index + 1} needs a title`);
+    }
+    if (!item.text) {
+      throw new Error(`Value card ${index + 1} needs a description`);
+    }
+  }
+
+  const widget = await upsertWidget('about', 'values', normalized);
+  return normalizeAboutValuesContent(widget.content);
+}
+
+export function normalizeAboutCredentialsContent(content = {}) {
+  const defaults = DEFAULT_ABOUT_CREDENTIALS.items;
+  const rawItems = Array.isArray(content.items) ? content.items : defaults;
+
+  const items = rawItems
+    .map((item, index) => ({
+      image: String(item?.image ?? defaults[index]?.image ?? '').trim(),
+      label: String(item?.label ?? '').trim(),
+    }))
+    .filter((item) => item.image || item.label)
+    .slice(0, 6);
+
+  return {
+    title: String(content.title ?? DEFAULT_ABOUT_CREDENTIALS.title).trim(),
+    esaLicenseNumber: normalizeEsaLicenseNumber(
+      content.esaLicenseNumber ?? DEFAULT_ABOUT_CREDENTIALS.esaLicenseNumber
+    ),
+    items: items.length ? items : defaults.map((item) => ({ ...item })),
+  };
+}
+
+export async function getAboutCredentialsContent() {
+  const widget = await getWidget('about', 'credentials');
+  return normalizeAboutCredentialsContent(widget?.content || DEFAULT_ABOUT_CREDENTIALS);
+}
+
+export async function updateAboutCredentialsContent(content) {
+  const incoming = { ...(content || {}) };
+  const rawItems = Array.isArray(incoming.items) ? incoming.items : [];
+
+  incoming.items = rawItems.map((item, index) => {
+    const next = { ...(item || {}) };
+    if (next.imageData) {
+      next.image = saveCmsImage(`about-credentials-${index}`, next.imageData);
+    }
+    delete next.imageData;
+    return next;
+  });
+
+  const normalized = normalizeAboutCredentialsContent(incoming);
+
+  if (!normalized.title) {
+    throw new Error('Title is required');
+  }
+  if (!normalized.items.length) {
+    throw new Error('At least one credential card is required');
+  }
+  for (const [index, item] of normalized.items.entries()) {
+    if (!item.label) {
+      throw new Error(`Credential card ${index + 1} needs a label`);
+    }
+    if (!item.image) {
+      throw new Error(`Credential card ${index + 1} needs a logo image`);
+    }
+  }
+
+  const widget = await upsertWidget('about', 'credentials', normalized);
+  return normalizeAboutCredentialsContent(widget.content);
 }
 
 export function normalizeTeamBannerContent(content = {}) {
@@ -1507,36 +1654,6 @@ export async function updateContactBannerContent(content) {
 
   const widget = await upsertWidget('contact', 'banner', normalized);
   return normalizeContactBannerContent(widget.content);
-}
-
-export function normalizeAboutContactContent(content = {}) {
-  return {
-    tagline: String(content.tagline ?? DEFAULT_ABOUT_CONTACT.tagline).trim(),
-    title: String(content.title ?? DEFAULT_ABOUT_CONTACT.title).trim(),
-    text1: String(content.text1 ?? DEFAULT_ABOUT_CONTACT.text1).trim(),
-    text2: String(content.text2 ?? DEFAULT_ABOUT_CONTACT.text2).trim(),
-    primaryButtonText: String(content.primaryButtonText ?? DEFAULT_ABOUT_CONTACT.primaryButtonText).trim(),
-    primaryButtonLink: String(content.primaryButtonLink ?? DEFAULT_ABOUT_CONTACT.primaryButtonLink).trim(),
-    secondaryButtonText: String(content.secondaryButtonText ?? DEFAULT_ABOUT_CONTACT.secondaryButtonText).trim(),
-    secondaryButtonLink: String(content.secondaryButtonLink ?? DEFAULT_ABOUT_CONTACT.secondaryButtonLink).trim(),
-    backgroundImage: String(content.backgroundImage ?? DEFAULT_ABOUT_CONTACT.backgroundImage).trim(),
-  };
-}
-
-export async function getAboutContactContent() {
-  const widget = await getWidget('about', 'contact');
-  return normalizeAboutContactContent(widget?.content || DEFAULT_ABOUT_CONTACT);
-}
-
-export async function updateAboutContactContent(content) {
-  const normalized = normalizeAboutContactContent(content);
-
-  if (!normalized.title) {
-    throw new Error('Title is required');
-  }
-
-  const widget = await upsertWidget('about', 'contact', normalized);
-  return normalizeAboutContactContent(widget.content);
 }
 
 export async function saveWidgetImage(dataUrl, key) {

@@ -2,7 +2,8 @@ import { Router } from 'express';
 import {
   getAboutBannerContent,
   getAboutIntroContent,
-  getAboutContactContent,
+  getAboutValuesContent,
+  getAboutCredentialsContent,
   getFeaturedServicesContent,
   getHomeAboutContent,
   getHomeGalleryContent,
@@ -196,8 +197,13 @@ router.get('/about/intro', async (_req, res) => {
   return res.json({ content });
 });
 
-router.get('/about/contact', async (_req, res) => {
-  const content = await getAboutContactContent();
+router.get('/about/values', async (_req, res) => {
+  const content = await getAboutValuesContent();
+  return res.json({ content });
+});
+
+router.get('/about/credentials', async (_req, res) => {
+  const content = await getAboutCredentialsContent();
   return res.json({ content });
 });
 

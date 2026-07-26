@@ -5,7 +5,7 @@
     position: relative;
     display: block;
     padding: 90px 0 100px;
-    background: var(--erepair-extra);
+    background: var(--erepair-navy);
     z-index: 1;
 }
 
@@ -13,12 +13,20 @@
     margin-bottom: 36px;
 }
 
+.home-coverage .section-title__tagline {
+    color: var(--erepair-base);
+}
+
+.home-coverage .section-title__title {
+    color: var(--erepair-white);
+}
+
 .home-coverage__details {
     max-width: 680px;
     margin: 16px auto 0;
     font-size: 16px;
     line-height: 1.7;
-    color: var(--erepair-gray);
+    color: rgba(var(--erepair-white-rgb), 0.82);
 }
 
 .home-coverage__categories {
@@ -31,9 +39,9 @@
 
 .home-coverage__category {
     appearance: none;
-    border: 1px solid rgba(var(--erepair-navy-rgb), 0.18);
-    background: var(--erepair-white);
-    color: var(--erepair-navy);
+    border: 1px solid rgba(var(--erepair-white-rgb), 0.28);
+    background: transparent;
+    color: var(--erepair-white);
     border-radius: 999px;
     padding: 10px 22px;
     font-size: 14px;
@@ -46,9 +54,9 @@
 
 .home-coverage__category:hover,
 .home-coverage__category.is-active {
-    background: var(--erepair-navy);
-    border-color: var(--erepair-navy);
-    color: var(--erepair-white);
+    background: var(--erepair-base);
+    border-color: var(--erepair-base);
+    color: var(--erepair-navy);
 }
 
 .home-coverage__chips {
@@ -65,13 +73,13 @@
     align-items: center;
     padding: 8px 14px;
     border-radius: 999px;
-    background: var(--erepair-white);
-    border: 1px solid rgba(var(--erepair-navy-rgb), 0.1);
-    color: var(--erepair-black);
+    background: rgba(var(--erepair-white-rgb), 0.1);
+    border: 1px solid rgba(var(--erepair-white-rgb), 0.22);
+    color: var(--erepair-white);
     font-size: 13px;
     font-weight: 600;
     line-height: 1.3;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    box-shadow: none;
 }
 
 /* Hero-style entrance animation (runs once when section enters view) */

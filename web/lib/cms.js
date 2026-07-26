@@ -198,18 +198,6 @@ export const DEFAULT_LEGAL_CONTENT = {
   },
 };
 
-export const DEFAULT_ABOUT_CONTACT = {
-  tagline: '',
-  title: '',
-  text1: '',
-  text2: '',
-  primaryButtonText: '',
-  primaryButtonLink: '/about',
-  secondaryButtonText: '',
-  secondaryButtonLink: '/contact',
-  backgroundImage: '',
-};
-
 export async function fetchSliderContent() {
   try {
     const res = await fetch(`${API_URL}/api/web-content/home/slider`, {

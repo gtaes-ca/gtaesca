@@ -3,7 +3,8 @@
 import Layout from '@/components/layout/Layout'
 import AboutBanner from '@/components/sections/about/AboutBanner'
 import AboutIntro from '@/components/sections/about/AboutIntro'
-import AboutContact from '@/components/sections/about/AboutContact'
+import AboutValues from '@/components/sections/about/AboutValues'
+import AboutCredentials from '@/components/sections/about/AboutCredentials'
 
 export default function AboutPage() {
     return (
@@ -11,7 +12,8 @@ export default function AboutPage() {
             <Layout headerStyle={1} footerStyle={1}>
                 <AboutBanner />
                 <AboutIntro />
-                <AboutContact />
+                <AboutValues />
+                <AboutCredentials />
             </Layout>
         </div>
     )
