@@ -7,10 +7,14 @@ import { serviceCategoryLabel, serviceCategoryPath } from '@/lib/paths'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-function truncateText(text, maxLength = 90) {
-    if (!text || text.length <= maxLength) return text
-    return `${text.slice(0, maxLength).trim()}...`
-}
+const COLUMN_CLASSES = [
+    'col-xl-6 col-lg-6 col-md-6',
+    'col-xl-3 col-lg-6 col-md-6',
+    'col-xl-3 col-lg-6 col-md-6',
+    'col-xl-3 col-lg-6 col-md-6',
+    'col-xl-3 col-lg-6 col-md-6',
+    'col-xl-6 col-lg-6 col-md-6',
+]
 
 export default function ServicesGallery({
     pageKey = 'residential',
@@ -21,6 +25,7 @@ export default function ServicesGallery({
 }) {
     const [content, setContent] = useState(DEFAULT_SERVICE_CATEGORY_GALLERY)
     const [activeIndex, setActiveIndex] = useState(null)
+    const [orientations, setOrientations] = useState({})
 
     useEffect(() => {
         let cancelled = false
@@ -37,6 +42,7 @@ export default function ServicesGallery({
                         ...data.content,
                         items: Array.isArray(data.content.items) ? data.content.items : [],
                     })
+                    setOrientations({})
                 }
             } catch {
                 // Keep defaults on failure
@@ -48,6 +54,15 @@ export default function ServicesGallery({
             cancelled = true
         }
     }, [pageKey])
+
+    const rememberOrientation = useCallback((key, event) => {
+        const { naturalWidth, naturalHeight } = event.currentTarget
+        if (!naturalWidth || !naturalHeight) return
+        const orientation = naturalHeight > naturalWidth ? 'portrait' : 'landscape'
+        setOrientations((prev) => (
+            prev[key] === orientation ? prev : { ...prev, [key]: orientation }
+        ))
+    }, [])
 
     const visibleItems = useMemo(() => {
         return content.items.filter((item) => {
@@ -108,7 +123,7 @@ export default function ServicesGallery({
     const innerClassName = embedded ? 'services-gallery__embedded' : 'container'
 
     return (
-        <Wrapper className={`services-gallery services-gallery--cards${embedded ? ' services-gallery--embedded' : ''}${sectionClassName ? ` ${sectionClassName}` : ''}`}>
+        <Wrapper className={`services-gallery services-gallery--project${embedded ? ' services-gallery--embedded' : ''}${sectionClassName ? ` ${sectionClassName}` : ''}`}>
             <div className={innerClassName}>
                 {showHeader ? (
                     <div className="services-gallery__header">
@@ -139,75 +154,57 @@ export default function ServicesGallery({
                                 </>
                             )}
                         </div>
-                        {!isServiceScoped && content.buttonText && content.buttonLink ? (
-                            <div className="services-gallery__btn-box text-center">
-                                <Link href={content.buttonLink} className="thm-btn">
-                                    {content.buttonText}
-                                </Link>
-                            </div>
-                        ) : null}
                     </div>
                 ) : null}
 
-                <div className="row services-page__grid">
+                <div className="row">
                     {visibleItems.map((item, index) => {
                         const imageUrl = resolveCmsAssetUrl(item.image)
-                        const label = item.serviceName || item.subTitle || categoryLabel
+                        const serviceLabel = item.serviceName || item.subTitle || categoryLabel
+                        const columnClass = embedded
+                            ? 'col-md-6'
+                            : COLUMN_CLASSES[index % COLUMN_CLASSES.length]
+                        const itemKey = `${item.serviceId || 'item'}-${item.image || item.title}-${index}`
+                        const orientation = orientations[itemKey] || 'landscape'
+                        const labelParts = [serviceLabel, item.title].filter(Boolean).join(' — ')
+
                         return (
                             <div
-                                className={embedded ? 'col-md-6' : 'col-xl-4 col-lg-6 col-md-6'}
-                                key={`${item.serviceId || 'item'}-${item.title}-${index}`}
+                                className={columnClass}
+                                key={itemKey}
                             >
-                                <article className="services-page__card">
-                                    <button
-                                        type="button"
-                                        className="services-gallery__card-media-btn"
-                                        onClick={() => setActiveIndex(index)}
-                                        aria-label={item.title ? `View ${item.title}` : `View gallery image ${index + 1}`}
-                                    >
-                                        <div className="services-page__card-media">
+                                <button
+                                    type="button"
+                                    className="project-one__single home-services-gallery__card services-gallery__project-card"
+                                    onClick={() => setActiveIndex(index)}
+                                    aria-label={labelParts ? `View ${labelParts}` : `View gallery image ${index + 1}`}
+                                >
+                                    <div className="project-one__img-box">
+                                        <div className={`project-one__img is-${orientation}`}>
                                             {imageUrl ? (
                                                 <img
                                                     src={imageUrl}
-                                                    alt={item.title || `Gallery image ${index + 1}`}
+                                                    alt={item.title || serviceLabel || `Gallery image ${index + 1}`}
+                                                    onLoad={(event) => rememberOrientation(itemKey, event)}
                                                 />
-                                            ) : (
-                                                <div className="services-page__card-fallback" aria-hidden="true">
-                                                    <span className="icon-setting" />
-                                                </div>
-                                            )}
+                                            ) : null}
+                                            <div className="project-one__arrow">
+                                                <span className="icon-arrow-right" />
+                                            </div>
                                         </div>
-                                    </button>
-                                    <div className="services-page__card-body">
-                                        {label ? (
-                                            <p className="services-gallery__card-service">{label}</p>
-                                        ) : null}
-                                        {item.title ? (
-                                            <h3 className="services-page__card-title">
-                                                <button
-                                                    type="button"
-                                                    className="services-gallery__card-title-btn"
-                                                    onClick={() => setActiveIndex(index)}
-                                                >
-                                                    {item.title}
-                                                </button>
-                                            </h3>
-                                        ) : null}
-                                        {item.text ? (
-                                            <p className="services-page__card-text">
-                                                {truncateText(item.text)}
-                                            </p>
-                                        ) : null}
-                                        <button
-                                            type="button"
-                                            className="services-page__card-more"
-                                            onClick={() => setActiveIndex(index)}
-                                        >
-                                            View Photo
-                                            <span className="icon-arrow-right" aria-hidden="true" />
-                                        </button>
+                                        <div className="project-one__content">
+                                            {serviceLabel ? (
+                                                <p className="project-one__sub-title">{serviceLabel}</p>
+                                            ) : null}
+                                            {item.title ? (
+                                                <h3 className="project-one__title">{item.title}</h3>
+                                            ) : null}
+                                            {item.text ? (
+                                                <p className="project-one__text">{item.text}</p>
+                                            ) : null}
+                                        </div>
                                     </div>
-                                </article>
+                                </button>
                             </div>
                         )
                     })}
@@ -274,13 +271,12 @@ export default function ServicesGallery({
                             src={resolveCmsAssetUrl(activeItem.image)}
                             alt={activeItem.title || `Gallery image ${activeIndex + 1}`}
                         />
-                        {(activeItem.title || activeItem.subTitle || activeItem.serviceName) ? (
+                        {(activeItem.serviceName || activeItem.subTitle || activeItem.title) ? (
                             <div className="services-gallery__lightbox-caption">
                                 {(activeItem.serviceName || activeItem.subTitle) ? (
                                     <p>{activeItem.serviceName || activeItem.subTitle}</p>
                                 ) : null}
                                 {activeItem.title ? <h3>{activeItem.title}</h3> : null}
-                                {activeItem.text ? <p>{activeItem.text}</p> : null}
                             </div>
                         ) : null}
                         <p className="services-gallery__lightbox-count">
