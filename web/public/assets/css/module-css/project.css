@@ -198,6 +198,19 @@
     object-position: center;
 }
 
+.home-services-gallery--embedded {
+    padding: 48px 0 0;
+}
+
+.home-services-gallery--embedded .project-one__top {
+    margin-bottom: 36px;
+}
+
+.services-gallery--service-detail.home-services-gallery {
+    padding-top: 48px;
+    padding-bottom: 0;
+}
+
 @media (max-width: 991px) {
     .home-services-gallery .project-one__img {
         height: 280px;
