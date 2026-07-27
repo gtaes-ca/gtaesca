@@ -1205,6 +1205,8 @@ ul {
   background-color: transparent;
   color: var(--erepair-navy);
   border: 2px solid var(--erepair-navy);
+  min-width: 0;
+  width: fit-content;
 }
 
 .main-menu__btn--call:hover {
