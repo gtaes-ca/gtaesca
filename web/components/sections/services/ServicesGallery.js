@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useCallback, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { DEFAULT_SERVICE_CATEGORY_GALLERY, hasGalleryImage, resolveCmsAssetUrl } from '@/lib/cms'
 import { serviceCategoryLabel, serviceCategoryPath } from '@/lib/paths'
 
@@ -327,22 +328,23 @@ export default function ServicesGallery({
                 ) : null}
             </div>
 
-            {isOpen && activeItem ? (
-                <div
-                    className="services-gallery__lightbox"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Gallery preview"
-                    onClick={closePreview}
-                >
-                    <button
-                        type="button"
-                        className="services-gallery__lightbox-close"
+            {isOpen && activeItem && typeof document !== 'undefined'
+                ? createPortal(
+                    <div
+                        className="services-gallery__lightbox"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Gallery preview"
                         onClick={closePreview}
-                        aria-label="Close preview"
                     >
-                        <span className="fa fa-times" />
-                    </button>
+                        <button
+                            type="button"
+                            className="services-gallery__lightbox-close"
+                            onClick={closePreview}
+                            aria-label="Close preview"
+                        >
+                            <span className="fa fa-times" />
+                        </button>
 
                     {layoutItems.length > 1 ? (
                         <>
@@ -391,8 +393,10 @@ export default function ServicesGallery({
                             {activeIndex + 1} / {layoutItems.length}
                         </p>
                     </div>
-                </div>
-            ) : null}
+                    </div>,
+                    document.body
+                )
+                : null}
         </Wrapper>
     )
 }
