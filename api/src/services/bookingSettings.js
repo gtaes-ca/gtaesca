@@ -27,14 +27,21 @@ export function isWhatsAppBookingMode(settings) {
   return settings?.bookingMode === BOOKING_MODES.WHATSAPP;
 }
 
+/** wa.me rejects numbers without a country code; GTA numbers are +1. */
+const DEFAULT_COUNTRY_CODE = '1';
+
 export function normalizeWhatsAppNumber(number) {
-  return String(number || '').replace(/\D/g, '');
+  let digits = String(number || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.length === 10) digits = `${DEFAULT_COUNTRY_CODE}${digits}`;
+  return digits;
 }
 
 function validateWhatsAppNumber(number) {
   const digits = normalizeWhatsAppNumber(number);
-  if (digits.length < 10 || digits.length > 15) {
-    throw new Error('WhatsApp number must be 10–15 digits including country code');
+  if (digits.length < 11 || digits.length > 15) {
+    throw new Error('WhatsApp number must include a country code (11–15 digits)');
   }
   return digits;
 }

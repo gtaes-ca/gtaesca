@@ -87,6 +87,7 @@ export async function migrate() {
   await runSqlFile('48_optional_service_duration.sql');
   await runSqlFile('49_two_service_categories.sql');
   await runSqlFile('50_fix_contact_recipient_email.sql');
+  await runSqlFile('51_whatsapp_country_code.sql');
 
   await backfillProjectSlugs();
 

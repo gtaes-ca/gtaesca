@@ -86,8 +86,15 @@ export function formatDuration(minutes) {
   return mins ? `${hours}h ${mins}m` : `${hours} hour${hours > 1 ? 's' : ''}`;
 }
 
+/** wa.me and tel: links need a country code; GTA numbers are +1. */
+const DEFAULT_COUNTRY_CODE = '1';
+
 export function normalizeWhatsAppNumber(number) {
-  return String(number || '').replace(/\D/g, '');
+  let digits = String(number || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.length === 10) digits = `${DEFAULT_COUNTRY_CODE}${digits}`;
+  return digits;
 }
 
 export function buildTelHref(number) {

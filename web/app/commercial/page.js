@@ -3,7 +3,6 @@
 import Layout from '@/components/layout/Layout'
 import ServicesBanner from '@/components/sections/services/ServicesBanner'
 import ServicesCategoryDetails from '@/components/sections/services/ServicesCategoryDetails'
-import ServicesGallery from '@/components/sections/services/ServicesGallery'
 import ServicesGrid from '@/components/sections/services/ServicesGrid'
 
 export default function CommercialServicesPage() {
@@ -13,7 +12,6 @@ export default function CommercialServicesPage() {
                 <ServicesBanner pageKey="commercial" />
                 <ServicesCategoryDetails pageKey="commercial" />
                 <ServicesGrid group="commercial" />
-                <ServicesGallery pageKey="commercial" />
             </Layout>
         </div>
     )

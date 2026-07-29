@@ -4,6 +4,10 @@ export function serviceCategoryPath(categoryName = '') {
   return '/residential';
 }
 
+export function serviceCategoryPageKey(categoryName = '') {
+  return serviceCategoryPath(categoryName) === '/commercial' ? 'commercial' : 'residential';
+}
+
 export function serviceCategoryLabel(categoryName = '') {
   const name = String(categoryName || '').toLowerCase();
   if (name.includes('commercial')) return 'Commercial';

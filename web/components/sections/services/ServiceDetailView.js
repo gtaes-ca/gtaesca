@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { DEFAULT_TOPBAR, fetchTopbarContent, resolveCmsAssetUrl } from '@/lib/cms'
-import { serviceCategoryLabel, serviceCategoryPath, serviceDetailPath } from '@/lib/paths'
+import { serviceCategoryLabel, serviceCategoryPageKey, serviceCategoryPath, serviceDetailPath } from '@/lib/paths'
 import ServiceDetailsBanner from '@/components/sections/services/ServiceDetailsBanner'
 import ServicesGallery from '@/components/sections/services/ServicesGallery'
 
@@ -195,8 +195,8 @@ export default function ServiceDetailView({ serviceSlug }) {
                                     </Link>
                                 </div>
                                 <ServicesGallery
-                                    pageKey={categoryHref === '/commercial' ? 'commercial' : 'residential'}
-                                    serviceId={service.id}
+                                    pageKey={serviceCategoryPageKey(service.categoryName)}
+                                    serviceId={String(service.id)}
                                     embedded
                                     sectionClassName="services-gallery--service-detail"
                                 />

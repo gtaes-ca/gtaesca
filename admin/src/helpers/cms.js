@@ -286,8 +286,9 @@ export function mapServiceCategoryGalleryFromApi(content = {}) {
     buttonLink: content.buttonLink || '',
     items: items.map((item) => {
       const image = item.image || '';
+      const parsedId = Number(item.serviceId);
       return {
-        serviceId: item.serviceId ? String(item.serviceId) : '',
+        serviceId: Number.isInteger(parsedId) && parsedId > 0 ? String(parsedId) : '',
         serviceName: item.serviceName || '',
         subTitle: item.subTitle || '',
         title: item.title || '',
@@ -307,14 +308,17 @@ export function mapServiceCategoryGalleryForSave(content = {}) {
     titleLine2: content.titleLine2,
     buttonText: content.buttonText,
     buttonLink: content.buttonLink,
-    items: (content.items || []).map((item) => ({
-      serviceId: item.serviceId ? String(item.serviceId) : '',
-      serviceName: item.serviceName || '',
-      subTitle: item.subTitle,
-      title: item.title,
-      text: item.text,
-      image: item.image,
-    })),
+    items: (content.items || []).map((item) => {
+      const parsedId = Number(item.serviceId);
+      return {
+        serviceId: Number.isInteger(parsedId) && parsedId > 0 ? String(parsedId) : '',
+        serviceName: item.serviceName || '',
+        subTitle: item.subTitle,
+        title: item.title,
+        text: item.text,
+        image: item.image,
+      };
+    }),
   };
 }
 

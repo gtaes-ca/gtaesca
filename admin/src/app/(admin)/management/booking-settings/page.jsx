@@ -200,7 +200,7 @@ const BookingSettingsPage = () => {
                           required={isWhatsAppMode}
                         />
                         <Form.Text className="text-muted">
-                          Include country code, digits only (10–15). Used for Call Now on the website and WhatsApp booking.
+                          Digits only. A 10-digit Canadian number is saved with the 1 country code. Used for Call Now on the website and WhatsApp booking.
                         </Form.Text>
                       </Form.Group>
                     </Col>

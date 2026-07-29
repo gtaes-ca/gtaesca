@@ -12,7 +12,6 @@ import {
 import httpClient from '@/helpers/httpClient';
 
 const MAX_GALLERY_ITEMS = 24;
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 async function uploadGalleryImage(dataUrl, key) {
   const res = await httpClient.post('/api/admin/web-content/upload-image', { dataUrl, key });
@@ -70,12 +69,29 @@ export default function CategoryServicesGalleryForm({
     try {
       const [galleryRes, servicesRes] = await Promise.all([
         httpClient.get(`/api/admin/web-content/${pageKey}/gallery`),
-        fetch(`${API_URL}/api/services/list?group=${encodeURIComponent(pageKey)}`).then((res) =>
-          res.ok ? res.json() : { services: [] }
-        ),
+        httpClient.get(`/api/services/list`, { params: { group: pageKey } }),
       ]);
-      setForm(mapServiceCategoryGalleryFromApi(galleryRes.data.content || {}));
-      setServices(Array.isArray(servicesRes.services) ? servicesRes.services : []);
+      const nextServices = Array.isArray(servicesRes.data.services) ? servicesRes.data.services : [];
+      setServices(nextServices);
+
+      const mapped = mapServiceCategoryGalleryFromApi(galleryRes.data.content || {});
+      const serviceIds = new Set(nextServices.map((service) => String(service.id)));
+      mapped.items = mapped.items.map((item) => {
+        if (item.serviceId && serviceIds.has(item.serviceId)) {
+          const selected = nextServices.find((service) => String(service.id) === item.serviceId);
+          return {
+            ...item,
+            serviceName: selected?.name || item.serviceName || '',
+          };
+        }
+        // Clear stale links so an image cannot stay attached to the wrong/missing service
+        return {
+          ...item,
+          serviceId: '',
+          serviceName: '',
+        };
+      });
+      setForm(mapped);
     } catch (e) {
       showNotification({
         message: e.response?.data?.error || 'Failed to load gallery content',
@@ -180,7 +196,15 @@ export default function CategoryServicesGalleryForm({
       const item = form.items[index];
       if (!item.serviceId) {
         showNotification({
-          message: `Gallery item ${index + 1} needs a service selected`,
+          message: `Gallery item ${index + 1} needs a ${pageKey} service selected`,
+          variant: 'danger',
+        });
+        return;
+      }
+      const linked = services.find((service) => String(service.id) === String(item.serviceId));
+      if (!linked) {
+        showNotification({
+          message: `Gallery item ${index + 1} must be linked to a valid ${pageKey} service`,
           variant: 'danger',
         });
         return;
@@ -209,7 +233,11 @@ export default function CategoryServicesGalleryForm({
         const selected = services.find((service) => String(service.id) === String(item.serviceId));
 
         if (item.imageData) {
-          image = await uploadGalleryImage(item.imageData, `${pageKey}-gallery-${index}`);
+          // Include serviceId so uploads never overwrite another service’s image file
+          image = await uploadGalleryImage(
+            item.imageData,
+            `${pageKey}-gallery-svc-${item.serviceId}-${Date.now()}-${index}`
+          );
         }
 
         preparedItems.push({
@@ -220,6 +248,14 @@ export default function CategoryServicesGalleryForm({
           text: item.text,
           image,
         });
+      }
+
+      if (preparedItems.some((item) => !item.serviceId)) {
+        showNotification({
+          message: 'Every gallery image must be linked to one service before saving',
+          variant: 'danger',
+        });
+        return;
       }
 
       const res = await httpClient.put(`/api/admin/web-content/${pageKey}/gallery`, {
@@ -318,13 +354,16 @@ export default function CategoryServicesGalleryForm({
                             onChange={(e) => handleServiceSelect(index, e.target.value)}
                             required
                           >
-                            <option value="">Select a service…</option>
+                            <option value="">Select a {pageKey} service…</option>
                             {services.map((service) => (
                               <option key={service.id} value={String(service.id)}>
                                 {service.name}
                               </option>
                             ))}
                           </Form.Select>
+                          <Form.Text className="text-muted">
+                            This photo only appears on that service’s detail page on the website.
+                          </Form.Text>
                           {!services.length ? (
                             <Form.Text className="text-muted">
                               No {pageKey} services found. Add services first under Management → Services.

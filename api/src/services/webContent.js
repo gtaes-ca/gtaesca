@@ -1450,10 +1450,9 @@ const DEFAULT_SERVICE_CATEGORY_GALLERY = {
 
 function normalizeServiceCategoryGalleryItem(item = {}) {
   const rawServiceId = item?.serviceId ?? item?.service_id ?? '';
+  const parsedId = Number(rawServiceId);
   const serviceId =
-    rawServiceId === '' || rawServiceId === null || rawServiceId === undefined
-      ? ''
-      : String(rawServiceId).trim();
+    Number.isInteger(parsedId) && parsedId > 0 ? String(parsedId) : '';
 
   return {
     serviceId,
@@ -1480,6 +1479,27 @@ export function normalizeServiceCategoryGalleryContent(content = {}) {
   };
 }
 
+async function resolveGalleryServicesForPage(pageKey, serviceIds) {
+  const uniqueIds = [...new Set(serviceIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+  if (!uniqueIds.length) return new Map();
+
+  const categoryFilter =
+    pageKey === 'commercial'
+      ? `AND lower(c.name) LIKE '%commercial%'`
+      : `AND lower(c.name) NOT LIKE '%commercial%'`;
+
+  const result = await pool.query(
+    `SELECT s.id, s.name
+     FROM services s
+     JOIN service_categories c ON c.id = s.category_id
+     WHERE s.id = ANY($1::int[])
+     ${categoryFilter}`,
+    [uniqueIds]
+  );
+
+  return new Map(result.rows.map((row) => [String(row.id), row.name]));
+}
+
 export async function getServiceCategoryGalleryContent(page) {
   const pageKey = assertServiceCategoryPage(page);
   const widget = await getWidget(pageKey, 'gallery');
@@ -1494,16 +1514,35 @@ export async function updateServiceCategoryGalleryContent(page, content) {
     throw new Error('Section title is required when gallery items are present');
   }
 
-  for (const item of normalized.items) {
+  for (const [index, item] of normalized.items.entries()) {
     if (!item.image) {
-      throw new Error('Each gallery item needs an image');
+      throw new Error(`Gallery item ${index + 1} needs an image`);
     }
     if (!item.serviceId) {
-      throw new Error('Each gallery item needs a linked service');
+      throw new Error(`Gallery item ${index + 1} needs a linked ${pageKey} service`);
     }
   }
 
-  const widget = await upsertWidget(pageKey, 'gallery', normalized);
+  const serviceMap = await resolveGalleryServicesForPage(
+    pageKey,
+    normalized.items.map((item) => item.serviceId)
+  );
+
+  const items = normalized.items.map((item, index) => {
+    const serviceName = serviceMap.get(item.serviceId);
+    if (!serviceName) {
+      throw new Error(
+        `Gallery item ${index + 1} must be linked to a valid ${pageKey} service`
+      );
+    }
+    return {
+      ...item,
+      serviceId: item.serviceId,
+      serviceName,
+    };
+  });
+
+  const widget = await upsertWidget(pageKey, 'gallery', { ...normalized, items });
   return normalizeServiceCategoryGalleryContent(widget.content);
 }
 

@@ -125,8 +125,12 @@ export default function ServicesGallery({
     const visibleItems = useMemo(() => {
         return content.items.filter((item) => {
             if (!hasGalleryImage(item.image)) return false
-            if (serviceId == null || serviceId === '') return true
-            return String(item.serviceId || '') === String(serviceId)
+            // Service detail pages: only images linked to this exact service
+            if (serviceId != null && serviceId !== '') {
+                return String(item.serviceId || '') === String(serviceId)
+            }
+            // Category pages (if shown): still require a linked service id
+            return Boolean(item.serviceId)
         })
     }, [content.items, serviceId])
 
@@ -318,14 +322,6 @@ export default function ServicesGallery({
                         )
                     })}
                 </div>
-
-                {isServiceScoped ? (
-                    <div className={`services-gallery__footer-link${embedded ? '' : ' text-center'}`}>
-                        <Link href={categoryHref} className="thm-btn">
-                            View All {categoryLabel} Gallery
-                        </Link>
-                    </div>
-                ) : null}
             </div>
 
             {isOpen && activeItem && typeof document !== 'undefined'
