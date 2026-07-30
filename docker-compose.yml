@@ -46,10 +46,13 @@ services:
       - WEB_URL=${WEB_URL:-http://localhost:3000}
       - DB_INIT_DIR=/db/init
       - UPLOADS_DIR=/app/uploads
-      - USEPLUNK_API_KEY=${USEPLUNK_API_KEY:-}
-      - USEPLUNK_FROM_EMAIL=${USEPLUNK_FROM_EMAIL:-}
-      - USEPLUNK_FROM_NAME=${USEPLUNK_FROM_NAME:-GTA Electric Services}
-      - USEPLUNK_API_URL=${USEPLUNK_API_URL:-https://next-api.useplunk.com/v1/send}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME:-GTA Electric Services}
     volumes:
       - ./api:/app
       - ./db/init:/db/init:ro

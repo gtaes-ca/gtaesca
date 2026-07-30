@@ -10,14 +10,22 @@ import BookServiceLink from '@/components/booking/BookServiceLink'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-const swiperOptions = {
-    modules: [Pagination],
-    slidesPerView: 1,
-    spaceBetween: 0,
-    loop: true,
-    pagination: {
-        clickable: true,
-    },
+function buildSwiperOptions(slideCount) {
+    return {
+        modules: [Pagination],
+        slidesPerView: 1,
+        spaceBetween: 0,
+        // Looping a single slide leaves Swiper without usable duplicates
+        loop: slideCount > 1,
+        // Re-measure when slides or fonts settle at different speeds per device
+        observer: true,
+        observeParents: true,
+        resizeObserver: true,
+        watchOverflow: true,
+        pagination: {
+            clickable: true,
+        },
+    }
 }
 
 const SOCIAL_ITEMS = [
@@ -118,9 +126,18 @@ export default function Banner() {
         }
     }, [])
 
+    if (!slides.length) {
+        return <section className="main-slider" />
+    }
+
     return (
         <section className="main-slider">
-            <Swiper {...swiperOptions} className="main-slider__carousel owl-carousel owl-theme">
+            <Swiper
+                // Remount once the slide count is known so loop mode initializes
+                key={`main-slider-${slides.length}`}
+                {...buildSwiperOptions(slides.length)}
+                className="main-slider__carousel owl-carousel owl-theme"
+            >
                 {slides.map((slide, index) => (
                     <SwiperSlide key={`slide-${index}`}>
                         <div className="item">

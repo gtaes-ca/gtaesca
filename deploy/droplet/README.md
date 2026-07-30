@@ -51,7 +51,7 @@ git clone https://github.com/Hashmarkai/gta-electric-services-1.git /opt/gtaes
 cd /opt/gtaes/deploy/droplet
 
 cp .env.example .env
-nano .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_URL, WEB_URL, CORS_ORIGINS, email keys
+nano .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_URL, WEB_URL, CORS_ORIGINS, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL
 ```
 
 Start database + API + nginx (HTTP bootstrap):

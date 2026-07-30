@@ -1,106 +1,100 @@
+import nodemailer from 'nodemailer';
 import { BRAND_NAME } from '../constants.js';
 import { formatCurrency } from '../utils/currency.js';
 import { formatBookingDateTime } from '../utils/formatDateTime.js';
 import { getBookingSettings } from './bookingSettings.js';
 
-const USEPLUNK_API_KEY =
-  process.env.USEPLUNK_API_KEY ||
-  process.env.PLUNK_SECRET_KEY ||
-  process.env.PLUNK_API_KEY;
-const USEPLUNK_API_URL =
-  process.env.USEPLUNK_API_URL ||
-  process.env.PLUNK_SEND_URL ||
-  'https://next-api.useplunk.com/v1/send';
-const USEPLUNK_FROM_EMAIL =
-  process.env.USEPLUNK_FROM_EMAIL ||
-  process.env.USEPLUNK_FROM ||
-  process.env.PLUNK_FROM_EMAIL ||
-  process.env.PLUNK_FROM;
-const USEPLUNK_FROM_NAME =
-  process.env.USEPLUNK_FROM_NAME ||
-  process.env.USEPLUNK_NAME ||
-  process.env.PLUNK_NAME ||
-  BRAND_NAME;
+// UsePlunk is intentionally disabled. All application email uses SMTP.
+const SMTP_HOST = String(process.env.SMTP_HOST || '').trim();
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
+const SMTP_SECURE =
+  String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' ||
+  SMTP_PORT === 465;
+const SMTP_USER = String(process.env.SMTP_USER || '').trim();
+const SMTP_PASS = String(process.env.SMTP_PASS || '');
+const SMTP_FROM_EMAIL = String(
+  process.env.SMTP_FROM_EMAIL || SMTP_USER || ''
+).trim();
+const SMTP_FROM_NAME = String(
+  process.env.SMTP_FROM_NAME || BRAND_NAME
+).trim();
 const ADMIN_URL = process.env.ADMIN_URL || 'http://localhost:5173';
 
-function plunkErrorMessage(data) {
-  const error = data?.error;
-  if (typeof error === 'string' && error.trim()) return error.trim();
-  if (error && typeof error === 'object') {
-    const parts = [];
-    if (error.message) parts.push(error.message);
-    if (Array.isArray(error.errors)) {
-      error.errors.forEach((item) => {
-        if (item?.message) parts.push(item.message);
-      });
-    }
-    if (error.suggestion) parts.push(error.suggestion);
-    if (parts.length) return parts.join(' — ');
-  }
-  if (data?.message) return data.message;
-  return 'UsePlunk send failed';
+let smtpTransport;
+
+function smtpIsUnconfigured() {
+  return !SMTP_HOST && !SMTP_USER && !SMTP_PASS && !SMTP_FROM_EMAIL;
 }
 
-async function sendViaUsePlunk({ to, subject, html, text, data, replyTo }) {
-  if (!USEPLUNK_API_KEY) {
-    console.log('\n--- EMAIL (dev mode, UsePlunk not configured) ---');
+function getSmtpTransport() {
+  if (!SMTP_HOST) {
+    throw new Error('SMTP_HOST is required to send email');
+  }
+  if (!SMTP_FROM_EMAIL) {
+    throw new Error('SMTP_FROM_EMAIL (or SMTP_USER) is required to send email');
+  }
+  if (Boolean(SMTP_USER) !== Boolean(SMTP_PASS)) {
+    throw new Error('SMTP_USER and SMTP_PASS must be configured together');
+  }
+
+  if (!smtpTransport) {
+    smtpTransport = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      ...(SMTP_USER
+        ? {
+            auth: {
+              user: SMTP_USER,
+              pass: SMTP_PASS,
+            },
+          }
+        : {}),
+    });
+  }
+
+  return smtpTransport;
+}
+
+async function sendViaSmtp({ to, subject, html, text, replyTo }) {
+  if (smtpIsUnconfigured()) {
+    console.log('\n--- EMAIL (dev mode, SMTP not configured) ---');
     console.log(`To: ${to}`);
     if (replyTo) console.log(`Reply-To: ${replyTo}`);
     console.log(`Subject: ${subject}`);
     console.log(text || html);
-    console.log('Set USEPLUNK_API_KEY and USEPLUNK_FROM_EMAIL in .env');
+    console.log('Set SMTP_HOST and SMTP_FROM_EMAIL in .env');
     console.log('---------------------------------------------\n');
     return { devMode: true };
   }
 
-  if (String(USEPLUNK_API_KEY).startsWith('pk_')) {
-    throw new Error('UsePlunk public key (pk_*) cannot send email. Use secret key (sk_*).');
-  }
-
-  if (!USEPLUNK_FROM_EMAIL) {
-    throw new Error('USEPLUNK_FROM_EMAIL is required when USEPLUNK_API_KEY is set');
-  }
-
-  const body = html || `<pre>${text || ''}</pre>`;
   const safeReplyTo = String(replyTo || '').trim();
-
-  const payload = {
+  const result = await getSmtpTransport().sendMail({
+    from: {
+      name: SMTP_FROM_NAME,
+      address: SMTP_FROM_EMAIL,
+    },
     to,
     subject,
-    body,
-    from: USEPLUNK_FROM_EMAIL,
-    name: USEPLUNK_FROM_NAME,
-    subscribed: false,
-    ...(safeReplyTo ? { reply: safeReplyTo, replyTo: safeReplyTo } : {}),
-    ...(data ? { data } : {}),
-  };
-
-  const response = await fetch(USEPLUNK_API_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${USEPLUNK_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
+    text: text || undefined,
+    html: html || undefined,
+    replyTo: safeReplyTo || undefined,
   });
 
-  const result = await response.json().catch(() => ({}));
-
-  if (!response.ok || result?.success === false) {
-    const message = plunkErrorMessage(result) || `UsePlunk API error (${response.status})`;
-    console.error('[email] UsePlunk send failed:', { status: response.status, result });
-    throw new Error(message);
-  }
-
-  console.log('[email] Sent via UsePlunk:', { to, subject, replyTo: safeReplyTo || null, id: result?.data?.emails?.[0]?.email });
-  return { devMode: false, provider: 'useplunk', result };
+  console.log('[email] Sent via SMTP:', {
+    to,
+    subject,
+    replyTo: safeReplyTo || null,
+    id: result.messageId,
+  });
+  return { devMode: false, provider: 'smtp', result };
 }
 
 export async function sendInvitationEmail({ email, token, otp, userType, role }) {
   const inviteUrl = `${ADMIN_URL}/auth/accept-invitation?token=${token}`;
   const teamLabel = userType === 'operation_team' ? 'Operation Team' : 'Technicians';
 
-  return sendViaUsePlunk({
+  return sendViaSmtp({
     to: email,
     subject: `${BRAND_NAME} ${teamLabel} Invitation`,
     text: [
@@ -119,19 +113,13 @@ export async function sendInvitationEmail({ email, token, otp, userType, role })
         <p style="color:#666;font-size:12px;">If the button does not work, copy this link:<br>${inviteUrl}</p>
       </div>
     `,
-    data: {
-      otp: { value: otp, persistent: false },
-      inviteUrl: { value: inviteUrl, persistent: false },
-      teamLabel: { value: teamLabel, persistent: false },
-      role: { value: role, persistent: false },
-    },
   });
 }
 
 export async function sendPasswordResetEmail({ email, otp }) {
   const resetUrl = `${ADMIN_URL}/auth/reset-pass-confirm?email=${encodeURIComponent(email)}`;
 
-  return sendViaUsePlunk({
+  return sendViaSmtp({
     to: email,
     subject: `${BRAND_NAME} Password Reset`,
     text: [
@@ -150,10 +138,6 @@ export async function sendPasswordResetEmail({ email, otp }) {
         <p style="color:#666;font-size:12px;">If the button does not work, copy this link:<br>${resetUrl}</p>
       </div>
     `,
-    data: {
-      otp: { value: otp, persistent: false },
-      resetUrl: { value: resetUrl, persistent: false },
-    },
   });
 }
 
@@ -244,7 +228,7 @@ export async function sendBookingConfirmationEmail({ booking, activationUrl = nu
       ].join('\n')
     : '';
 
-  return sendViaUsePlunk({
+  return sendViaSmtp({
     to: booking.clientEmail,
     subject: `${BRAND_NAME} Booking Received — ${booking.referenceCode}`,
     text: [
@@ -307,7 +291,7 @@ export async function sendBookingStatusEmail({ booking, status }) {
   const scheduledLabel = formatBookingDateTime(booking.scheduledAt, timezone);
   const materialsText = bookingMaterialsText(booking);
 
-  return sendViaUsePlunk({
+  return sendViaSmtp({
     to: booking.clientEmail,
     subject: `${BRAND_NAME} ${copy.subject} — ${booking.referenceCode}`,
     text: [
@@ -340,7 +324,6 @@ export async function sendContactQuoteEmail({
   phone = '',
   company = '',
   services = [],
-  serviceIds = [],
   message,
 }) {
   const safeName = String(name || '').trim();
@@ -378,24 +361,18 @@ export async function sendContactQuoteEmail({
       </div>
     `;
 
-  const teamResult = await sendViaUsePlunk({
+  const teamResult = await sendViaSmtp({
     to,
     replyTo: safeEmail,
     subject: `${BRAND_NAME} Contact Form — ${safeName}`,
     text: textBody,
     html: htmlBody,
-    data: {
-      contactName: { value: safeName, persistent: false },
-      contactEmail: { value: safeEmail, persistent: false },
-      contactServices: { value: servicesLabel || 'None', persistent: false },
-      contactServiceIds: { value: Array.isArray(serviceIds) ? serviceIds.join(',') : '', persistent: false },
-    },
   });
 
   // Confirmation to the person who submitted the form
   if (safeEmail && safeEmail.toLowerCase() !== String(to).toLowerCase()) {
     try {
-      await sendViaUsePlunk({
+      await sendViaSmtp({
         to: safeEmail,
         subject: `We received your quote request — ${BRAND_NAME}`,
         text: [

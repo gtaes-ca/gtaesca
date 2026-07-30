@@ -5,7 +5,10 @@
     position: relative;
     background-color: var(--erepair-black);
     z-index: 10;
-    /* Fills viewport below the measured menu bar height */
+    /* Fills viewport below the measured menu bar height.
+       vh first so browsers without svh/dvh (older Samsung Internet, Android
+       WebView) still get a definite height for the percentage-based slides. */
+    height: calc(100vh - var(--hero-header-offset, 118px));
     height: calc(100svh - var(--hero-header-offset, 118px));
     height: calc(100dvh - var(--hero-header-offset, 118px));
     min-height: 420px;
@@ -16,6 +19,8 @@
 .main-slider .swiper-wrapper,
 .main-slider .swiper-slide {
     height: 100%;
+    /* Guards against a collapsed carousel when height: 100% cannot resolve */
+    min-height: 420px;
 }
 
 .main-slider .main-slider__carousel.swiper,
@@ -48,7 +53,8 @@
     clip-path: none;
     opacity: 1;
     z-index: 0;
-    background-image: var(--slider-bg-mobile);
+    /* Fall back to the other size so a slide with only one image still paints */
+    background-image: var(--slider-bg-mobile, var(--slider-bg-desktop, none));
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -57,7 +63,10 @@
 .main-slider__bg::after {
     content: "";
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: var(--erepair-banner-overlay);
     z-index: 1;
     pointer-events: none;
@@ -65,7 +74,7 @@
 
 @media (min-width: 992px) {
     .main-slider__bg {
-        background-image: var(--slider-bg-desktop);
+        background-image: var(--slider-bg-desktop, var(--slider-bg-mobile, none));
     }
 }
 
