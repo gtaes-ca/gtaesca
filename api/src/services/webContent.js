@@ -1577,6 +1577,10 @@ const DEFAULT_CONTACT_BANNER = {
 const DEFAULT_CONTACT_PAGE_SETTINGS = {
   formTitle: 'Get A Free Quote',
   recipientEmail: '',
+  smtpUser: '',
+  smtpPass: '',
+  smtpFromEmail: '',
+  smtpFromName: '',
   phone: '',
   displayEmail: '',
   address: '',
@@ -1600,12 +1604,27 @@ export function normalizeContactPageSettingsContent(content = {}) {
   return {
     formTitle: String(content.formTitle ?? DEFAULT_CONTACT_PAGE_SETTINGS.formTitle).trim(),
     recipientEmail: String(content.recipientEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.recipientEmail).trim(),
+    smtpUser: String(content.smtpUser ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpUser).trim(),
+    smtpPass: String(content.smtpPass ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpPass),
+    smtpFromEmail: String(content.smtpFromEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpFromEmail).trim(),
+    smtpFromName: String(content.smtpFromName ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpFromName).trim(),
     phone: String(content.phone ?? DEFAULT_CONTACT_PAGE_SETTINGS.phone).trim(),
     displayEmail: String(content.displayEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.displayEmail).trim(),
     address: String(content.address ?? DEFAULT_CONTACT_PAGE_SETTINGS.address).trim(),
     latitude: parseCoordinate(content.latitude, DEFAULT_CONTACT_PAGE_SETTINGS.latitude),
     longitude: parseCoordinate(content.longitude, DEFAULT_CONTACT_PAGE_SETTINGS.longitude),
     mapZoom: parseMapZoom(content.mapZoom, DEFAULT_CONTACT_PAGE_SETTINGS.mapZoom),
+  };
+}
+
+/** Admin-facing payload: never echo the raw password; expose a configured flag instead. */
+export function toAdminContactPageSettings(content = {}) {
+  const normalized = normalizeContactPageSettingsContent(content);
+  const { smtpPass, ...rest } = normalized;
+  return {
+    ...rest,
+    smtpPass: '',
+    smtpPassConfigured: Boolean(String(smtpPass || '').trim()),
   };
 }
 
@@ -1624,7 +1643,22 @@ export function toPublicContactPageSettings(content = {}) {
 
 export async function getContactPageSettingsContent() {
   const widget = await getWidget('contact', 'settings');
-  return normalizeContactPageSettingsContent(widget?.content || DEFAULT_CONTACT_PAGE_SETTINGS);
+  const normalized = normalizeContactPageSettingsContent(widget?.content || DEFAULT_CONTACT_PAGE_SETTINGS);
+
+  // Prefer CMS recipient; fall back to SMTP From / User configured in the same settings
+  if (!normalized.recipientEmail) {
+    const smtpEmail = normalized.smtpFromEmail || normalized.smtpUser;
+    if (smtpEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(smtpEmail)) {
+      normalized.recipientEmail = smtpEmail;
+    }
+  }
+
+  return normalized;
+}
+
+export async function getAdminContactPageSettingsContent() {
+  const content = await getContactPageSettingsContent();
+  return toAdminContactPageSettings(content);
 }
 
 export async function getPublicContactPageSettingsContent() {
@@ -1644,9 +1678,18 @@ export async function updateContactPageSettingsContent(content = {}) {
   const current = await getContactPageSettingsContent();
   const syncContactDetails = Boolean(content.syncContactDetails);
 
+  const nextSmtpPass =
+    content.smtpPass !== undefined && String(content.smtpPass).trim() !== ''
+      ? String(content.smtpPass)
+      : current.smtpPass;
+
   const next = {
     formTitle: content.formTitle !== undefined ? content.formTitle : current.formTitle,
     recipientEmail: content.recipientEmail !== undefined ? content.recipientEmail : current.recipientEmail,
+    smtpUser: content.smtpUser !== undefined ? content.smtpUser : current.smtpUser,
+    smtpPass: nextSmtpPass,
+    smtpFromEmail: content.smtpFromEmail !== undefined ? content.smtpFromEmail : current.smtpFromEmail,
+    smtpFromName: content.smtpFromName !== undefined ? content.smtpFromName : current.smtpFromName,
     phone: syncContactDetails && content.phone !== undefined ? content.phone : current.phone,
     displayEmail:
       syncContactDetails && content.displayEmail !== undefined
@@ -1669,6 +1712,15 @@ export async function updateContactPageSettingsContent(content = {}) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.recipientEmail)) {
     throw new Error('Recipient email is invalid');
   }
+  if (normalized.smtpFromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.smtpFromEmail)) {
+    throw new Error('SMTP From Email is invalid');
+  }
+  if (normalized.smtpUser && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.smtpUser)) {
+    throw new Error('SMTP User must be a valid email address for Gmail SMTP');
+  }
+  if (Boolean(normalized.smtpUser) !== Boolean(String(normalized.smtpPass || '').trim())) {
+    throw new Error('SMTP User and SMTP Password must both be set');
+  }
   if (normalized.displayEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.displayEmail)) {
     throw new Error('Display email is invalid');
   }
@@ -1680,7 +1732,7 @@ export async function updateContactPageSettingsContent(content = {}) {
   }
 
   const widget = await upsertWidget('contact', 'settings', normalized);
-  return normalizeContactPageSettingsContent(widget.content);
+  return toAdminContactPageSettings(normalizeContactPageSettingsContent(widget.content));
 }
 
 export function normalizeContactBannerContent(content = {}) {

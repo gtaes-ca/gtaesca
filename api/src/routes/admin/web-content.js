@@ -27,6 +27,7 @@ import {
   getServiceDetailsBannerContent,
   getContactBannerContent,
   getContactPageSettingsContent,
+  getAdminContactPageSettingsContent,
   getFaqBannerContent,
   getFaqSettingsContent,
   getPrivacyBannerContent,
@@ -412,7 +413,7 @@ router.put('/service-details/banner', requirePageAccess('management.cms.services
 });
 
 router.get('/contact/settings', requirePageAccess('management.cms.contact'), async (_req, res) => {
-  const content = await getContactPageSettingsContent();
+  const content = await getAdminContactPageSettingsContent();
   return res.json({ content });
 });
 

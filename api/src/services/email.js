@@ -3,91 +3,91 @@ import { BRAND_NAME } from '../constants.js';
 import { formatCurrency } from '../utils/currency.js';
 import { formatBookingDateTime } from '../utils/formatDateTime.js';
 import { getBookingSettings } from './bookingSettings.js';
+import { getContactPageSettingsContent } from './webContent.js';
 
-// UsePlunk is intentionally disabled. All application email uses SMTP.
+// Connection host/port stay in env; account + From are managed in Admin → CMS → Contact.
 const SMTP_HOST = String(process.env.SMTP_HOST || '').trim();
 const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
 const SMTP_SECURE =
   String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' ||
   SMTP_PORT === 465;
-const SMTP_USER = String(process.env.SMTP_USER || '').trim();
-const SMTP_PASS = String(process.env.SMTP_PASS || '');
-const SMTP_FROM_EMAIL = String(
-  process.env.SMTP_FROM_EMAIL || SMTP_USER || ''
-).trim();
-const SMTP_FROM_NAME = String(
-  process.env.SMTP_FROM_NAME || BRAND_NAME
-).trim();
 const ADMIN_URL = process.env.ADMIN_URL || 'http://localhost:5173';
 
-let smtpTransport;
-
-function smtpIsUnconfigured() {
-  return !SMTP_HOST && !SMTP_USER && !SMTP_PASS && !SMTP_FROM_EMAIL;
+async function loadSmtpAccount() {
+  const settings = await getContactPageSettingsContent();
+  const smtpUser = String(settings.smtpUser || '').trim();
+  const smtpPass = String(settings.smtpPass || '');
+  const smtpFromEmail = String(settings.smtpFromEmail || smtpUser || '').trim();
+  const smtpFromName = String(settings.smtpFromName || BRAND_NAME).trim();
+  return { smtpUser, smtpPass, smtpFromEmail, smtpFromName };
 }
 
-function getSmtpTransport() {
+function createSmtpTransport({ smtpUser, smtpPass }) {
   if (!SMTP_HOST) {
-    throw new Error('SMTP_HOST is required to send email');
+    throw new Error('SMTP_HOST is required in .env to send email');
   }
-  if (!SMTP_FROM_EMAIL) {
-    throw new Error('SMTP_FROM_EMAIL (or SMTP_USER) is required to send email');
-  }
-  if (Boolean(SMTP_USER) !== Boolean(SMTP_PASS)) {
-    throw new Error('SMTP_USER and SMTP_PASS must be configured together');
+  if (Boolean(smtpUser) !== Boolean(String(smtpPass || '').trim())) {
+    throw new Error('SMTP User and SMTP Password must both be set in Admin → CMS → Contact');
   }
 
-  if (!smtpTransport) {
-    smtpTransport = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_SECURE,
-      ...(SMTP_USER
-        ? {
-            auth: {
-              user: SMTP_USER,
-              pass: SMTP_PASS,
-            },
-          }
-        : {}),
-    });
-  }
-
-  return smtpTransport;
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    ...(smtpUser
+      ? {
+          auth: {
+            user: smtpUser,
+            pass: smtpPass,
+          },
+        }
+      : {}),
+  });
 }
 
 async function sendViaSmtp({ to, subject, html, text, replyTo }) {
-  if (smtpIsUnconfigured()) {
+  const account = await loadSmtpAccount();
+
+  if (!SMTP_HOST && !account.smtpUser && !account.smtpPass && !account.smtpFromEmail) {
     console.log('\n--- EMAIL (dev mode, SMTP not configured) ---');
     console.log(`To: ${to}`);
     if (replyTo) console.log(`Reply-To: ${replyTo}`);
     console.log(`Subject: ${subject}`);
     console.log(text || html);
-    console.log('Set SMTP_HOST and SMTP_FROM_EMAIL in .env');
+    console.log('Set SMTP_HOST in .env and SMTP account fields in Admin → CMS → Contact');
     console.log('---------------------------------------------\n');
     return { devMode: true };
   }
 
-  const safeReplyTo = String(replyTo || '').trim();
-  const result = await getSmtpTransport().sendMail({
-    from: {
-      name: SMTP_FROM_NAME,
-      address: SMTP_FROM_EMAIL,
-    },
-    to,
-    subject,
-    text: text || undefined,
-    html: html || undefined,
-    replyTo: safeReplyTo || undefined,
-  });
+  if (!account.smtpFromEmail) {
+    throw new Error('SMTP From Email is required in Admin → CMS → Contact');
+  }
 
-  console.log('[email] Sent via SMTP:', {
-    to,
-    subject,
-    replyTo: safeReplyTo || null,
-    id: result.messageId,
-  });
-  return { devMode: false, provider: 'smtp', result };
+  const safeReplyTo = String(replyTo || '').trim();
+  const transport = createSmtpTransport(account);
+  try {
+    const result = await transport.sendMail({
+      from: {
+        name: account.smtpFromName,
+        address: account.smtpFromEmail,
+      },
+      to,
+      subject,
+      text: text || undefined,
+      html: html || undefined,
+      replyTo: safeReplyTo || undefined,
+    });
+
+    console.log('[email] Sent via SMTP:', {
+      to,
+      subject,
+      replyTo: safeReplyTo || null,
+      id: result.messageId,
+    });
+    return { devMode: false, provider: 'smtp', result };
+  } finally {
+    transport.close();
+  }
 }
 
 export async function sendInvitationEmail({ email, token, otp, userType, role }) {

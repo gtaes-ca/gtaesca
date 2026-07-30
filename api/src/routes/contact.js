@@ -29,6 +29,8 @@ async function resolveQuoteRecipientEmail() {
     settings.recipientEmail,
     settings.displayEmail,
     topbar.email,
+    settings.smtpFromEmail,
+    settings.smtpUser,
   ];
 
   for (const candidate of candidates) {

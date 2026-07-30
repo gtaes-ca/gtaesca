@@ -380,6 +380,11 @@ export function mapContactSettingsFromApi(content = {}) {
   return {
     formTitle: content.formTitle || 'Get A Free Quote',
     recipientEmail: content.recipientEmail || '',
+    smtpUser: content.smtpUser || '',
+    smtpPass: '',
+    smtpPassConfigured: Boolean(content.smtpPassConfigured),
+    smtpFromEmail: content.smtpFromEmail || '',
+    smtpFromName: content.smtpFromName || 'GTA Electric Services',
     latitude: content.latitude ?? 43.6532,
     longitude: content.longitude ?? -79.3832,
     mapZoom: content.mapZoom ?? 14,
@@ -387,13 +392,21 @@ export function mapContactSettingsFromApi(content = {}) {
 }
 
 export function mapContactSettingsForSave(content = {}) {
-  return {
+  const payload = {
     formTitle: content.formTitle,
     recipientEmail: content.recipientEmail,
+    smtpUser: content.smtpUser,
+    smtpFromEmail: content.smtpFromEmail,
+    smtpFromName: content.smtpFromName,
     latitude: Number(content.latitude),
     longitude: Number(content.longitude),
     mapZoom: Number.parseInt(content.mapZoom, 10) || 14,
   };
+  // Only send password when the admin entered a new value
+  if (String(content.smtpPass || '').trim()) {
+    payload.smtpPass = content.smtpPass;
+  }
+  return payload;
 }
 
 export function mapProjectsGalleryFromApi(content = {}) {

@@ -51,7 +51,8 @@ git clone https://github.com/Hashmarkai/gta-electric-services-1.git /opt/gtaes
 cd /opt/gtaes/deploy/droplet
 
 cp .env.example .env
-nano .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_URL, WEB_URL, CORS_ORIGINS, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL
+nano .env   # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_URL, WEB_URL, CORS_ORIGINS, SMTP_HOST, SMTP_PORT
+# Then in Admin → CMS → Contact set SMTP User, Password, From Email, From Name, and Recipient Email.
 ```
 
 Start database + API + nginx (HTTP bootstrap):
