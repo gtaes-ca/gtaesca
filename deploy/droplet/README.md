@@ -152,6 +152,8 @@ Restart API after changes.
 
 Uploads are served at `https://gtaes.nicheye.com/uploads/...` (proxied through nginx).
 
+To move uploaded CMS/avatar images (and the database) to another droplet, see [MIGRATING-UPLOADS.md](./MIGRATING-UPLOADS.md).
+
 ---
 
 ## 6. Files in this directory
@@ -164,6 +166,7 @@ Uploads are served at `https://gtaes.nicheye.com/uploads/...` (proxied through n
 | `nginx/templates/gtaes.ssl.conf` | HTTPS config (enabled by `init-ssl.sh`) |
 | `scripts/init-ssl.sh` | Issue cert + switch nginx to HTTPS |
 | `scripts/deploy.sh` | Pull + rebuild stack |
+| `MIGRATING-UPLOADS.md` | Copy CMS/avatar uploads (and DB) between droplets |
 
 ---
 

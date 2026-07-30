@@ -11,8 +11,6 @@ import {
 } from '@/helpers/cms';
 import httpClient from '@/helpers/httpClient';
 
-const MAX_GALLERY_ITEMS = 24;
-
 async function uploadGalleryImage(dataUrl, key) {
   const res = await httpClient.post('/api/admin/web-content/upload-image', { dataUrl, key });
   return res.data.url;
@@ -159,13 +157,6 @@ export default function CategoryServicesGalleryForm({
   };
 
   const addItem = () => {
-    if (form.items.length >= MAX_GALLERY_ITEMS) {
-      showNotification({
-        message: `You can add up to ${MAX_GALLERY_ITEMS} gallery items`,
-        variant: 'warning',
-      });
-      return;
-    }
     setForm((prev) => ({
       ...prev,
       items: [...prev.items, emptyItem()],
@@ -454,18 +445,14 @@ export default function CategoryServicesGalleryForm({
             <p className="text-muted mb-4">No gallery items yet. Add photos linked to a service.</p>
           )}
 
-          <div className="d-flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline-secondary"
-              onClick={addItem}
-              disabled={form.items.length >= MAX_GALLERY_ITEMS}
-            >
+          <div className="d-flex flex-wrap align-items-center gap-2">
+            <Button type="button" variant="outline-secondary" onClick={addItem}>
               Add Gallery Item
             </Button>
             <Button type="submit" disabled={submitting}>
               {submitting ? 'Saving...' : 'Save Gallery'}
             </Button>
+            <span className="text-muted small ms-1">{form.items.length} items</span>
           </div>
         </form>
       )}

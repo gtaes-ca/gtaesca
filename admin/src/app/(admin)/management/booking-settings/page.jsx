@@ -158,7 +158,7 @@ const BookingSettingsPage = () => {
       <PageMetaData title="Booking Settings" />
       {superAdmin && isWhatsAppMode ? (
         <Alert variant="warning" className="mb-3">
-          WhatsApp mode is active. Dashboard, Online Customers, Bookings, and Booking Settings are hidden from non–super admin users.
+          WhatsApp mode is active. Dashboard, Online Customers, Bookings, Materials, and Booking Settings are hidden from non–super admin users. Super admins keep access to every page.
         </Alert>
       ) : null}
       <ComponentContainerCard

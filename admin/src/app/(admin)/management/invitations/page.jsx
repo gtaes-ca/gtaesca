@@ -5,7 +5,7 @@ import ComponentContainerCard from '@/components/ComponentContainerCard';
 import PageMetaData from '@/components/PageTitle';
 import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
-import { isWhatsAppBookingMode } from '@/helpers/auth';
+import { canManageTechnicians } from '@/helpers/auth';
 import httpClient from '@/helpers/httpClient';
 
 const defaultForm = {
@@ -30,7 +30,7 @@ const TeamInvitationsPage = () => {
   const [resendingId, setResendingId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [form, setForm] = useState(defaultForm);
-  const whatsAppMode = isWhatsAppBookingMode(user);
+  const showTechnicians = canManageTechnicians(user);
 
   const loadInvitations = async () => {
     setLoading(true);
@@ -86,10 +86,10 @@ const TeamInvitationsPage = () => {
 
     setSubmitting(true);
     try {
-      const userType = whatsAppMode ? 'operation_team' : form.userType;
-      const role = whatsAppMode
-        ? (form.role === 'technician' ? 'support' : form.role)
-        : form.role;
+      const userType = showTechnicians ? form.userType : 'operation_team';
+      const role = showTechnicians
+        ? form.role
+        : (form.role === 'technician' ? 'support' : form.role);
 
       if (form.method === 'email') {
         await httpClient.post('/api/invitations', {
@@ -169,9 +169,9 @@ const TeamInvitationsPage = () => {
   const isManual = form.method === 'manual';
 
   const visibleInvitations = useMemo(() => {
-    if (!whatsAppMode) return invitations;
+    if (showTechnicians) return invitations;
     return invitations.filter((invite) => invite.userType === 'operation_team');
-  }, [invitations, whatsAppMode]);
+  }, [invitations, showTechnicians]);
 
   return (
     <>
@@ -180,9 +180,9 @@ const TeamInvitationsPage = () => {
       <ComponentContainerCard
         title="Team Invitations"
         description={
-          whatsAppMode
-            ? 'Invite or create Operation Team accounts. Technician accounts are unavailable in WhatsApp booking mode.'
-            : 'Invite by email link, or create an account manually with a password.'
+          showTechnicians
+            ? 'Invite by email link, or create an account manually with a password.'
+            : 'Invite or create Operation Team accounts. Technician accounts are unavailable in WhatsApp booking mode.'
         }
       >
         <div className="d-flex justify-content-end mb-3">
@@ -299,7 +299,7 @@ const TeamInvitationsPage = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Team Type</Form.Label>
-              {whatsAppMode ? (
+              {!showTechnicians ? (
                 <Form.Control value="Operation Team" readOnly />
               ) : (
                 <Form.Select
@@ -325,7 +325,7 @@ const TeamInvitationsPage = () => {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 disabled={form.userType === 'technician'}
               >
-                {form.userType === 'technician' && !whatsAppMode ? (
+                {form.userType === 'technician' && showTechnicians ? (
                   <option value="technician">Technician</option>
                 ) : (
                   operationRoles.map((role) => (

@@ -72,17 +72,16 @@ export function requireAdminPanelAccess(req, res, next) {
 
 export function requirePageAccess(pageKey) {
   return async (req, res, next) => {
+    // Super admin keeps every page in both booking modes.
+    if (isSuperAdmin(req.user)) {
+      return next();
+    }
+
     if (BOOKING_SYSTEM_PAGE_KEYS.includes(pageKey)) {
       const settings = await getBookingSettings();
       if (isWhatsAppBookingMode(settings)) {
-        if (!(pageKey === 'management.booking-settings' && isSuperAdmin(req.user))) {
-          return res.status(403).json({ error: 'Booking system is disabled' });
-        }
+        return res.status(403).json({ error: 'Booking system is disabled' });
       }
-    }
-
-    if (isSuperAdmin(req.user)) {
-      return next();
     }
 
     const allowedPages = await getAllowedPagesForUser(req.user);

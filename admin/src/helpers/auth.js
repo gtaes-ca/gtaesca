@@ -52,6 +52,12 @@ export function isTechnician(user) {
   return user?.userType === USER_TYPES.TECHNICIAN;
 }
 
+/** Technician team members are only relevant to full booking mode, but super admin always manages them. */
+export function canManageTechnicians(user) {
+  if (isSuperAdmin(user)) return true;
+  return !isWhatsAppBookingMode(user);
+}
+
 export function isCustomer(user) {
   return user?.userType === USER_TYPES.CUSTOMER;
 }
@@ -62,13 +68,11 @@ export function canAccessManagement(user) {
 
 export function canAccessPage(user, pageKey) {
   if (!user || !pageKey) return true;
-  if (BOOKING_SYSTEM_PAGE_KEYS.includes(pageKey) && isWhatsAppBookingMode(user)) {
-    // Super admin still needs booking settings to switch modes back.
-    if (pageKey !== 'management.booking-settings' || !isSuperAdmin(user)) {
-      return false;
-    }
-  }
+  // Super admin keeps every page in both booking modes.
   if (isSuperAdmin(user)) return true;
+  if (BOOKING_SYSTEM_PAGE_KEYS.includes(pageKey) && isWhatsAppBookingMode(user)) {
+    return false;
+  }
   return Array.isArray(user.allowedPages) && user.allowedPages.includes(pageKey);
 }
 

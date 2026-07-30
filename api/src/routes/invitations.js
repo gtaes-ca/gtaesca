@@ -3,6 +3,7 @@ import pool from '../db.js';
 import { authenticate, requirePageAccess } from '../middleware/auth.js';
 import {
   INVITABLE_USER_TYPES,
+  isSuperAdmin,
   isValidRoleForUserType,
   USER_TYPES,
 } from '../constants.js';
@@ -13,8 +14,10 @@ import { getBookingSettings, isWhatsAppBookingMode } from '../services/bookingSe
 
 const router = Router();
 
-async function assertTechnicianInviteAllowed(userType) {
+async function assertTechnicianInviteAllowed(userType, user) {
   if (userType !== USER_TYPES.TECHNICIAN) return;
+  // Super admin manages technicians in both booking modes.
+  if (isSuperAdmin(user)) return;
   const settings = await getBookingSettings();
   if (isWhatsAppBookingMode(settings)) {
     const error = new Error('Technician accounts are not available while WhatsApp booking mode is enabled');
@@ -39,7 +42,7 @@ router.post('/', authenticate, requirePageAccess('management.invitations'), asyn
   }
 
   try {
-    await assertTechnicianInviteAllowed(userType);
+    await assertTechnicianInviteAllowed(userType, req.user);
   } catch (error) {
     return res.status(error.status || 400).json({ error: error.message });
   }
@@ -95,7 +98,7 @@ router.post('/create-account', authenticate, requirePageAccess('management.invit
   const normalizedEmail = String(email || '').trim().toLowerCase();
 
   try {
-    await assertTechnicianInviteAllowed(userType);
+    await assertTechnicianInviteAllowed(userType, req.user);
   } catch (error) {
     return res.status(error.status || 400).json({ error: error.message });
   }

@@ -1475,7 +1475,7 @@ export function normalizeServiceCategoryGalleryContent(content = {}) {
     titleLine2: String(content.titleLine2 ?? DEFAULT_SERVICE_CATEGORY_GALLERY.titleLine2).trim(),
     buttonText: String(content.buttonText ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonText).trim(),
     buttonLink: String(content.buttonLink ?? DEFAULT_SERVICE_CATEGORY_GALLERY.buttonLink).trim(),
-    items: items.slice(0, 24),
+    items,
   };
 }
 

@@ -7,7 +7,7 @@ import UserAvatar from '@/components/UserAvatar';
 import PageMetaData from '@/components/PageTitle';
 import { useAuthContext } from '@/context/useAuthContext';
 import { useNotificationContext } from '@/context/useNotificationContext';
-import { isWhatsAppBookingMode } from '@/helpers/auth';
+import { canManageTechnicians } from '@/helpers/auth';
 import httpClient from '@/helpers/httpClient';
 
 const OPERATION_TAB = 'operation_team';
@@ -17,7 +17,7 @@ const operationRoles = ['admin', 'support', 'viewer'];
 const UserManagementPage = () => {
   const { user: sessionUser } = useAuthContext();
   const { showNotification } = useNotificationContext();
-  const whatsAppMode = isWhatsAppBookingMode(sessionUser);
+  const showTechnicians = canManageTechnicians(sessionUser);
   const [activeTab, setActiveTab] = useState(OPERATION_TAB);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,10 +27,10 @@ const UserManagementPage = () => {
   const [expandedExpertiseUsers, setExpandedExpertiseUsers] = useState(() => new Set());
 
   useEffect(() => {
-    if (whatsAppMode && activeTab === TECHNICIAN_TAB) {
+    if (!showTechnicians && activeTab === TECHNICIAN_TAB) {
       setActiveTab(OPERATION_TAB);
     }
-  }, [whatsAppMode, activeTab]);
+  }, [showTechnicians, activeTab]);
 
   const loadUsers = useCallback(async (userType) => {
     setLoading(true);
@@ -48,9 +48,9 @@ const UserManagementPage = () => {
   }, [showNotification]);
 
   useEffect(() => {
-    if (whatsAppMode && activeTab === TECHNICIAN_TAB) return;
+    if (!showTechnicians && activeTab === TECHNICIAN_TAB) return;
     loadUsers(activeTab);
-  }, [activeTab, loadUsers, whatsAppMode]);
+  }, [activeTab, loadUsers, showTechnicians]);
 
   const updateStatus = async (user, status) => {
     try {
@@ -236,16 +236,16 @@ const UserManagementPage = () => {
       <ComponentContainerCard
         title="Team Management"
         description={
-          whatsAppMode
-            ? 'Manage operation team members — passwords, roles, blocking, and session logout.'
-            : 'Manage operation team and technician members — passwords, roles, blocking, session logout, and service expertise.'
+          showTechnicians
+            ? 'Manage operation team and technician members — passwords, roles, blocking, session logout, and service expertise.'
+            : 'Manage operation team members — passwords, roles, blocking, and session logout.'
         }
       >
         <Tab.Container
           activeKey={activeTab}
           onSelect={(key) => key && setActiveTab(key)}
         >
-          {!whatsAppMode ? (
+          {showTechnicians ? (
             <Nav variant="tabs" className="nav-tabs card-tabs mb-3">
               <Nav.Item>
                 <Nav.Link eventKey={OPERATION_TAB}>Operation Team</Nav.Link>
@@ -259,7 +259,7 @@ const UserManagementPage = () => {
             <Tab.Pane eventKey={OPERATION_TAB}>
               {activeTab === OPERATION_TAB && renderUsersTable()}
             </Tab.Pane>
-            {!whatsAppMode ? (
+            {showTechnicians ? (
               <Tab.Pane eventKey={TECHNICIAN_TAB}>
                 {activeTab === TECHNICIAN_TAB && renderUsersTable()}
               </Tab.Pane>
