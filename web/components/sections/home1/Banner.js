@@ -17,6 +17,8 @@ function buildSwiperOptions(slideCount) {
         spaceBetween: 0,
         // Looping a single slide leaves Swiper without usable duplicates
         loop: slideCount > 1,
+        // Grow with slide content so CTAs are never clipped
+        autoHeight: true,
         // Re-measure when slides or fonts settle at different speeds per device
         observer: true,
         observeParents: true,

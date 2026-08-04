@@ -2,25 +2,34 @@
 # Main Slider
 --------------------------------------------------------------*/
 .main-slider {
+    --hero-slide-min-height: calc(100vh - var(--hero-header-offset, 118px));
     position: relative;
     background-color: var(--erepair-black);
     z-index: 10;
-    /* Fills viewport below the measured menu bar height.
-       vh first so browsers without svh/dvh (older Samsung Internet, Android
-       WebView) still get a definite height for the percentage-based slides. */
-    height: calc(100vh - var(--hero-header-offset, 118px));
-    height: calc(100svh - var(--hero-header-offset, 118px));
-    height: calc(100dvh - var(--hero-header-offset, 118px));
-    min-height: 420px;
+    /* Fill the viewport below the header, but grow when title + CTAs need
+       more room so overflow:hidden never clips Call Now / Quote buttons. */
+    height: auto;
+    min-height: max(420px, var(--hero-slide-min-height));
+}
+
+@supports (height: 100svh) {
+    .main-slider {
+        --hero-slide-min-height: calc(100svh - var(--hero-header-offset, 118px));
+    }
+}
+
+@supports (height: 100dvh) {
+    .main-slider {
+        --hero-slide-min-height: calc(100dvh - var(--hero-header-offset, 118px));
+    }
 }
 
 .main-slider .main-slider__carousel.swiper,
 .main-slider .swiper,
 .main-slider .swiper-wrapper,
 .main-slider .swiper-slide {
-    height: 100%;
-    /* Guards against a collapsed carousel when height: 100% cannot resolve */
-    min-height: 420px;
+    height: auto;
+    min-height: inherit;
 }
 
 .main-slider .main-slider__carousel.swiper,
@@ -33,10 +42,11 @@
     position: relative;
     display: flex;
     align-items: center;
-    height: 100%;
-    min-height: 100%;
-    padding-top: 70px;
-    padding-bottom: 70px;
+    height: auto;
+    min-height: max(420px, var(--hero-slide-min-height));
+    padding-top: 48px;
+    padding-bottom: 56px;
+    box-sizing: border-box;
     background-color: var(--erepair-black);
     z-index: 10;
     overflow: hidden;
@@ -166,42 +176,47 @@
 .main-slider__layout {
     position: relative;
     z-index: 10;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 40px;
+    display: block;
     width: 100%;
-    min-height: inherit;
 }
 
 .main-slider__content {
     position: relative;
     display: block;
     z-index: 10;
-    flex: 1 1 auto;
-    max-width: 640px;
+    max-width: 920px;
+    width: 100%;
+    padding-right: 24px;
+}
+
+@media (min-width: 992px) {
+    .main-slider__content {
+        max-width: min(920px, calc(100% - 300px));
+    }
 }
 
 .main-slider__specialties {
-    position: relative;
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    bottom: auto;
     z-index: 10;
-    flex: 0 0 auto;
-    max-width: 340px;
     margin: 0;
-    /* Sit beside the CTA row; leave room for social icons below the buttons */
-    padding: 0 48px 68px 0;
+    padding: 0;
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
+    max-width: 320px;
     opacity: 0;
-    transform: translateX(40px);
+    transform: translate(40px, -50%);
     transition: transform 1000ms ease, opacity 1000ms ease;
+    pointer-events: none;
 }
 
 .swiper-slide-active .main-slider__specialties {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate(0, -50%);
     transition-delay: 900ms;
 }
 
@@ -252,16 +267,19 @@
 .main-slider__title {
     position: relative;
     display: block;
-    font-size: clamp(38px, 6vw, 70px);
+    font-size: clamp(32px, 4.6vw, 56px);
     color: var(--erepair-white);
     font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -1.8px;
-    margin-top: 12px;
-    margin-bottom: 20px;
+    line-height: 1.18;
+    letter-spacing: -1.4px;
+    margin-top: 10px;
+    margin-bottom: 16px;
+    max-width: 100%;
+    width: 100%;
     opacity: 0;
     transition: transform 1000ms ease, opacity 1000ms ease;
     transform: translateX(200px);
+    overflow: visible;
 }
 
 .swiper-slide-active .main-slider__title {
@@ -286,7 +304,7 @@
     font-size: 16px;
     line-height: 26px;
     color: rgba(var(--erepair-white-rgb), .70);
-    max-width: 560px;
+    max-width: 780px;
     opacity: 0;
     transition: transform 1200ms ease, opacity 1200ms ease;
     transform: translateX(-200px);
@@ -304,24 +322,16 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 16px;
-    margin-top: 28px;
+    margin-top: 22px;
     opacity: 0;
-    transform: perspective(400px) rotateY(0deg) translateY(80px);
-    transform-origin: bottom;
-    transition: all 1500ms ease;
+    transform: translateY(32px);
+    transition: transform 1000ms ease, opacity 1000ms ease;
 }
 
 .swiper-slide-active .main-slider__btn-box {
     opacity: 1;
-    transform: perspective(400px) rotateY(0deg) translateY(0px);
+    transform: translateY(0);
     transition-delay: 1500ms;
-}
-
-.swiper-slide-active .main-slider__btn-box {
-    visibility: visible;
-    opacity: 1;
-    -webkit-transform: translateY(0) translateX(0);
-    transform: translateY(0) translateX(0);
 }
 
 .main-slider__btn.thm-btn {
@@ -372,7 +382,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 18px;
     opacity: 0;
     transition: transform 1200ms ease, opacity 1200ms ease;
     transform: translateY(24px);
@@ -413,25 +423,26 @@
     }
 
     .main-slider .item {
-        padding-top: 48px;
+        padding-top: 40px;
         padding-bottom: 48px;
-    }
-
-    .main-slider__layout {
-        flex-direction: column;
         align-items: flex-start;
-        justify-content: center;
-        gap: 28px;
+        min-height: max(400px, var(--hero-slide-min-height));
     }
 
     .main-slider__content {
         max-width: 100%;
     }
 
+    .main-slider__title {
+        font-size: clamp(28px, 7vw, 42px);
+    }
+
     .main-slider__specialties {
+        position: relative;
+        right: auto;
+        top: auto;
         max-width: 100%;
-        padding-right: 0;
-        padding-bottom: 0;
+        margin-top: 24px;
         transform: translateY(24px);
     }
 
@@ -446,7 +457,7 @@
 
     .main-slider__social {
         gap: 10px;
-        margin-top: 20px;
+        margin-top: 16px;
     }
 
     .main-slider__social a {
@@ -462,8 +473,9 @@
     }
 
     .main-slider .item {
-        padding-top: 40px;
-        padding-bottom: 56px;
+        padding-top: 36px;
+        padding-bottom: 48px;
+        min-height: max(380px, var(--hero-slide-min-height));
     }
 }
 

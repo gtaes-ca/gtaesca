@@ -4522,8 +4522,8 @@ ul {
 
 @media only screen and (min-width: 768px) and (max-width: 991px) {
   .main-slider__title {
-      font-size: 78px;
-      line-height: 100px;
+      font-size: clamp(34px, 5vw, 48px);
+      line-height: 1.2;
   }
 
   .main-slider__img {
@@ -4638,7 +4638,8 @@ ul {
   }
 
   .main-slider .item {
-      padding-top: 115px;
+      padding-top: 48px;
+      padding-bottom: 48px;
   }
 
 
