@@ -1826,6 +1826,34 @@ export async function updateFaqBannerContent(content) {
   return normalizeFaqBannerContent(widget.content);
 }
 
+const DEFAULT_SERVICE_AREAS_BANNER = {
+  title: 'Service Areas',
+  backgroundImage: '',
+};
+
+export function normalizeServiceAreasBannerContent(content = {}) {
+  return {
+    title: String(content.title ?? DEFAULT_SERVICE_AREAS_BANNER.title).trim(),
+    backgroundImage: String(content.backgroundImage ?? DEFAULT_SERVICE_AREAS_BANNER.backgroundImage).trim(),
+  };
+}
+
+export async function getServiceAreasBannerContent() {
+  const widget = await getWidget('service-areas', 'banner');
+  return normalizeServiceAreasBannerContent(widget?.content || DEFAULT_SERVICE_AREAS_BANNER);
+}
+
+export async function updateServiceAreasBannerContent(content) {
+  const normalized = normalizeServiceAreasBannerContent(content);
+
+  if (!normalized.title) {
+    throw new Error('Banner title is required');
+  }
+
+  const widget = await upsertWidget('service-areas', 'banner', normalized);
+  return normalizeServiceAreasBannerContent(widget.content);
+}
+
 export function normalizeFaqSettingsContent(content = {}) {
   return {
     tagline: String(content.tagline ?? DEFAULT_FAQ_SETTINGS.tagline).trim(),

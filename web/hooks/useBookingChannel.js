@@ -3,42 +3,61 @@
 import { useEffect, useState } from 'react'
 import {
   BOOKING_MODES,
-  BOOK_SERVICE_CTA_HREF,
-  BOOK_SERVICE_CTA_LABEL,
   fetchPublicBookingSettings,
   getBookingCtaHref,
   getBookingCtaLabel,
   isWhatsAppBookingMode,
 } from '@/lib/booking'
 
-const DEFAULT_CHANNEL = {
-  bookingMode: BOOKING_MODES.FULL,
-  isWhatsAppMode: false,
-  label: BOOK_SERVICE_CTA_LABEL,
-  href: BOOK_SERVICE_CTA_HREF,
+const BOOKING_MODE_CACHE_KEY = 'gtaes.bookingMode'
+
+function readCachedBookingMode() {
+  if (typeof window === 'undefined') return BOOKING_MODES.WHATSAPP
+  try {
+    const cached = window.sessionStorage.getItem(BOOKING_MODE_CACHE_KEY)
+    if (cached === BOOKING_MODES.FULL || cached === BOOKING_MODES.WHATSAPP) {
+      return cached
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return BOOKING_MODES.WHATSAPP
+}
+
+function channelFromMode(bookingMode) {
+  return {
+    bookingMode,
+    isWhatsAppMode: isWhatsAppBookingMode(bookingMode),
+    label: getBookingCtaLabel(bookingMode),
+    href: getBookingCtaHref(bookingMode),
+  }
 }
 
 export function useBookingChannel() {
-  const [channel, setChannel] = useState(DEFAULT_CHANNEL)
+  // Stable first paint: WhatsApp CTA ("Request a Free Quote") — no "Book a Service" flash
+  const [channel, setChannel] = useState(() => channelFromMode(BOOKING_MODES.WHATSAPP))
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let cancelled = false
+
+    // Prefer last known mode immediately (after hydration)
+    setChannel(channelFromMode(readCachedBookingMode()))
 
     async function loadChannel() {
       try {
         const settings = await fetchPublicBookingSettings()
         if (cancelled) return
         const bookingMode = settings.bookingMode || BOOKING_MODES.FULL
-        setChannel({
-          bookingMode,
-          isWhatsAppMode: isWhatsAppBookingMode(bookingMode),
-          label: getBookingCtaLabel(bookingMode),
-          href: getBookingCtaHref(bookingMode),
-        })
+        try {
+          window.sessionStorage.setItem(BOOKING_MODE_CACHE_KEY, bookingMode)
+        } catch {
+          // ignore storage errors
+        }
+        setChannel(channelFromMode(bookingMode))
       } catch {
         if (!cancelled) {
-          setChannel(DEFAULT_CHANNEL)
+          setChannel(channelFromMode(readCachedBookingMode()))
         }
       } finally {
         if (!cancelled) {

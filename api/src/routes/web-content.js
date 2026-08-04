@@ -31,6 +31,7 @@ import {
   getPrivacyPageContent,
   getTermsBannerContent,
   getTermsPageContent,
+  getServiceAreasBannerContent,
   getTopbarContent,
   getWidget,
 } from '../services/webContent.js';
@@ -89,6 +90,11 @@ router.get('/contact/banner', async (_req, res) => {
 
 router.get('/faq/banner', async (_req, res) => {
   const content = await getFaqBannerContent();
+  return res.json({ content });
+});
+
+router.get('/service-areas/banner', async (_req, res) => {
+  const content = await getServiceAreasBannerContent();
   return res.json({ content });
 });
 

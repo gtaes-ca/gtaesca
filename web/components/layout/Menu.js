@@ -10,6 +10,7 @@ const NAV_ITEMS = [
     { label: 'Team', href: '/team', bookingOnly: true },
     { label: 'Residential', href: '/residential' },
     { label: 'Commercial', href: '/commercial' },
+    { label: 'Service Areas', href: '/service-areas' },
     { label: 'FAQ', href: '/faq' },
     { label: 'Contact', href: '/contact' },
 ]

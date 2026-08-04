@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import PageBannerCta from '@/components/layout/PageBannerCta'
 import { DEFAULT_LEGAL_BANNERS, resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -53,6 +54,7 @@ export default function LegalBanner({ pageKey, fallbackTitle }) {
                             <li>{content.title || fallbackTitle}</li>
                         </ul>
                     </div>
+                    <PageBannerCta />
                 </div>
             </div>
         </section>

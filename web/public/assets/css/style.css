@@ -54,18 +54,18 @@
   --erepair-white: #ffffff;
   --erepair-white-rgb: 255, 255, 255;
   /* Logo navy — primary brand / structure */
-  --erepair-navy: #1c2f48;
-  --erepair-navy-rgb: 28, 47, 72;
-  --erepair-navy-deep: #1a2d44;
-  --erepair-navy-deep-rgb: 26, 45, 68;
+  --erepair-navy: #000082;
+  --erepair-navy-rgb: 0, 0, 130;
+  --erepair-navy-deep: #000066;
+  --erepair-navy-deep-rgb: 0, 0, 102;
   /* Premium gold — accent / CTAs / highlights */
   --erepair-base: #fc9c04;
   --erepair-base-rgb: 252, 156, 4;
   --erepair-gold-deep: #c47a03;
   --erepair-gold-deep-rgb: 196, 122, 3;
   /* Dark text & panels use logo navy for brand consistency */
-  --erepair-black: #1c2f48;
-  --erepair-black-rgb: 28, 47, 72;
+  --erepair-black: #000082;
+  --erepair-black-rgb: 0, 0, 130;
   --erepair-primary: #fc9c04;
   --erepair-primary-rgb: 252, 156, 4;
   /* Soft warm wash that pairs with gold + navy */
@@ -1093,9 +1093,10 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 150px;
+  flex-wrap: nowrap;
+  padding: 0 60px;
   background-color: var(--erepair-extra);
+  gap: 24px;
 }
 
 .main-menu__left {
@@ -1103,8 +1104,9 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 110px;
+  flex-wrap: nowrap;
+  gap: 36px;
+  min-width: 0;
 }
 
 .main-menu__logo img,
@@ -1122,6 +1124,12 @@ ul {
   object-fit: contain;
 }
 
+.main-menu__logo img,
+.main-menu-two__logo img,
+.main-menu-three__logo img {
+  max-height: 76px;
+}
+
 .footer-widget__logo img,
 .footer-widget-two__logo img,
 .site-footer-three__logo img {
@@ -1131,7 +1139,7 @@ ul {
 .main-menu__logo {
   position: relative;
   display: block;
-  padding: 30px 0;
+  padding: 22px 0;
   z-index: 2;
 }
 
@@ -1262,6 +1270,8 @@ ul {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 }
 
@@ -1274,7 +1284,7 @@ ul {
 
 .main-menu .main-menu__list>li+li,
 .stricky-header .main-menu__list>li+li {
-  margin-left: 35px;
+  margin-left: 18px;
 }
 
 .main-menu .main-menu__list>li>a,
@@ -1286,13 +1296,15 @@ ul {
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
   color: var(--erepair-black);
   font-weight: 700;
   text-transform: uppercase;
   font-family: var(--erepair-font-2);
   -webkit-transition: all 500ms ease;
   transition: all 500ms ease;
+  white-space: nowrap;
 }
 
 .main-menu .main-menu__list>li.current>a,

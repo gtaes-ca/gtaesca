@@ -14,11 +14,11 @@ const DEFAULT_CONTENT = {
   locations: { gta: [], nearby: [] },
 }
 
-export default function Coverage() {
+export default function Coverage({ forceVisible = false }) {
   const sectionRef = useRef(null)
   const [content, setContent] = useState(DEFAULT_CONTENT)
   const [activeRegion, setActiveRegion] = useState('gta')
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(Boolean(forceVisible))
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -101,6 +101,10 @@ export default function Coverage() {
 
   useEffect(() => {
     if (!loaded || !hasContent) return undefined
+    if (forceVisible) {
+      setIsVisible(true)
+      return undefined
+    }
 
     const node = sectionRef.current
     if (!node) return undefined
@@ -128,7 +132,7 @@ export default function Coverage() {
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [loaded, hasContent])
+  }, [loaded, hasContent, forceVisible])
 
   const activeItems = content.locations[activeRegion] || []
 

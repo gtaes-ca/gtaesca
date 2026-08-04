@@ -326,6 +326,8 @@ export const mapContactBannerFromApi = mapAboutBannerFromApi;
 export const mapContactBannerForSave = mapAboutBannerForSave;
 export const mapFaqBannerFromApi = mapAboutBannerFromApi;
 export const mapFaqBannerForSave = mapAboutBannerForSave;
+export const mapServiceAreasBannerFromApi = mapAboutBannerFromApi;
+export const mapServiceAreasBannerForSave = mapAboutBannerForSave;
 
 export function mapFaqSettingsFromApi(content = {}) {
   return {

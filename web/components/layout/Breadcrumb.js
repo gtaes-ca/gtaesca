@@ -1,4 +1,6 @@
 import Link from "next/link"
+import PageBannerCta from '@/components/layout/PageBannerCta'
+
 export default function Breadcrumb({ breadcrumbTitle }) {
     return (
         <>
@@ -20,6 +22,7 @@ export default function Breadcrumb({ breadcrumbTitle }) {
                             <li>{breadcrumbTitle}</li>
                         </ul>
                     </div>
+                    <PageBannerCta />
                 </div>
             </div>
         </section>

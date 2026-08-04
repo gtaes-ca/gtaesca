@@ -166,6 +166,11 @@ export const DEFAULT_FAQ_BANNER = {
   backgroundImage: '',
 };
 
+export const DEFAULT_SERVICE_AREAS_BANNER = {
+  title: 'Service Areas',
+  backgroundImage: '',
+};
+
 export const DEFAULT_FAQ_SETTINGS = {
   tagline: 'FAQ',
   title: 'Frequently Asked Questions',

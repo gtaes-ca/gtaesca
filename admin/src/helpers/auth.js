@@ -36,6 +36,7 @@ export const PAGE_PATH_BY_KEY = {
   'management.cms.services': '/management/cms/services',
   'management.cms.contact': '/management/cms/contact',
   'management.cms.faq': '/management/cms/faq',
+  'management.cms.service-areas': '/management/cms/service-areas',
   'management.cms.legal': '/management/cms/legal',
   'technician.jobs': '/technician/jobs',
 };

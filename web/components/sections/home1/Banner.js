@@ -35,6 +35,12 @@ const SOCIAL_ITEMS = [
     { key: 'instagram', icon: 'icon-instagram' },
 ]
 
+const DEFAULT_SPECIALTIES = [
+    'Licensed & Insured electricians',
+    'Residential & Commercial Expertise',
+    'Transparent Qoute with no hidden fee',
+]
+
 function slideBackgroundStyle(slide) {
     const desktop = resolveCmsAssetUrl(slide.backgroundImage)
     const mobile = resolveCmsAssetUrl(slide.backgroundImageMobile || slide.backgroundImage)
@@ -50,6 +56,7 @@ function slideBackgroundStyle(slide) {
 export default function Banner() {
     const [slides, setSlides] = useState([])
     const [callHref, setCallHref] = useState(null)
+    const [specialties, setSpecialties] = useState(DEFAULT_SPECIALTIES)
     const contactDetails = useContactDetails()
 
     const socialLinks = useMemo(
@@ -89,8 +96,24 @@ export default function Banner() {
             }
         }
 
+        async function loadSpecialties() {
+            try {
+                const res = await fetch(`${API_URL}/api/web-content/contact/settings`)
+                if (!res.ok) return
+                const data = await res.json()
+                const items = data?.content?.specificationItems
+                if (cancelled) return
+                if (Array.isArray(items) && items.length) {
+                    setSpecialties(items.map((item) => String(item || '').trim()).filter(Boolean))
+                }
+            } catch {
+                // keep defaults on failure
+            }
+        }
+
         loadSlider()
         loadCallNumber()
+        loadSpecialties()
         return () => {
             cancelled = true
         }
@@ -146,44 +169,54 @@ export default function Banner() {
                                 style={slideBackgroundStyle(slide)}
                             />
                             <div className="container">
-                                <div className="main-slider__content">
-                                    <div className="main-slider__sub-title-box">
-                                        <p className="main-slider__sub-title">{slide.subTitle}</p>
-                                        <div className="main-slider__sub-title-shape"></div>
-                                    </div>
-                                    <h2 className="main-slider__title">
-                                        {slide.titleLine1}
-                                        {slide.titleLine2 ? (
-                                            <>
-                                                <br />
-                                                {slide.titleLine2}
-                                            </>
-                                        ) : null}
-                                    </h2>
-                                    <p className="main-slider__text">{slide.text}</p>
-                                    <div className="main-slider__btn-box">
-                                        {callHref ? (
-                                            <a href={callHref} className="main-slider__btn thm-btn">
-                                                <span className="thm-btn__icon icon-phone-call" aria-hidden="true" />
-                                                <span className="thm-btn__label">Call Now</span>
-                                            </a>
-                                        ) : null}
-                                        <BookServiceLink className="main-slider__btn main-slider__btn--outline" />
-                                    </div>
-                                    {socialLinks.length ? (
-                                        <div className="main-slider__social" aria-label="Social links">
-                                            {socialLinks.map(({ key, icon, href }) => (
-                                                <Link
-                                                    key={key}
-                                                    href={href}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    aria-label={key}
-                                                >
-                                                    <i className={icon}></i>
-                                                </Link>
-                                            ))}
+                                <div className="main-slider__layout">
+                                    <div className="main-slider__content">
+                                        <div className="main-slider__sub-title-box">
+                                            <p className="main-slider__sub-title">{slide.subTitle}</p>
+                                            <div className="main-slider__sub-title-shape"></div>
                                         </div>
+                                        <h2 className="main-slider__title">
+                                            {slide.titleLine1}
+                                            {slide.titleLine2 ? (
+                                                <>
+                                                    <br />
+                                                    {slide.titleLine2}
+                                                </>
+                                            ) : null}
+                                        </h2>
+                                        <p className="main-slider__text">{slide.text}</p>
+                                        <div className="main-slider__btn-box">
+                                            {callHref ? (
+                                                <a href={callHref} className="main-slider__btn thm-btn">
+                                                    <span className="thm-btn__icon icon-phone-call" aria-hidden="true" />
+                                                    <span className="thm-btn__label">Call Now</span>
+                                                </a>
+                                            ) : null}
+                                            <BookServiceLink className="main-slider__btn main-slider__btn--outline" />
+                                        </div>
+                                        {socialLinks.length ? (
+                                            <div className="main-slider__social" aria-label="Social links">
+                                                {socialLinks.map(({ key, icon, href }) => (
+                                                    <Link
+                                                        key={key}
+                                                        href={href}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        aria-label={key}
+                                                    >
+                                                        <i className={icon}></i>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+
+                                    {specialties.length ? (
+                                        <ul className="main-slider__specialties list-unstyled" aria-label="Our specialties">
+                                            {specialties.map((item, idx) => (
+                                                <li key={`${idx}-${item}`}>- {item}</li>
+                                            ))}
+                                        </ul>
                                     ) : null}
                                 </div>
                             </div>

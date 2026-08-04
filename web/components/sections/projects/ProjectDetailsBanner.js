@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import PageBannerCta from '@/components/layout/PageBannerCta'
 import { DEFAULT_PROJECT_DETAILS_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -56,6 +57,7 @@ export default function ProjectDetailsBanner({ projectTitle = '' }) {
                             <li>{displayTitle}</li>
                         </ul>
                     </div>
+                    <PageBannerCta />
                 </div>
             </div>
         </section>

@@ -145,6 +145,7 @@ const ProjectsCmsPage = lazy(() => import('@/app/(admin)/management/cms/projects
 const ServicesCmsPage = lazy(() => import('@/app/(admin)/management/cms/services/page'));
 const ContactCmsPage = lazy(() => import('@/app/(admin)/management/cms/contact/page'));
 const FaqCmsPage = lazy(() => import('@/app/(admin)/management/cms/faq/page'));
+const ServiceAreasCmsPage = lazy(() => import('@/app/(admin)/management/cms/service-areas/page'));
 const LegalCmsPage = lazy(() => import('@/app/(admin)/management/cms/legal/page'));
 const PageAccess = lazy(() => import('../app/(admin)/management/page-access/page.jsx'));
 const BookService = lazy(() => import('@/app/(public)/book/page'));
@@ -250,6 +251,11 @@ const managementRoutes = [{
   name: 'Contact Page',
   element: <ContactCmsPage />,
   pageKey: 'management.cms.contact'
+}, {
+  path: '/management/cms/service-areas',
+  name: 'Service Areas Page',
+  element: <ServiceAreasCmsPage />,
+  pageKey: 'management.cms.service-areas'
 }, {
   path: '/management/cms/faq',
   name: 'FAQ Page',

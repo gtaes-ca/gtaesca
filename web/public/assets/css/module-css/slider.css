@@ -163,10 +163,58 @@
     transition-delay: 2000ms;
 }
 
+.main-slider__layout {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%;
+    min-height: inherit;
+}
+
 .main-slider__content {
     position: relative;
     display: block;
     z-index: 10;
+    flex: 1 1 auto;
+    max-width: 640px;
+}
+
+.main-slider__specialties {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 auto;
+    max-width: 340px;
+    margin: 0;
+    /* Sit beside the CTA row; leave room for social icons below the buttons */
+    padding: 0 48px 68px 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: transform 1000ms ease, opacity 1000ms ease;
+}
+
+.swiper-slide-active .main-slider__specialties {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 900ms;
+}
+
+.main-slider__specialties li {
+    margin: 0;
+    padding: 0;
+    color: var(--erepair-white);
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
 }
 
 .main-slider__sub-title-box {
@@ -369,6 +417,33 @@
         padding-bottom: 48px;
     }
 
+    .main-slider__layout {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 28px;
+    }
+
+    .main-slider__content {
+        max-width: 100%;
+    }
+
+    .main-slider__specialties {
+        max-width: 100%;
+        padding-right: 0;
+        padding-bottom: 0;
+        transform: translateY(24px);
+    }
+
+    .swiper-slide-active .main-slider__specialties {
+        transform: translateY(0);
+    }
+
+    .main-slider__specialties li {
+        white-space: normal;
+        font-size: 15px;
+    }
+
     .main-slider__social {
         gap: 10px;
         margin-top: 20px;
@@ -402,7 +477,7 @@
 .main-slider .swiper-pagination.swiper-pagination-bullets {
     position: absolute !important;
     top: 50% !important;
-    right: 40px !important;
+    right: 24px !important;
     left: auto !important;
     bottom: auto !important;
     width: auto !important;

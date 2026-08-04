@@ -17,7 +17,7 @@ const QUICK_LINKS = [
     { label: 'Home', href: '/' },
     { label: 'Residential', href: '/residential' },
     { label: 'Commercial', href: '/commercial' },
-    { label: 'Service Areas', href: '/#service-coverage' },
+    { label: 'Service Areas', href: '/service-areas' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact', href: '/contact' },
 ]
@@ -124,9 +124,7 @@ export default function Footer1() {
                         </div>
                         <div className="site-footer__cta-actions">
                             <CallNowLink className="site-footer__cta-btn site-footer__cta-btn--primary thm-btn" />
-                            <BookServiceLink className="site-footer__cta-btn site-footer__cta-btn--outline">
-                                Request a Free Quote
-                            </BookServiceLink>
+                            <BookServiceLink className="site-footer__cta-btn site-footer__cta-btn--outline" />
                         </div>
                     </div>
 

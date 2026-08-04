@@ -3,19 +3,19 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import PageBannerCta from '@/components/layout/PageBannerCta'
-import { DEFAULT_FAQ_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
+import { DEFAULT_SERVICE_AREAS_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-export default function FaqBanner() {
-    const [content, setContent] = useState(DEFAULT_FAQ_BANNER)
+export default function ServiceAreasBanner() {
+    const [content, setContent] = useState(DEFAULT_SERVICE_AREAS_BANNER)
 
     useEffect(() => {
         let cancelled = false
 
         async function loadBanner() {
             try {
-                const res = await fetch(`${API_URL}/api/web-content/faq/banner`)
+                const res = await fetch(`${API_URL}/api/web-content/service-areas/banner`)
                 if (!res.ok) return
                 const data = await res.json()
                 if (cancelled) return

@@ -8,7 +8,7 @@ export const BOOKING_MODES = {
 };
 
 export const BOOK_SERVICE_CTA_LABEL = 'Book a Service';
-export const BOOK_WHATSAPP_CTA_LABEL = 'Request a Quote';
+export const BOOK_WHATSAPP_CTA_LABEL = 'Request a Free Quote';
 export const BOOK_SERVICE_CTA_HREF = '/book';
 export const CONTACT_QUOTE_HREF = '/contact#quote';
 

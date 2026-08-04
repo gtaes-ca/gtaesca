@@ -34,6 +34,7 @@ import {
   getPrivacyPageContent,
   getTermsBannerContent,
   getTermsPageContent,
+  getServiceAreasBannerContent,
   getTopbarContent,
   getWidget,
   saveWidgetImage,
@@ -67,6 +68,7 @@ import {
   updatePrivacyPageContent,
   updateTermsBannerContent,
   updateTermsPageContent,
+  updateServiceAreasBannerContent,
   updateTopbarContent,
   upsertWidget,
 } from '../../services/webContent.js';
@@ -84,6 +86,7 @@ const CMS_PAGE_KEYS = [
   'management.cms.contact',
   'management.cms.faq',
   'management.cms.legal',
+  'management.cms.service-areas',
 ];
 
 function hasAnyCmsPageAccess(allowedPages) {
@@ -448,6 +451,20 @@ router.get('/faq/banner', requirePageAccess('management.cms.faq'), async (_req, 
 router.put('/faq/banner', requirePageAccess('management.cms.faq'), async (req, res) => {
   try {
     const content = await updateFaqBannerContent(req.body.content || {});
+    return res.json({ content });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+router.get('/service-areas/banner', requirePageAccess('management.cms.service-areas'), async (_req, res) => {
+  const content = await getServiceAreasBannerContent();
+  return res.json({ content });
+});
+
+router.put('/service-areas/banner', requirePageAccess('management.cms.service-areas'), async (req, res) => {
+  try {
+    const content = await updateServiceAreasBannerContent(req.body.content || {});
     return res.json({ content });
   } catch (error) {
     return res.status(400).json({ error: error.message });

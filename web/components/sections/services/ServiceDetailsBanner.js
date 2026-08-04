@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import PageBannerCta from '@/components/layout/PageBannerCta'
 import { DEFAULT_SERVICES_BANNER, resolveCmsAssetUrl } from '@/lib/cms'
 import { serviceCategoryLabel, serviceCategoryPath } from '@/lib/paths'
 
@@ -60,6 +61,7 @@ export default function ServiceDetailsBanner({ serviceName = '', categoryName = 
                             <li>{displayTitle}</li>
                         </ul>
                     </div>
+                    <PageBannerCta />
                 </div>
             </div>
         </section>
