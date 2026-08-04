@@ -197,7 +197,6 @@ const HomeServicesForm = () => {
                         <div className="d-flex gap-3 align-items-start flex-wrap">
                           <div style={{ width: 92 }}>
                             {item.imagePreview ? (
-                              // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={item.imagePreview}
                                 alt="Feature preview"
