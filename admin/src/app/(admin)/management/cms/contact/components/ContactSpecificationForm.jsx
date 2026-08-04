@@ -37,7 +37,7 @@ export default function ContactSpecificationForm() {
   }, [loadSpec]);
 
   const updateItem = (index, value) => {
-    setItems((prev) => prev.map((item, i) => (i === index ? value)));
+    setItems((prev) => prev.map((item, i) => (i === index ? value : item)));
   };
 
   const addItem = () => setItems((prev) => [...prev, '']);
