@@ -139,7 +139,7 @@ export default function Servicetwo() {
                                             <p className="services-two__category-card-text">{card.text}</p>
                                         ) : null}
                                         <Link href={card.link} className="services-two__category-card-more">
-                                            More<span className="icon-arrow-right" aria-hidden="true" />
+                                            Learn More<span className="icon-arrow-right" aria-hidden="true" />
                                         </Link>
                                     </div>
                                 </article>

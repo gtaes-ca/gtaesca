@@ -38,10 +38,32 @@ const corsOrigins = (process.env.CORS_ORIGINS || '')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Vercel preview URLs change per deploy (e.g. web-gtaes-<hash>-gtaes.vercel.app).
+// Allow the team suffix by default so previews work without editing CORS each time.
+const allowVercelPreviews = process.env.CORS_ALLOW_VERCEL_PREVIEWS !== 'false';
+const vercelPreviewOrigin = /^https:\/\/[a-z0-9-]+-gtaes\.vercel\.app$/i;
+
+function isCorsOriginAllowed(origin) {
+  if (!origin) return true;
+  if (corsOrigins.includes(origin)) return true;
+  if (allowVercelPreviews && vercelPreviewOrigin.test(origin)) return true;
+  return false;
+}
+
 app.set('trust proxy', 1);
 app.use(
   cors({
-    origin: corsOrigins.length ? corsOrigins : true,
+    origin(origin, callback) {
+      // Local/dev fallback: if no explicit allowlist is configured,
+      // allow all origins (previous behavior).
+      if (!corsOrigins.length) {
+        return callback(null, true);
+      }
+      if (isCorsOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   }),
 );

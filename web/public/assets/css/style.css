@@ -54,8 +54,8 @@
   --erepair-white: #ffffff;
   --erepair-white-rgb: 255, 255, 255;
   /* Logo navy — primary brand / structure */
-  --erepair-navy: #243c5a;
-  --erepair-navy-rgb: 36, 60, 90;
+  --erepair-navy: #1c2f48;
+  --erepair-navy-rgb: 28, 47, 72;
   --erepair-navy-deep: #1a2d44;
   --erepair-navy-deep-rgb: 26, 45, 68;
   /* Premium gold — accent / CTAs / highlights */
@@ -64,8 +64,8 @@
   --erepair-gold-deep: #c47a03;
   --erepair-gold-deep-rgb: 196, 122, 3;
   /* Dark text & panels use logo navy for brand consistency */
-  --erepair-black: #243c5a;
-  --erepair-black-rgb: 36, 60, 90;
+  --erepair-black: #1c2f48;
+  --erepair-black-rgb: 28, 47, 72;
   --erepair-primary: #fc9c04;
   --erepair-primary-rgb: 252, 156, 4;
   /* Soft warm wash that pairs with gold + navy */

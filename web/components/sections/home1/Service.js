@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from 'react'
+import { resolveCmsAssetUrl } from '@/lib/cms'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 export default function Service() {
@@ -44,8 +45,16 @@ export default function Service() {
                                 data-wow-delay={`${(index + 1) * 100}ms`}
                             >
                                 <div className="services-one__single">
-                                    <div className="services-one__icon">
-                                        <span className="icon-like"></span>
+                                    <div className={`services-one__icon ${item.image ? 'services-one__icon--image' : ''}`}>
+                                        {item.image ? (
+                                            <img
+                                                src={resolveCmsAssetUrl(item.image)}
+                                                alt={item.title || 'Service feature'}
+                                                className="services-one__icon-image"
+                                            />
+                                        ) : (
+                                            <span className="icon-like"></span>
+                                        )}
                                     </div>
                                     <h3 className="services-one__title"><Link href={item.link}>{item.title}</Link></h3>
                                     <p className="services-one__text">{item.text}</p>

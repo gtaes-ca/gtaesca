@@ -58,18 +58,21 @@ const DEFAULT_HOME_SERVICES = {
       text: 'Honest upfront quotes with no hidden fees on residential and commercial electrical work.',
       link: '/residential',
       icon: HOME_SERVICES_ICON,
+      image: '',
     },
     {
       title: 'Licensed & Insured',
       text: 'ESA-certified electricians delivering safe, code-compliant work backed by our satisfaction guarantee.',
       link: '/about',
       icon: HOME_SERVICES_ICON,
+      image: '',
     },
     {
       title: '24/7 Emergency Service',
       text: 'Available around the clock for urgent electrical repairs across the Greater Toronto Area.',
       link: '/contact',
       icon: HOME_SERVICES_ICON,
+      image: '',
     },
   ],
 };
@@ -182,11 +185,13 @@ export function normalizeHomeServicesContent(content = {}) {
   return {
     items: items.slice(0, 3).map((item, index) => {
       const fallback = DEFAULT_HOME_SERVICES.items[index] || DEFAULT_HOME_SERVICES.items[0];
+      const image = String(item?.image ?? fallback.image ?? '').trim();
       return {
         title: String(item?.title ?? fallback.title).trim(),
         text: String(item?.text ?? fallback.text).trim(),
         link: String(item?.link ?? fallback.link).trim(),
-        icon: HOME_SERVICES_ICON,
+        icon: String(item?.icon ?? fallback.icon ?? HOME_SERVICES_ICON).trim() || HOME_SERVICES_ICON,
+        image,
       };
     }),
   };
@@ -591,7 +596,22 @@ export async function getHomeServicesContent() {
 }
 
 export async function updateHomeServicesContent(content) {
-  const normalized = normalizeHomeServicesContent(content);
+  const next = { ...(content || {}) };
+  // Support optional base64 image uploads coming from the admin UI.
+  if (Array.isArray(next.items)) {
+    next.items = await Promise.all(
+      next.items.map(async (item, index) => {
+        const nextItem = { ...item };
+        if (nextItem.imageData) {
+          nextItem.image = saveCmsImage(`home-service-feature-${index}`, nextItem.imageData);
+          delete nextItem.imageData;
+        }
+        return nextItem;
+      })
+    );
+  }
+
+  const normalized = normalizeHomeServicesContent(next);
 
   for (const item of normalized.items) {
     if (!item.title) {
@@ -602,9 +622,6 @@ export async function updateHomeServicesContent(content) {
     }
     if (!item.link) {
       throw new Error('Each service feature requires a link');
-    }
-    if (!item.icon) {
-      throw new Error('Each service feature requires an icon');
     }
   }
 
@@ -1587,6 +1604,11 @@ const DEFAULT_CONTACT_PAGE_SETTINGS = {
   latitude: 43.6532,
   longitude: -79.3832,
   mapZoom: 14,
+  specificationItems: [
+    'Licensed & Insured electricians',
+    'Residential & Commercial Expertise',
+    'Transparent Qoute with no hidden fee',
+  ],
 };
 
 function parseCoordinate(value, fallback) {
@@ -1601,6 +1623,10 @@ function parseMapZoom(value, fallback) {
 }
 
 export function normalizeContactPageSettingsContent(content = {}) {
+  const specificationItems = Array.isArray(content.specificationItems)
+    ? content.specificationItems.map((item) => String(item || '').trim()).filter(Boolean)
+    : DEFAULT_CONTACT_PAGE_SETTINGS.specificationItems;
+
   return {
     formTitle: String(content.formTitle ?? DEFAULT_CONTACT_PAGE_SETTINGS.formTitle).trim(),
     recipientEmail: String(content.recipientEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.recipientEmail).trim(),
@@ -1614,6 +1640,7 @@ export function normalizeContactPageSettingsContent(content = {}) {
     latitude: parseCoordinate(content.latitude, DEFAULT_CONTACT_PAGE_SETTINGS.latitude),
     longitude: parseCoordinate(content.longitude, DEFAULT_CONTACT_PAGE_SETTINGS.longitude),
     mapZoom: parseMapZoom(content.mapZoom, DEFAULT_CONTACT_PAGE_SETTINGS.mapZoom),
+    specificationItems,
   };
 }
 
@@ -1638,6 +1665,7 @@ export function toPublicContactPageSettings(content = {}) {
     latitude: normalized.latitude,
     longitude: normalized.longitude,
     mapZoom: normalized.mapZoom,
+    specificationItems: normalized.specificationItems,
   };
 }
 
@@ -1690,6 +1718,8 @@ export async function updateContactPageSettingsContent(content = {}) {
     smtpPass: nextSmtpPass,
     smtpFromEmail: content.smtpFromEmail !== undefined ? content.smtpFromEmail : current.smtpFromEmail,
     smtpFromName: content.smtpFromName !== undefined ? content.smtpFromName : current.smtpFromName,
+    specificationItems:
+      content.specificationItems !== undefined ? content.specificationItems : current.specificationItems,
     phone: syncContactDetails && content.phone !== undefined ? content.phone : current.phone,
     displayEmail:
       syncContactDetails && content.displayEmail !== undefined

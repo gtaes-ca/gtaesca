@@ -36,16 +36,18 @@ export default function Footer1() {
     const [content, setContent] = useState(DEFAULT_TOPBAR)
     const [residential, setResidential] = useState([])
     const [commercial, setCommercial] = useState([])
+    const [specificationItems, setSpecificationItems] = useState([])
 
     useEffect(() => {
         let cancelled = false
 
         async function loadFooterData() {
             try {
-                const [topbarRes, residentialRes, commercialRes] = await Promise.all([
+                const [topbarRes, residentialRes, commercialRes, contactSettingsRes] = await Promise.all([
                     fetch(`${API_URL}/api/web-content/home/topbar`),
                     fetch(`${API_URL}/api/services/list?group=residential`),
                     fetch(`${API_URL}/api/services/list?group=commercial`),
+                    fetch(`${API_URL}/api/web-content/contact/settings`),
                 ])
 
                 if (topbarRes.ok) {
@@ -80,6 +82,14 @@ export default function Footer1() {
                         setCommercial(
                             (Array.isArray(data.services) ? data.services : []).slice(0, FOOTER_SERVICE_LIMIT)
                         )
+                    }
+                }
+
+                if (contactSettingsRes.ok) {
+                    const data = await contactSettingsRes.json()
+                    const items = data?.content?.specificationItems
+                    if (!cancelled && Array.isArray(items)) {
+                        setSpecificationItems(items.map((x) => String(x || '').trim()).filter(Boolean))
                     }
                 }
             } catch {
@@ -119,6 +129,19 @@ export default function Footer1() {
                             </BookServiceLink>
                         </div>
                     </div>
+
+                    {specificationItems.length ? (
+                        <div className="row mt-4">
+                            <div className="col-12">
+                                <ul className="footer-widget__specification list-unstyled">
+                                    {specificationItems.map((item, idx) => (
+                                        <li key={`${idx}-${item}`}>- {item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    ) : null}
+
                 </div>
             </div>
 
@@ -133,6 +156,7 @@ export default function Footer1() {
                                     </Link>
                                 </div>
                                 <p className="footer-widget__about-text">{ABOUT_TEXT}</p>
+
                                 <ul className="footer-widget__contact-inline list-unstyled">
                                     {content.phone ? (
                                         <li>
@@ -227,6 +251,7 @@ export default function Footer1() {
                                 </ul>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

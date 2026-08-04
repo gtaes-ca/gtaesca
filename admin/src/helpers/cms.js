@@ -388,6 +388,7 @@ export function mapContactSettingsFromApi(content = {}) {
     latitude: content.latitude ?? 43.6532,
     longitude: content.longitude ?? -79.3832,
     mapZoom: content.mapZoom ?? 14,
+    specificationItems: Array.isArray(content.specificationItems) ? content.specificationItems : [],
   };
 }
 
