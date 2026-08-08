@@ -53,7 +53,10 @@ export default function Menu() {
                 }
 
                 return (
-                    <li key={item.href} className="dropdown dropdown--services">
+                    <li
+                        key={item.href}
+                        className="dropdown dropdown--services dropdown--services-start"
+                    >
                         <Link href={item.href}>{item.label}</Link>
                         <ul className="main-menu__services-panel">
                             <li className="main-menu__services-panel-all">

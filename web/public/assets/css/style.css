@@ -1401,6 +1401,16 @@ ul {
   box-shadow: 0px 10px 60px 0px rgba(0, 0, 0, 0.07);
 }
 
+/* Service mega-menus must not inherit the narrow single-column submenu constraints */
+.main-menu .main-menu__list>li.dropdown--services>ul.main-menu__services-panel,
+.stricky-header .main-menu__list>li.dropdown--services>ul.main-menu__services-panel {
+  max-width: min(920px, calc(100vw - 48px));
+  max-height: none;
+  overflow: visible;
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
 .main-menu .main-menu__list>li>ul>li>ul>li>ul,
 .stricky-header .main-menu__list>li>ul>li>ul>li>ul {
   display: none;
@@ -1469,30 +1479,52 @@ ul {
 }
 
 /* Residential / Commercial services — row / multi-column panel */
+.main-menu,
+.main-menu__wrapper,
+.main-menu__wrapper-inner,
+.main-menu__left,
+.main-menu__main-menu-box,
+.main-menu .main-menu__list,
+.stricky-header .main-menu__list {
+  overflow: visible;
+}
+
+.main-menu .main-menu__list>li.dropdown--services,
+.stricky-header .main-menu__list>li.dropdown--services {
+  position: relative;
+  overflow: visible;
+  z-index: 20;
+}
+
 .main-menu .main-menu__list>li.dropdown--services>ul.main-menu__services-panel,
 .stricky-header .main-menu__list>li.dropdown--services>ul.main-menu__services-panel {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 6px 10px;
-  left: 50%;
-  right: auto;
   min-width: 620px;
-  max-width: min(920px, 90vw);
+  max-width: min(920px, calc(100vw - 48px));
   width: max-content;
   max-height: none;
   overflow: visible;
   padding: 14px 16px;
   flex-direction: unset;
-  -webkit-transform: translateX(-50%) scaleY(0);
-  transform: translateX(-50%) scaleY(0);
-  -webkit-transform-origin: top center;
-  transform-origin: top center;
+  z-index: 200;
+  -webkit-transform: scaleY(0);
+  transform: scaleY(0);
+}
+
+.main-menu .main-menu__list>li.dropdown--services-start>ul.main-menu__services-panel,
+.stricky-header .main-menu__list>li.dropdown--services-start>ul.main-menu__services-panel {
+  left: 0;
+  right: auto;
+  -webkit-transform-origin: top left;
+  transform-origin: top left;
 }
 
 .main-menu .main-menu__list>li.dropdown--services:hover>ul.main-menu__services-panel,
 .stricky-header .main-menu__list>li.dropdown--services:hover>ul.main-menu__services-panel {
-  -webkit-transform: translateX(-50%) scaleY(1);
-  transform: translateX(-50%) scaleY(1);
+  -webkit-transform: scaleY(1);
+  transform: scaleY(1);
 }
 
 .main-menu .main-menu__list>li.dropdown--services>ul.main-menu__services-panel>li,
@@ -1547,6 +1579,7 @@ ul {
   padding: 0;
   gap: 0;
   left: auto;
+  right: auto;
   transform: none;
 }
 

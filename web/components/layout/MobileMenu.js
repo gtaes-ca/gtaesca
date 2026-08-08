@@ -98,7 +98,7 @@ const MobileMenu = ({ handleMobileMenu }) => {
                                 return (
                                     <li
                                         key={item.href}
-                                        className={isOpen ? 'dropdown dropdown--services current' : 'dropdown dropdown--services'}
+                                        className={`dropdown dropdown--services dropdown--services-start${isOpen ? ' current' : ''}`}
                                     >
                                         <Link href={item.href} onClick={handleMobileMenu}>{item.label}</Link>
                                         <ul className="main-menu__services-panel" style={{ display: isOpen ? 'block' : 'none' }}>
