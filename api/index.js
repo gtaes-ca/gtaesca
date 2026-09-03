@@ -1,3 +1,4 @@
+import './src/loadEnv.js';
 import cors from 'cors';
 import express from 'express';
 import pool from './src/db.js';
@@ -122,6 +123,16 @@ app.use((err, _req, res, _next) => {
 async function start() {
   ensureUploadsDirs();
   await migrate();
+
+  const plunkKey = String(process.env.PLUNK_API_KEY || '').trim();
+  if (!plunkKey) {
+    console.warn('[email] PLUNK_API_KEY is not set — contact/booking emails will fail until it is configured in .env');
+  } else if (plunkKey.startsWith('pk_')) {
+    console.warn('[email] PLUNK_API_KEY looks like a public key (pk_). Use the secret key (sk_).');
+  } else {
+    console.log('[email] Plunk configured (secret key present)');
+  }
+
   app.listen(port, '0.0.0.0', () => {
     console.log(`${BRAND_NAME} API listening on port ${port}`);
   });

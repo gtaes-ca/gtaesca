@@ -130,11 +130,11 @@ Volume project prefix depends on the compose project name (often `droplet_` when
 
 - [ ] Source: create `gtaes-uploads.tar.gz`
 - [ ] Source: create `gtaes-db.sql` (or equivalent dump)
-- [ ] Destination: deploy stack from `deploy/droplet` and configure `.env` (domain, SMTP host/port, JWT, DB passwords, CORS, etc.)
+- [ ] Destination: deploy stack from `deploy/droplet` and configure `.env` (domain, JWT, DB passwords, CORS, etc.)
 - [ ] Destination: restore uploads into `gtaes-api` `/app/uploads`
 - [ ] Destination: restore DB (if cutover)
 - [ ] Destination: DNS / SSL for the new domain
-- [ ] Destination: set CMS SMTP account fields in Admin → Contact settings (credentials are stored in DB/CMS, not only in `.env`)
+- [ ] Destination: set `PLUNK_API_KEY` in droplet `.env`, and From + Recipient Email(s) in Admin → Contact settings
 - [ ] Spot-check CMS images and `/uploads/cms/...` URLs
 - [ ] Point Vercel (or other) web/admin `API` / CORS origins at the new domain
 - [ ] Decommission or lock down the old droplet when cutover is confirmed

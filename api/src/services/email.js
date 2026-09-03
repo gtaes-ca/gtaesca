@@ -1,100 +1,144 @@
-import nodemailer from 'nodemailer';
 import { BRAND_NAME } from '../constants.js';
 import { formatCurrency } from '../utils/currency.js';
 import { formatBookingDateTime } from '../utils/formatDateTime.js';
 import { getBookingSettings } from './bookingSettings.js';
 import { getContactPageSettingsContent } from './webContent.js';
 
-// Connection host/port stay in env; account + From are managed in Admin → CMS → Contact.
-const SMTP_HOST = String(process.env.SMTP_HOST || '').trim();
-const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
-const SMTP_SECURE =
-  String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' ||
-  SMTP_PORT === 465;
 const ADMIN_URL = process.env.ADMIN_URL || 'http://localhost:5173';
+// Current Plunk docs use next-api; override with PLUNK_API_URL if needed.
+const PLUNK_API_URL_DEFAULT = 'https://next-api.useplunk.com/v1/send';
+const PLUNK_TIMEOUT_MS = Number(process.env.PLUNK_TIMEOUT_MS) || 30000;
 
-async function loadSmtpAccount() {
+function getPlunkApiUrl() {
+  return String(process.env.PLUNK_API_URL || PLUNK_API_URL_DEFAULT).trim();
+}
+
+function getPlunkApiKey() {
+  return String(process.env.PLUNK_API_KEY || '')
+    .trim()
+    .replace(/^["']+|["']+$/g, '');
+}
+
+function formatPlunkError(data, status) {
+  const err = data?.error;
+  if (typeof err === 'string' && err.trim()) return err.trim();
+  if (err && typeof err === 'object') {
+    const parts = [err.message, err.code, err.suggestion].filter(Boolean);
+    if (parts.length) return parts.join(' — ');
+  }
+  if (typeof data?.message === 'string' && data.message.trim()) return data.message.trim();
+  if (typeof data?.raw === 'string' && data.raw.trim()) return data.raw.trim().slice(0, 200);
+  return `Plunk send failed (${status})`;
+}
+
+async function loadPlunkAccount() {
   const settings = await getContactPageSettingsContent();
-  const smtpUser = String(settings.smtpUser || '').trim();
-  const smtpPass = String(settings.smtpPass || '');
-  const smtpFromEmail = String(settings.smtpFromEmail || smtpUser || '').trim();
-  const smtpFromName = String(settings.smtpFromName || BRAND_NAME).trim();
-  return { smtpUser, smtpPass, smtpFromEmail, smtpFromName };
+  const fromEmail = String(settings.plunkFromEmail || '').trim();
+  const fromName = String(settings.plunkFromName || BRAND_NAME).trim();
+  return { apiKey: getPlunkApiKey(), fromEmail, fromName };
 }
 
-function createSmtpTransport({ smtpUser, smtpPass }) {
-  if (!SMTP_HOST) {
-    throw new Error('SMTP_HOST is required in .env to send email');
-  }
-  if (Boolean(smtpUser) !== Boolean(String(smtpPass || '').trim())) {
-    throw new Error('SMTP User and SMTP Password must both be set in Admin → CMS → Contact');
-  }
+async function sendViaPlunk({ to, subject, html, text, replyTo }) {
+  const account = await loadPlunkAccount();
+  const recipients = Array.isArray(to)
+    ? to.map((item) => String(item || '').trim()).filter(Boolean)
+    : [String(to || '').trim()].filter(Boolean);
+  const safeReplyTo = String(replyTo || '').trim();
 
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: SMTP_SECURE,
-    ...(smtpUser
-      ? {
-          auth: {
-            user: smtpUser,
-            pass: smtpPass,
-          },
-        }
-      : {}),
-  });
-}
-
-async function sendViaSmtp({ to, subject, html, text, replyTo }) {
-  const account = await loadSmtpAccount();
-
-  if (!SMTP_HOST && !account.smtpUser && !account.smtpPass && !account.smtpFromEmail) {
-    console.log('\n--- EMAIL (dev mode, SMTP not configured) ---');
-    console.log(`To: ${to}`);
-    if (replyTo) console.log(`Reply-To: ${replyTo}`);
+  if (!account.apiKey && !account.fromEmail) {
+    console.log('\n--- EMAIL (dev mode, Plunk not configured) ---');
+    console.log(`To: ${recipients.join(', ')}`);
+    if (safeReplyTo) console.log(`Reply-To: ${safeReplyTo}`);
     console.log(`Subject: ${subject}`);
     console.log(text || html);
-    console.log('Set SMTP_HOST in .env and SMTP account fields in Admin → CMS → Contact');
+    console.log('Set PLUNK_API_KEY in API .env and From Email in Admin → CMS → Contact');
     console.log('---------------------------------------------\n');
     return { devMode: true };
   }
 
-  if (!account.smtpFromEmail) {
-    throw new Error('SMTP From Email is required in Admin → CMS → Contact');
+  if (!account.apiKey) {
+    throw new Error('PLUNK_API_KEY is required in the API .env');
+  }
+  if (account.apiKey.startsWith('pk_')) {
+    throw new Error(
+      'PLUNK_API_KEY looks like a public key (pk_). Use the secret key (sk_) in the API .env.',
+    );
+  }
+  if (!account.fromEmail) {
+    throw new Error('Plunk From Email is required in Admin → CMS → Contact');
+  }
+  if (!recipients.length) {
+    throw new Error('At least one email recipient is required');
   }
 
-  const safeReplyTo = String(replyTo || '').trim();
-  const transport = createSmtpTransport(account);
+  const plunkApiUrl = getPlunkApiUrl();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PLUNK_TIMEOUT_MS);
+
+  let response;
   try {
-    const result = await transport.sendMail({
-      from: {
-        name: account.smtpFromName,
-        address: account.smtpFromEmail,
+    response = await fetch(plunkApiUrl, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${account.apiKey}`,
       },
-      to,
-      subject,
-      text: text || undefined,
-      html: html || undefined,
-      replyTo: safeReplyTo || undefined,
+      body: JSON.stringify({
+        to: recipients.length === 1 ? recipients[0] : recipients,
+        subject,
+        body: html || text || '',
+        from: account.fromEmail,
+        name: account.fromName || undefined,
+        // Official docs use `reply`; some guides use `replyTo`.
+        ...(safeReplyTo ? { reply: safeReplyTo, replyTo: safeReplyTo } : {}),
+      }),
     });
-
-    console.log('[email] Sent via SMTP:', {
-      to,
-      subject,
-      replyTo: safeReplyTo || null,
-      id: result.messageId,
-    });
-    return { devMode: false, provider: 'smtp', result };
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(`Plunk request timed out after ${PLUNK_TIMEOUT_MS}ms`);
+    }
+    throw new Error(error?.message || 'Failed to reach Plunk API');
   } finally {
-    transport.close();
+    clearTimeout(timeout);
   }
+
+  const raw = await response.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = { raw };
+  }
+
+  if (!response.ok) {
+    const message = formatPlunkError(data, response.status);
+    console.error('[email] Plunk send failed:', {
+      status: response.status,
+      url: plunkApiUrl,
+      keyPrefix: account.apiKey.slice(0, 3),
+      message,
+      body: data,
+    });
+    throw new Error(message);
+  }
+
+  console.log('[email] Sent via Plunk:', {
+    to: recipients,
+    subject,
+    from: account.fromEmail,
+    replyTo: safeReplyTo || null,
+    status: response.status,
+  });
+
+  return { devMode: false, provider: 'plunk', result: data };
 }
 
 export async function sendInvitationEmail({ email, token, otp, userType, role }) {
   const inviteUrl = `${ADMIN_URL}/auth/accept-invitation?token=${token}`;
   const teamLabel = userType === 'operation_team' ? 'Operation Team' : 'Technicians';
 
-  return sendViaSmtp({
+  return sendViaPlunk({
     to: email,
     subject: `${BRAND_NAME} ${teamLabel} Invitation`,
     text: [
@@ -119,7 +163,7 @@ export async function sendInvitationEmail({ email, token, otp, userType, role })
 export async function sendPasswordResetEmail({ email, otp }) {
   const resetUrl = `${ADMIN_URL}/auth/reset-pass-confirm?email=${encodeURIComponent(email)}`;
 
-  return sendViaSmtp({
+  return sendViaPlunk({
     to: email,
     subject: `${BRAND_NAME} Password Reset`,
     text: [
@@ -228,7 +272,7 @@ export async function sendBookingConfirmationEmail({ booking, activationUrl = nu
       ].join('\n')
     : '';
 
-  return sendViaSmtp({
+  return sendViaPlunk({
     to: booking.clientEmail,
     subject: `${BRAND_NAME} Booking Received — ${booking.referenceCode}`,
     text: [
@@ -291,7 +335,7 @@ export async function sendBookingStatusEmail({ booking, status }) {
   const scheduledLabel = formatBookingDateTime(booking.scheduledAt, timezone);
   const materialsText = bookingMaterialsText(booking);
 
-  return sendViaSmtp({
+  return sendViaPlunk({
     to: booking.clientEmail,
     subject: `${BRAND_NAME} ${copy.subject} — ${booking.referenceCode}`,
     text: [
@@ -335,6 +379,9 @@ export async function sendContactQuoteEmail({
     : [];
   const safeMessage = String(message || '').trim();
   const servicesLabel = selectedServices.length ? selectedServices.join(', ') : '';
+  const recipients = Array.isArray(to)
+    ? to.map((item) => String(item || '').trim()).filter(Boolean)
+    : [String(to || '').trim()].filter(Boolean);
 
   const textBody = [
     'New contact form submission:',
@@ -361,18 +408,19 @@ export async function sendContactQuoteEmail({
       </div>
     `;
 
-  const teamResult = await sendViaSmtp({
-    to,
+  const teamResult = await sendViaPlunk({
+    to: recipients,
     replyTo: safeEmail,
-    subject: `${BRAND_NAME} Contact Form — ${safeName}`,
+    subject: 'New Contact Form Submission',
     text: textBody,
     html: htmlBody,
   });
 
   // Confirmation to the person who submitted the form
-  if (safeEmail && safeEmail.toLowerCase() !== String(to).toLowerCase()) {
+  const recipientSet = new Set(recipients.map((item) => item.toLowerCase()));
+  if (safeEmail && !recipientSet.has(safeEmail.toLowerCase())) {
     try {
-      await sendViaSmtp({
+      await sendViaPlunk({
         to: safeEmail,
         subject: `We received your quote request — ${BRAND_NAME}`,
         text: [

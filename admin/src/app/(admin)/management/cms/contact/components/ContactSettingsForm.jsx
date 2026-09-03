@@ -37,6 +37,30 @@ const ContactSettingsForm = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const updateRecipient = (index, value) => {
+    setForm((prev) => ({
+      ...prev,
+      recipientEmails: prev.recipientEmails.map((email, i) => (i === index ? value : email)),
+    }));
+  };
+
+  const addRecipient = () => {
+    setForm((prev) => ({
+      ...prev,
+      recipientEmails: [...prev.recipientEmails, ''],
+    }));
+  };
+
+  const removeRecipient = (index) => {
+    setForm((prev) => {
+      const next = prev.recipientEmails.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        recipientEmails: next.length ? next : [''],
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -59,7 +83,7 @@ const ContactSettingsForm = () => {
   return (
     <ComponentContainerCard
       title="Get A Free Quote"
-      description="Configure the contact form, SMTP sending account, where submissions are emailed, and map coordinates."
+      description="Configure the contact form, email sender, recipients, and map coordinates."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
@@ -78,82 +102,60 @@ const ContactSettingsForm = () => {
             </Col>
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Recipient Email</Form.Label>
+                <Form.Label>From Name</Form.Label>
                 <Form.Control
-                  type="email"
-                  value={form.recipientEmail}
-                  onChange={(e) => updateField('recipientEmail', e.target.value)}
-                  placeholder="quotes@yourcompany.com"
-                  required
-                />
-                <Form.Text className="text-muted">
-                  Contact form submissions are delivered to this address.
-                </Form.Text>
-              </Form.Group>
-            </Col>
-
-            <Col xs={12}>
-              <h5 className="mb-0">SMTP Account</h5>
-              <p className="text-muted small mb-0">
-                Used for all site emails (quotes, bookings, invitations, password resets).
-                Server connection still uses <code>SMTP_HOST</code> / <code>SMTP_PORT</code> from the API .env.
-              </p>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>SMTP User</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={form.smtpUser}
-                  onChange={(e) => updateField('smtpUser', e.target.value)}
-                  placeholder="you@gmail.com"
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>SMTP Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  value={form.smtpPass}
-                  onChange={(e) => updateField('smtpPass', e.target.value)}
-                  placeholder={form.smtpPassConfigured ? '•••••••• (leave blank to keep)' : 'App password'}
-                  autoComplete="new-password"
-                  required={!form.smtpPassConfigured}
-                />
-                <Form.Text className="text-muted">
-                  {form.smtpPassConfigured
-                    ? 'Password is already saved. Enter a new value only to replace it.'
-                    : 'For Gmail, use a 16-character App Password.'}
-                </Form.Text>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>SMTP From Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={form.smtpFromEmail}
-                  onChange={(e) => updateField('smtpFromEmail', e.target.value)}
-                  placeholder="you@gmail.com"
-                  required
-                />
-                <Form.Text className="text-muted">
-                  Must match the SMTP user (or a verified Send mail as alias).
-                </Form.Text>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>SMTP From Name</Form.Label>
-                <Form.Control
-                  value={form.smtpFromName}
-                  onChange={(e) => updateField('smtpFromName', e.target.value)}
+                  value={form.plunkFromName}
+                  onChange={(e) => updateField('plunkFromName', e.target.value)}
                   placeholder="GTA Electric Services"
                   required
                 />
               </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>From Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={form.plunkFromEmail}
+                  onChange={(e) => updateField('plunkFromEmail', e.target.value)}
+                  placeholder="gtaes.ca@hashmark.tech"
+                  required
+                />
+              </Form.Group>
+            </Col>
+
+            {form.recipientEmails.map((email, idx) => (
+              <Col md={6} key={`recipient-${idx}`}>
+                <Form.Group>
+                  <Form.Label>
+                    {form.recipientEmails.length > 1
+                      ? `Recipient Email ${idx + 1}`
+                      : 'Recipient Email'}
+                  </Form.Label>
+                  <div className="d-flex gap-2">
+                    <Form.Control
+                      type="email"
+                      value={email}
+                      onChange={(e) => updateRecipient(idx, e.target.value)}
+                      placeholder="hashimsadiq@gmail.com"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="outline-secondary"
+                      onClick={() => removeRecipient(idx)}
+                      disabled={form.recipientEmails.length <= 1}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </Form.Group>
+              </Col>
+            ))}
+            <Col xs={12}>
+              <Button type="button" variant="outline-secondary" onClick={addRecipient}>
+                Add Recipient Email
+              </Button>
             </Col>
 
             <Col md={4}>

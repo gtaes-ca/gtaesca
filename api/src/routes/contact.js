@@ -6,6 +6,7 @@ import {
 } from '../services/webContent.js';
 
 const router = Router();
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isPlaceholderEmail(email) {
   const value = String(email || '').trim().toLowerCase();
@@ -19,28 +20,41 @@ function isPlaceholderEmail(email) {
   );
 }
 
-async function resolveQuoteRecipientEmail() {
+function pushUniqueEmail(list, seen, candidate) {
+  const email = String(candidate || '').trim();
+  if (!email || isPlaceholderEmail(email) || !EMAIL_RE.test(email)) return;
+  const key = email.toLowerCase();
+  if (seen.has(key)) return;
+  seen.add(key);
+  list.push(email);
+}
+
+async function resolveQuoteRecipientEmails() {
   const [settings, topbar] = await Promise.all([
     getContactPageSettingsContent(),
     getTopbarContent(),
   ]);
 
-  const candidates = [
-    settings.recipientEmail,
-    settings.displayEmail,
-    topbar.email,
-    settings.smtpFromEmail,
-    settings.smtpUser,
-  ];
+  const recipients = [];
+  const seen = new Set();
 
-  for (const candidate of candidates) {
-    const email = String(candidate || '').trim();
-    if (email && !isPlaceholderEmail(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return email;
+  for (const email of settings.recipientEmails || []) {
+    pushUniqueEmail(recipients, seen, email);
+  }
+
+  // Fallbacks when CMS recipients are empty
+  if (!recipients.length) {
+    for (const candidate of [
+      settings.recipientEmail,
+      settings.displayEmail,
+      topbar.email,
+      settings.plunkFromEmail,
+    ]) {
+      pushUniqueEmail(recipients, seen, candidate);
     }
   }
 
-  return null;
+  return recipients;
 }
 
 router.post('/quote', async (req, res) => {
@@ -56,22 +70,22 @@ router.post('/quote', async (req, res) => {
     if (!safeName) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    if (!safeEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+    if (!safeEmail || !EMAIL_RE.test(safeEmail)) {
       return res.status(400).json({ error: 'A valid email is required' });
     }
     if (!safeMessage) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const recipientEmail = await resolveQuoteRecipientEmail();
-    if (!recipientEmail) {
+    const recipientEmails = await resolveQuoteRecipientEmails();
+    if (!recipientEmails.length) {
       return res.status(503).json({
         error: 'Contact form recipient email is not configured. Set it in Admin → CMS → Contact → Recipient Email.',
       });
     }
 
     await sendContactQuoteEmail({
-      to: recipientEmail,
+      to: recipientEmails,
       name: safeName,
       email: safeEmail,
       phone: String(phone || '').trim(),

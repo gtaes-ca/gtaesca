@@ -77,9 +77,18 @@ Set at least:
 - `ADMIN_URL=https://admin.gtaelectricservices.ca`
 - `WEB_URL=https://gtaelectricservices.ca`
 - `CORS_ORIGINS` including custom domains **and** Vercel project URLs (see `.env.example`)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`
+- `PLUNK_API_KEY` (secret key starting with `sk_…`) and optional `PLUNK_API_URL=https://next-api.useplunk.com/v1/send`
 
-Then in **Admin → CMS → Contact** set SMTP User, Password, From Email, From Name, and Recipient Email (after admin is online).
+Then in **Admin → CMS → Contact** set From Email (verified Plunk domain), From Name, and Recipient Email(s) after admin is online.
+
+After changing Plunk env on an existing droplet:
+
+```bash
+cd /opt/gtaes/deploy/droplet
+nano .env   # set PLUNK_API_KEY=sk_...
+docker compose up -d --force-recreate --no-deps api
+docker compose logs api --tail 30   # should show: Plunk configured (secret key present)
+```
 
 Start database + API + nginx (HTTP bootstrap):
 
@@ -215,14 +224,14 @@ Uploads are served at `https://api.gtaelectricservices.ca/uploads/...` (proxied 
 ## 8. Cutover checklist (old droplet → this one)
 
 - [ ] DNS `api` A record points at the new droplet IP
-- [ ] Clone repo, copy `.env.example` → `.env`, set secrets + CORS
+- [ ] Clone repo, copy `.env.example` → `.env`, set secrets + CORS + `PLUNK_API_KEY`
 - [ ] `docker compose up -d --build`
 - [ ] `./scripts/init-ssl.sh api.gtaelectricservices.ca <email>`
 - [ ] Restore DB + uploads from the old droplet ([MIGRATING-UPLOADS.md](./MIGRATING-UPLOADS.md))
 - [ ] Vercel Admin: `VITE_API_URL` + `VITE_WEB_URL` + domain `admin.gtaelectricservices.ca`
 - [ ] Vercel Web: `NEXT_PUBLIC_API_URL` + domains apex + `www`
-- [ ] Recreate API with final `ADMIN_URL` / `WEB_URL` / `CORS_ORIGINS`
-- [ ] Configure SMTP in Admin CMS Contact settings
+- [ ] Recreate API with final `ADMIN_URL` / `WEB_URL` / `CORS_ORIGINS` / `PLUNK_API_KEY`
+- [ ] Configure Plunk From Email + Recipient Email(s) in Admin CMS Contact settings
 - [ ] Spot-check login, CMS images, booking/contact forms, invitation emails
 - [ ] Decommission or lock down the old droplet when verified
 
@@ -263,6 +272,17 @@ docker compose logs -f api
 ```
 
 **CORS errors from Vercel** — add exact frontend origins to `CORS_ORIGINS` (no trailing slash), including both apex and `www` if both are used. Per-deploy preview hosts like `web-gtaes-<hash>-gtaes.vercel.app` are covered when `CORS_ALLOW_VERCEL_PREVIEWS=true` (default). After changing `.env`, recreate the API: `docker compose up -d --force-recreate --no-deps api`.
+
+**Contact form / email fails on droplet** — Plunk uses HTTPS (not SMTP), so DO port blocks do not apply. Check:
+
+```bash
+cd /opt/gtaes/deploy/droplet
+grep PLUNK .env
+docker compose exec api printenv | grep PLUNK
+docker compose logs api --tail 50 | grep -iE 'plunk|email|contact'
+```
+
+`PLUNK_API_KEY` must be the secret `sk_…` key. From Email in Admin → CMS → Contact must use a domain verified in Plunk (not `gmail.com`). After editing `.env`, recreate the API container.
 
 **Vercel SSO / `vercel.com/sso-api` on assets** — Deployment Protection is on. In the Vercel project → Settings → Deployment Protection, set Production to **None** (or disable SSO) so the public site and `site.webmanifest` load without a Vercel login. Prefer the custom domain (`https://gtaelectricservices.ca`) or the stable `*-git-main-gtaes.vercel.app` URL over hashed preview URLs for day-to-day use.
 

@@ -1591,13 +1591,15 @@ const DEFAULT_CONTACT_BANNER = {
   backgroundImage: '',
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const DEFAULT_CONTACT_PAGE_SETTINGS = {
   formTitle: 'Get A Free Quote',
+  recipientEmails: [],
+  // Legacy single-recipient field kept for migration from older CMS payloads.
   recipientEmail: '',
-  smtpUser: '',
-  smtpPass: '',
-  smtpFromEmail: '',
-  smtpFromName: '',
+  plunkFromEmail: '',
+  plunkFromName: '',
   phone: '',
   displayEmail: '',
   address: '',
@@ -1610,6 +1612,28 @@ const DEFAULT_CONTACT_PAGE_SETTINGS = {
     'Transparent Qoute with no hidden fee',
   ],
 };
+
+function normalizeRecipientEmails(content = {}) {
+  const fromArray = Array.isArray(content.recipientEmails)
+    ? content.recipientEmails.map((item) => String(item || '').trim()).filter(Boolean)
+    : [];
+  const source = fromArray.length
+    ? fromArray
+    : (() => {
+        const legacy = String(content.recipientEmail || '').trim();
+        return legacy ? [legacy] : [];
+      })();
+
+  const seen = new Set();
+  const unique = [];
+  for (const email of source) {
+    const key = email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(email);
+  }
+  return unique;
+}
 
 function parseCoordinate(value, fallback) {
   const parsed = Number(value);
@@ -1627,13 +1651,24 @@ export function normalizeContactPageSettingsContent(content = {}) {
     ? content.specificationItems.map((item) => String(item || '').trim()).filter(Boolean)
     : DEFAULT_CONTACT_PAGE_SETTINGS.specificationItems;
 
+  const recipientEmails = normalizeRecipientEmails(content);
+  const plunkFromEmail = String(
+    content.plunkFromEmail
+      ?? content.smtpFromEmail
+      ?? DEFAULT_CONTACT_PAGE_SETTINGS.plunkFromEmail,
+  ).trim();
+  const plunkFromName = String(
+    content.plunkFromName
+      ?? content.smtpFromName
+      ?? DEFAULT_CONTACT_PAGE_SETTINGS.plunkFromName,
+  ).trim();
+
   return {
     formTitle: String(content.formTitle ?? DEFAULT_CONTACT_PAGE_SETTINGS.formTitle).trim(),
-    recipientEmail: String(content.recipientEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.recipientEmail).trim(),
-    smtpUser: String(content.smtpUser ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpUser).trim(),
-    smtpPass: String(content.smtpPass ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpPass),
-    smtpFromEmail: String(content.smtpFromEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpFromEmail).trim(),
-    smtpFromName: String(content.smtpFromName ?? DEFAULT_CONTACT_PAGE_SETTINGS.smtpFromName).trim(),
+    recipientEmails,
+    recipientEmail: recipientEmails[0] || '',
+    plunkFromEmail,
+    plunkFromName,
     phone: String(content.phone ?? DEFAULT_CONTACT_PAGE_SETTINGS.phone).trim(),
     displayEmail: String(content.displayEmail ?? DEFAULT_CONTACT_PAGE_SETTINGS.displayEmail).trim(),
     address: String(content.address ?? DEFAULT_CONTACT_PAGE_SETTINGS.address).trim(),
@@ -1644,15 +1679,9 @@ export function normalizeContactPageSettingsContent(content = {}) {
   };
 }
 
-/** Admin-facing payload: never echo the raw password; expose a configured flag instead. */
+/** Admin-facing payload for contact settings. */
 export function toAdminContactPageSettings(content = {}) {
-  const normalized = normalizeContactPageSettingsContent(content);
-  const { smtpPass, ...rest } = normalized;
-  return {
-    ...rest,
-    smtpPass: '',
-    smtpPassConfigured: Boolean(String(smtpPass || '').trim()),
-  };
+  return normalizeContactPageSettingsContent(content);
 }
 
 export function toPublicContactPageSettings(content = {}) {
@@ -1673,12 +1702,10 @@ export async function getContactPageSettingsContent() {
   const widget = await getWidget('contact', 'settings');
   const normalized = normalizeContactPageSettingsContent(widget?.content || DEFAULT_CONTACT_PAGE_SETTINGS);
 
-  // Prefer CMS recipient; fall back to SMTP From / User configured in the same settings
-  if (!normalized.recipientEmail) {
-    const smtpEmail = normalized.smtpFromEmail || normalized.smtpUser;
-    if (smtpEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(smtpEmail)) {
-      normalized.recipientEmail = smtpEmail;
-    }
+  // Prefer CMS recipients; fall back to Plunk From when none configured
+  if (!normalized.recipientEmails.length && normalized.plunkFromEmail && EMAIL_RE.test(normalized.plunkFromEmail)) {
+    normalized.recipientEmails = [normalized.plunkFromEmail];
+    normalized.recipientEmail = normalized.plunkFromEmail;
   }
 
   return normalized;
@@ -1706,18 +1733,18 @@ export async function updateContactPageSettingsContent(content = {}) {
   const current = await getContactPageSettingsContent();
   const syncContactDetails = Boolean(content.syncContactDetails);
 
-  const nextSmtpPass =
-    content.smtpPass !== undefined && String(content.smtpPass).trim() !== ''
-      ? String(content.smtpPass)
-      : current.smtpPass;
+  const nextRecipientEmails =
+    content.recipientEmails !== undefined
+      ? content.recipientEmails
+      : content.recipientEmail !== undefined
+        ? [content.recipientEmail]
+        : current.recipientEmails;
 
   const next = {
     formTitle: content.formTitle !== undefined ? content.formTitle : current.formTitle,
-    recipientEmail: content.recipientEmail !== undefined ? content.recipientEmail : current.recipientEmail,
-    smtpUser: content.smtpUser !== undefined ? content.smtpUser : current.smtpUser,
-    smtpPass: nextSmtpPass,
-    smtpFromEmail: content.smtpFromEmail !== undefined ? content.smtpFromEmail : current.smtpFromEmail,
-    smtpFromName: content.smtpFromName !== undefined ? content.smtpFromName : current.smtpFromName,
+    recipientEmails: nextRecipientEmails,
+    plunkFromEmail: content.plunkFromEmail !== undefined ? content.plunkFromEmail : current.plunkFromEmail,
+    plunkFromName: content.plunkFromName !== undefined ? content.plunkFromName : current.plunkFromName,
     specificationItems:
       content.specificationItems !== undefined ? content.specificationItems : current.specificationItems,
     phone: syncContactDetails && content.phone !== undefined ? content.phone : current.phone,
@@ -1733,25 +1760,41 @@ export async function updateContactPageSettingsContent(content = {}) {
 
   const normalized = normalizeContactPageSettingsContent(next);
 
+  const isMainSettingsUpdate =
+    content.formTitle !== undefined
+    || content.recipientEmails !== undefined
+    || content.recipientEmail !== undefined
+    || content.plunkFromEmail !== undefined
+    || content.plunkFromName !== undefined
+    || content.latitude !== undefined
+    || content.longitude !== undefined
+    || content.mapZoom !== undefined;
+
   if (!normalized.formTitle) {
     throw new Error('Form title is required');
   }
-  if (!normalized.recipientEmail) {
-    throw new Error('Recipient email is required');
+
+  for (const email of normalized.recipientEmails) {
+    if (!EMAIL_RE.test(email)) {
+      throw new Error(`Recipient email is invalid: ${email}`);
+    }
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.recipientEmail)) {
-    throw new Error('Recipient email is invalid');
+
+  if (isMainSettingsUpdate) {
+    if (!normalized.recipientEmails.length) {
+      throw new Error('At least one recipient email is required');
+    }
+    if (!normalized.plunkFromEmail) {
+      throw new Error('Plunk From Email is required');
+    }
+    if (!EMAIL_RE.test(normalized.plunkFromEmail)) {
+      throw new Error('Plunk From Email is invalid');
+    }
+  } else if (normalized.plunkFromEmail && !EMAIL_RE.test(normalized.plunkFromEmail)) {
+    throw new Error('Plunk From Email is invalid');
   }
-  if (normalized.smtpFromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.smtpFromEmail)) {
-    throw new Error('SMTP From Email is invalid');
-  }
-  if (normalized.smtpUser && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.smtpUser)) {
-    throw new Error('SMTP User must be a valid email address for Gmail SMTP');
-  }
-  if (Boolean(normalized.smtpUser) !== Boolean(String(normalized.smtpPass || '').trim())) {
-    throw new Error('SMTP User and SMTP Password must both be set');
-  }
-  if (normalized.displayEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.displayEmail)) {
+
+  if (normalized.displayEmail && !EMAIL_RE.test(normalized.displayEmail)) {
     throw new Error('Display email is invalid');
   }
   if (normalized.latitude < -90 || normalized.latitude > 90) {
@@ -1761,7 +1804,23 @@ export async function updateContactPageSettingsContent(content = {}) {
     throw new Error('Longitude must be between -180 and 180');
   }
 
-  const widget = await upsertWidget('contact', 'settings', normalized);
+  // Persist CMS fields only (API key lives in PLUNK_API_KEY env).
+  const toStore = {
+    formTitle: normalized.formTitle,
+    recipientEmails: normalized.recipientEmails,
+    recipientEmail: normalized.recipientEmail,
+    plunkFromEmail: normalized.plunkFromEmail,
+    plunkFromName: normalized.plunkFromName,
+    phone: normalized.phone,
+    displayEmail: normalized.displayEmail,
+    address: normalized.address,
+    latitude: normalized.latitude,
+    longitude: normalized.longitude,
+    mapZoom: normalized.mapZoom,
+    specificationItems: normalized.specificationItems,
+  };
+
+  const widget = await upsertWidget('contact', 'settings', toStore);
   return toAdminContactPageSettings(normalizeContactPageSettingsContent(widget.content));
 }
 
