@@ -64,11 +64,21 @@ sudo usermod -aG docker "$USER"
 > The root `docker-compose.yml` builds admin + web for local dev and will take much longer on a droplet.
 
 ```bash
-git clone https://github.com/Hashmarkai/gta-electric-services-1.git /opt/gtaes
+git clone https://github.com/gtaes-ca/gtaesca.git /opt/gtaes
 cd /opt/gtaes/deploy/droplet
 
 cp .env.example .env
 nano .env
+```
+
+If the droplet already has the old clone, retarget the remote instead of re-cloning:
+
+```bash
+cd /opt/gtaes
+git remote set-url origin https://github.com/gtaes-ca/gtaesca.git
+git fetch origin
+git checkout main
+git pull --ff-only origin main
 ```
 
 Set at least:

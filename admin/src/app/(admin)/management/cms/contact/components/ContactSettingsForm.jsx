@@ -137,7 +137,7 @@ const ContactSettingsForm = () => {
                       type="email"
                       value={email}
                       onChange={(e) => updateRecipient(idx, e.target.value)}
-                      placeholder="hashimsadiq@gmail.com"
+                      placeholder="quotes@yourcompany.com"
                       required
                     />
                     <Button

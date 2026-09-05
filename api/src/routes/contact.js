@@ -84,6 +84,8 @@ router.post('/quote', async (req, res) => {
       });
     }
 
+    console.log('[contact] quote recipients:', recipientEmails, 'replyTo:', safeEmail);
+
     await sendContactQuoteEmail({
       to: recipientEmails,
       name: safeName,

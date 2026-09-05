@@ -1733,18 +1733,36 @@ export async function updateContactPageSettingsContent(content = {}) {
   const current = await getContactPageSettingsContent();
   const syncContactDetails = Boolean(content.syncContactDetails);
 
-  const nextRecipientEmails =
-    content.recipientEmails !== undefined
-      ? content.recipientEmails
-      : content.recipientEmail !== undefined
-        ? [content.recipientEmail]
-        : current.recipientEmails;
+  // Old Admin UI still sends smtp* fields — map them to Plunk sender fields.
+  const incomingFromEmail =
+    content.plunkFromEmail !== undefined
+      ? content.plunkFromEmail
+      : content.smtpFromEmail !== undefined
+        ? content.smtpFromEmail
+        : undefined;
+  const incomingFromName =
+    content.plunkFromName !== undefined
+      ? content.plunkFromName
+      : content.smtpFromName !== undefined
+        ? content.smtpFromName
+        : undefined;
+
+  // Prefer explicit recipientEmails; otherwise a single recipientEmail replaces the list.
+  // Important: do not keep stale recipientEmails when only recipientEmail is sent (legacy Admin).
+  let nextRecipientEmails;
+  if (content.recipientEmails !== undefined) {
+    nextRecipientEmails = content.recipientEmails;
+  } else if (content.recipientEmail !== undefined) {
+    nextRecipientEmails = [content.recipientEmail];
+  } else {
+    nextRecipientEmails = current.recipientEmails;
+  }
 
   const next = {
     formTitle: content.formTitle !== undefined ? content.formTitle : current.formTitle,
     recipientEmails: nextRecipientEmails,
-    plunkFromEmail: content.plunkFromEmail !== undefined ? content.plunkFromEmail : current.plunkFromEmail,
-    plunkFromName: content.plunkFromName !== undefined ? content.plunkFromName : current.plunkFromName,
+    plunkFromEmail: incomingFromEmail !== undefined ? incomingFromEmail : current.plunkFromEmail,
+    plunkFromName: incomingFromName !== undefined ? incomingFromName : current.plunkFromName,
     specificationItems:
       content.specificationItems !== undefined ? content.specificationItems : current.specificationItems,
     phone: syncContactDetails && content.phone !== undefined ? content.phone : current.phone,
@@ -1766,6 +1784,8 @@ export async function updateContactPageSettingsContent(content = {}) {
     || content.recipientEmail !== undefined
     || content.plunkFromEmail !== undefined
     || content.plunkFromName !== undefined
+    || content.smtpFromEmail !== undefined
+    || content.smtpFromName !== undefined
     || content.latitude !== undefined
     || content.longitude !== undefined
     || content.mapZoom !== undefined;
@@ -1785,13 +1805,13 @@ export async function updateContactPageSettingsContent(content = {}) {
       throw new Error('At least one recipient email is required');
     }
     if (!normalized.plunkFromEmail) {
-      throw new Error('Plunk From Email is required');
+      throw new Error('From Email is required');
     }
     if (!EMAIL_RE.test(normalized.plunkFromEmail)) {
-      throw new Error('Plunk From Email is invalid');
+      throw new Error('From Email is invalid');
     }
   } else if (normalized.plunkFromEmail && !EMAIL_RE.test(normalized.plunkFromEmail)) {
-    throw new Error('Plunk From Email is invalid');
+    throw new Error('From Email is invalid');
   }
 
   if (normalized.displayEmail && !EMAIL_RE.test(normalized.displayEmail)) {
@@ -1805,10 +1825,11 @@ export async function updateContactPageSettingsContent(content = {}) {
   }
 
   // Persist CMS fields only (API key lives in PLUNK_API_KEY env).
+  // Always write recipientEmails as the source of truth (drop stale legacy-only lists).
   const toStore = {
     formTitle: normalized.formTitle,
     recipientEmails: normalized.recipientEmails,
-    recipientEmail: normalized.recipientEmail,
+    recipientEmail: normalized.recipientEmails[0] || '',
     plunkFromEmail: normalized.plunkFromEmail,
     plunkFromName: normalized.plunkFromName,
     phone: normalized.phone,
