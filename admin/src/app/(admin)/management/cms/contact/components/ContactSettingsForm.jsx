@@ -83,7 +83,7 @@ const ContactSettingsForm = () => {
   return (
     <ComponentContainerCard
       title="Get A Free Quote"
-      description="Configure the contact form, email sender, recipients, and map coordinates."
+      description="Configure the contact form, sender, recipients, and map."
     >
       {loading ? (
         <p className="text-muted">Loading...</p>
